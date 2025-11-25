@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { characterImage, prompt, productImage, preset } = await req.json();
+    const { characterImage, prompt, productImage, preset, cameraAngle } = await req.json();
     
     if (!characterImage) {
       throw new Error("No character reference image provided");
@@ -39,6 +39,23 @@ serve(async (req) => {
     if (productImage && preset) {
       // Product integration mode
       console.log("Product integration mode with preset:", preset);
+      
+      const cameraAngleInstructions = cameraAngle ? (() => {
+        switch(cameraAngle) {
+          case 'front':
+            return '\n\n📸 CAMERA ANGLE: Front view - Position the character facing directly forward. Straight-on perspective with clear frontal view of both character and product.';
+          case 'side':
+            return '\n\n📸 CAMERA ANGLE: Side view - Position the character in profile. 90-degree side perspective showing character and product from the side.';
+          case 'three-quarter':
+            return '\n\n📸 CAMERA ANGLE: Three-quarter view - Position the character at a 45-degree angle. Show both front and side elements of character and product.';
+          case 'back':
+            return '\n\n📸 CAMERA ANGLE: Back view - Position the character facing away from camera. Show the rear view of character and product.';
+          case 'top-down':
+            return '\n\n📸 CAMERA ANGLE: Top-down view - Use an elevated perspective looking down at the character and product from above.';
+          default:
+            return '';
+        }
+      })() : '';
       
       const presetInstructions: Record<string, string> = {
         wearing: "The character is wearing the product naturally and realistically. The product must fit the character's body perfectly with proper draping, fabric physics, and realistic material behavior. Ensure zero distortion, proper sizing, and natural integration with the character's pose and movement.",
@@ -72,7 +89,7 @@ ANALYZE THE PRODUCT IMAGE AND PRESERVE:
 - Material appearance (fabric, metal, leather, etc. MUST LOOK AUTHENTIC)
 
 📸 STYLING PRESET: ${preset.toUpperCase()}
-${presetInstructions[preset]}
+${presetInstructions[preset]}${cameraAngleInstructions}
 
 🚨 CRITICAL QUALITY RULES:
 ✓ The character's face and body MUST be 100% identical to the reference

@@ -23,6 +23,7 @@ const Index = () => {
   const [characterImage, setCharacterImage] = useState<string | null>(null);
   const [productImage, setProductImage] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
+  const [selectedCameraAngle, setSelectedCameraAngle] = useState<string>("");
   const [generationProgress, setGenerationProgress] = useState(0);
   const [extractorImage, setExtractorImage] = useState<string | null>(null);
   const [extractedPrompt, setExtractedPrompt] = useState<string>("");
@@ -32,7 +33,6 @@ const Index = () => {
   const [dressImage, setDressImage] = useState<string | null>(null);
   const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
   const [isExtractingDress, setIsExtractingDress] = useState(false);
-  const [selectedCameraAngle, setSelectedCameraAngle] = useState<string>("");
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,7 +235,8 @@ const Index = () => {
           characterImage: characterImage,
           prompt: generationPrompt.trim(),
           productImage: productImage,
-          preset: selectedPreset
+          preset: selectedPreset,
+          cameraAngle: selectedCameraAngle || undefined
         }
       });
 
@@ -284,6 +285,7 @@ const Index = () => {
     setGenerationPrompt("");
     setProductImage(null);
     setSelectedPreset("");
+    setSelectedCameraAngle("");
   };
 
   const handleExtractorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -386,10 +388,7 @@ const Index = () => {
     setIsExtractingDress(true);
     try {
       const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', {
-        body: { 
-          image: dressImage,
-          cameraAngle: selectedCameraAngle || undefined
-        }
+        body: { image: dressImage }
       });
 
       if (error) throw error;
@@ -850,6 +849,7 @@ const Index = () => {
                             onClick={() => {
                               setProductImage(null);
                               setSelectedPreset("");
+                              setSelectedCameraAngle("");
                             }}
                             variant="outline"
                             size="sm"
@@ -924,6 +924,79 @@ const Index = () => {
                             >
                               <p className="text-sm font-medium">Lifestyle Interaction</p>
                               <p className="text-xs opacity-80">Natural interaction with product in context</p>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Camera Angle Selection (Optional) */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-foreground">
+                            Select Camera Angle <span className="text-xs text-muted-foreground">(Optional)</span>
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setSelectedCameraAngle("front")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedCameraAngle === "front"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Front View</p>
+                              <p className="text-xs opacity-80">Straight-on view</p>
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedCameraAngle("side")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedCameraAngle === "side"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Side View</p>
+                              <p className="text-xs opacity-80">Profile view from side</p>
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedCameraAngle("three-quarter")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedCameraAngle === "three-quarter"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">3/4 View</p>
+                              <p className="text-xs opacity-80">Three-quarter angle</p>
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedCameraAngle("back")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedCameraAngle === "back"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Back View</p>
+                              <p className="text-xs opacity-80">Rear view showing back</p>
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedCameraAngle("top-down")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all col-span-2 ${
+                                selectedCameraAngle === "top-down"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Top-Down View</p>
+                              <p className="text-xs opacity-80">Elevated angle looking down</p>
                             </button>
                           </div>
                         </div>
@@ -1106,86 +1179,6 @@ const Index = () => {
                 </div>
               )}
             </div>
-
-            {/* Camera Angle Selection (Optional) */}
-            {dressImage && (
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-3">
-                  Select Camera Angle <span className="text-xs text-muted-foreground">(Optional)</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <button
-                    onClick={() => setSelectedCameraAngle("front")}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedCameraAngle === "front"
-                        ? "border-accent bg-accent/10"
-                        : "border-border bg-background hover:border-accent/50"
-                    }`}
-                  >
-                    <div className="font-semibold text-foreground mb-1">Front View</div>
-                    <div className="text-xs text-muted-foreground">
-                      Straight-on view of mannequin
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedCameraAngle("side")}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedCameraAngle === "side"
-                        ? "border-accent bg-accent/10"
-                        : "border-border bg-background hover:border-accent/50"
-                    }`}
-                  >
-                    <div className="font-semibold text-foreground mb-1">Side View</div>
-                    <div className="text-xs text-muted-foreground">
-                      Profile view showing dress from side
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedCameraAngle("three-quarter")}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedCameraAngle === "three-quarter"
-                        ? "border-accent bg-accent/10"
-                        : "border-border bg-background hover:border-accent/50"
-                    }`}
-                  >
-                    <div className="font-semibold text-foreground mb-1">3/4 View</div>
-                    <div className="text-xs text-muted-foreground">
-                      Three-quarter angle showing both front and side
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedCameraAngle("back")}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedCameraAngle === "back"
-                        ? "border-accent bg-accent/10"
-                        : "border-border bg-background hover:border-accent/50"
-                    }`}
-                  >
-                    <div className="font-semibold text-foreground mb-1">Back View</div>
-                    <div className="text-xs text-muted-foreground">
-                      Rear view showing back design of dress
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedCameraAngle("top-down")}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedCameraAngle === "top-down"
-                        ? "border-accent bg-accent/10"
-                        : "border-border bg-background hover:border-accent/50"
-                    }`}
-                  >
-                    <div className="font-semibold text-foreground mb-1">Top-Down View</div>
-                    <div className="text-xs text-muted-foreground">
-                      Elevated angle looking down at mannequin
-                    </div>
-                  </button>
-                </div>
-              </div>
-            )}
 
             <Button
               onClick={handleExtractDress}
