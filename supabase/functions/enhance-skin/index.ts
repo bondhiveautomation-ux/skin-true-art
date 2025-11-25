@@ -25,41 +25,62 @@ serve(async (req) => {
 
     console.log("Processing skin enhancement for image");
 
-    const enhancementPrompt = `CRITICAL INSTRUCTIONS - Enhance ONLY the skin texture layer. You are FORBIDDEN from modifying anything else.
+    const enhancementPrompt = `CRITICAL INSTRUCTIONS - Enhance ONLY the skin texture layer across ALL VISIBLE SKIN in the entire image.
 
-LOCKED LAYERS (DO NOT MODIFY):
-- All makeup: eyeshadow, lipstick, lip gloss, contour, blush, eyeliner, mascara, highlighter
-- Lip position, shape, openness, color, and gloss - MUST remain pixel-identical
-- Eyebrows: shape, color, thickness, and positioning
-- Eyelashes: volume, length, and curl
-- Face shape, jawline, nose shape, eye shape, and all facial proportions
-- Facial expression: MUST remain exactly the same
-- Hairstyle and hair color
-- Lighting style and direction
-- Background
+SKIN AREAS TO ENHANCE:
+Apply realistic skin texture enhancement to EVERY visible skin area including:
+- Face (forehead, cheeks, nose, chin, around eyes)
+- Neck (front and sides)
+- Chest and décolletage
+- Shoulders and upper back (if visible)
+- Arms (upper arms, forearms)
+- Hands and fingers
+- Any other exposed skin areas
 
-ONLY MODIFY: Skin surface texture
-Add to skin ONLY:
-- Natural visible pores (especially on nose, cheeks, forehead)
-- Micro-lines and fine wrinkles
-- Soft organic imperfections and asymmetry
-- Natural micro-shadows around facial contours
-- Realistic skin texture depth with matte finish
-- Preserve natural skin undertones and color variation
-- Remove plastic smoothness and artificial blur
+LOCKED LAYERS (ABSOLUTELY DO NOT MODIFY):
+- All makeup: eyeshadow, foundation, contour, blush, eyeliner, mascara, lipstick, lip gloss, highlighter
+- Lip shape, position, openness, color, shine, and gloss - MUST remain pixel-identical
+- Facial expression: MUST remain exactly the same (no smile changes, eye adjustments)
+- Eyebrows: shape, color, thickness, positioning
+- Eyelashes: volume, length, curl
+- Eye shape, iris color, pupil size
+- Face shape, jawline, nose shape, cheekbones, and all facial proportions
+- Hairstyle, hair color, hair texture
+- Clothing, jewelry, accessories
+- Background elements
+- Lighting style, direction, and color mood
+
+ONLY MODIFY: Skin surface texture on ALL visible skin areas
+Apply these texture enhancements to all exposed skin:
+- Natural visible pores (varying density - more on nose/forehead, less on neck/chest)
+- Micro-lines and fine wrinkles appropriate to each skin area
+- Soft organic imperfections and natural asymmetry
+- Realistic micro-shadows that follow skin contours
+- Natural skin texture depth with matte finish (not glossy or plastic)
+- Preserve natural skin undertones and subtle color variations
+- Remove only artificial smoothing, blur, and plastic-looking surfaces
+- Maintain natural skin characteristics for different body areas (face skin differs from neck/arm skin)
+
+TEXTURE VARIATION BY AREA:
+- Face: More visible pores, micro-detail, expression lines
+- Neck: Softer texture, natural lines, less prominent pores
+- Chest/shoulders: Smooth but textured, subtle imperfections
+- Arms/hands: Natural texture appropriate to body skin
 
 ABSOLUTE PROHIBITIONS:
-- NO makeup removal or modification
-- NO color changes to lips, eyes, or skin tone
-- NO changes to lip position, openness, or gloss
-- NO expression changes (no smile adjustment, eye closing/opening)
-- NO facial feature reshaping (slimming, nose job, eye enlargement)
-- NO whitening or beautification filters
-- NO changes to facial proportions
+- NO makeup removal or modification whatsoever
+- NO color changes to lips, eyes, skin tone, or makeup
+- NO changes to lip position, openness, wetness, or gloss
+- NO facial expression changes (smile, eye opening, head tilt)
+- NO facial feature reshaping (slimming, nose refinement, eye enlargement)
+- NO whitening, brightening, or beautification filters
+- NO changes to facial proportions or bone structure
+- NO alterations to clothing, hair, jewelry, or background
+- NO smoothing or blur on non-skin areas
 
-The result must look like: Same person, same makeup application, same facial expression, same lighting - but photographed with a professional camera that captures real human skin texture instead of phone camera smoothing.
+GOAL:
+The result must look like the exact same person, same makeup application, same facial expression, same lighting - but photographed with a high-end professional camera that captures real human skin texture across all visible skin areas instead of phone camera smoothing. Think of this as adding a "real skin texture overlay" to all exposed skin without touching anything else in the image.`;
 
-Think of this as adding a "real skin texture overlay" on top of the existing image without touching anything underneath.`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
