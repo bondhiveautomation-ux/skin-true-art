@@ -33,6 +33,12 @@ const Index = () => {
   const [dressImage, setDressImage] = useState<string | null>(null);
   const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
   const [isExtractingDress, setIsExtractingDress] = useState(false);
+  
+  // Background Saver (People Removal) states
+  const [peopleImage, setPeopleImage] = useState<string | null>(null);
+  const [cleanBackground, setCleanBackground] = useState<string | null>(null);
+  const [isRemovingPeople, setIsRemovingPeople] = useState(false);
+  
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -440,6 +446,99 @@ const Index = () => {
       title: "Downloaded!",
       description: "Image saved to your device",
     });
+  };
+
+  const handlePeopleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPeopleImage(reader.result as string);
+      setCleanBackground(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePeople = async () => {
+    if (!peopleImage) {
+      toast({
+        title: "No image uploaded",
+        description: "Please upload an image first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRemovingPeople(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('remove-people-from-image', {
+        body: { image: peopleImage }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Processing failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.cleanBackground) {
+        setCleanBackground(data.cleanBackground);
+        toast({
+          title: "Success!",
+          description: "People removed successfully",
+        });
+      } else {
+        toast({
+          title: "No result",
+          description: "Failed to process image",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('People removal error:', error);
+      toast({
+        title: "Processing failed",
+        description: error.message || "Failed to remove people. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRemovingPeople(false);
+    }
+  };
+
+  const handleDownloadBackground = (format: 'png' | 'jpg') => {
+    if (!cleanBackground) return;
+
+    const link = document.createElement('a');
+    link.href = cleanBackground;
+    link.download = `clean-background.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded!",
+      description: `Image saved as ${format.toUpperCase()}`,
+    });
+  };
+
+  const handleResetPeopleRemoval = () => {
+    setPeopleImage(null);
+    setCleanBackground(null);
   };
 
   return (
@@ -1223,6 +1322,108 @@ const Index = () => {
                     className="flex-1"
                   >
                     Regenerate
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Background Saver (People Removal) Section */}
+        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-primary mb-2">Remove People, Keep Background</h2>
+            <p className="text-muted-foreground">
+              Upload a photo that contains people. The AI will remove them and keep the background untouched.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Upload Image with People
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Upload a clear photo where people are visible
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePeopleImageUpload}
+                className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-background hover:file:bg-accent/90 cursor-pointer"
+              />
+              {peopleImage && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-foreground mb-2">Original Image:</p>
+                  <img
+                    src={peopleImage}
+                    alt="Image with people"
+                    className="w-full max-w-md rounded-lg border-2 border-border"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={handleRemovePeople}
+              disabled={isRemovingPeople || !peopleImage}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              size="lg"
+            >
+              {isRemovingPeople ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Removing People...
+                </>
+              ) : (
+                'Generate Clean Background'
+              )}
+            </Button>
+
+            {cleanBackground && (
+              <div className="space-y-4">
+                <label className="block text-sm font-semibold text-foreground">
+                  Clean Background:
+                </label>
+                <div className="bg-muted p-4 rounded-lg border border-border">
+                  <img
+                    src={cleanBackground}
+                    alt="Clean background"
+                    className="w-full max-w-md rounded-lg mx-auto"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => handleDownloadBackground('png')}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PNG
+                  </Button>
+                  <Button
+                    onClick={() => handleDownloadBackground('jpg')}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download JPG
+                  </Button>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleRemovePeople}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Regenerate
+                  </Button>
+                  <Button
+                    onClick={handleResetPeopleRemoval}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Start Over
                   </Button>
                 </div>
               </div>

@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.extract-dress-to-dummy]
 verify_jwt = false
+
+[functions.remove-people-from-image]
+verify_jwt = false
