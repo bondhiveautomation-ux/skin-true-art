@@ -20,7 +20,28 @@ const Index = () => {
   const [basicPrompt, setBasicPrompt] = useState("");
   const [detailedPrompt, setDetailedPrompt] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [characterImage, setCharacterImage] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCharacterImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -146,7 +167,10 @@ const Index = () => {
     setIsGeneratingPrompt(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-prompt', {
-        body: { basicPrompt: basicPrompt.trim() }
+        body: { 
+          basicPrompt: basicPrompt.trim(),
+          characterImage: characterImage 
+        }
       });
 
       if (error) throw error;
@@ -155,7 +179,9 @@ const Index = () => {
         setDetailedPrompt(data.detailedPrompt);
         toast({
           title: "Prompt generated",
-          description: "Ultra-detailed prompt created successfully",
+          description: characterImage 
+            ? "Character-consistent prompt created successfully" 
+            : "Ultra-detailed prompt created successfully",
         });
       }
     } catch (error: any) {
@@ -474,13 +500,78 @@ const Index = () => {
           </div>
 
           <div className="space-y-6">
+            {/* Character Image Upload */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Character Reference Image (Optional)
+              </label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Upload an image to maintain exact character consistency across all generated prompts
+              </p>
+              
+              {!characterImage ? (
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCharacterImageUpload}
+                    className="hidden"
+                    id="character-upload"
+                  />
+                  <label
+                    htmlFor="character-upload"
+                    className="group cursor-pointer block"
+                  >
+                    <div className="flex items-center gap-4 rounded-lg border-2 border-dashed border-border p-6 transition-all hover:border-accent hover:bg-secondary/50">
+                      <div className="rounded-full bg-accent/10 p-3 transition-all group-hover:bg-accent/20">
+                        <Upload className="h-6 w-6 text-accent" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          Upload Character Image
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Click to select an influencer or character reference
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              ) : (
+                <div className="relative rounded-lg border border-accent/20 bg-accent/5 p-4">
+                  <img
+                    src={characterImage}
+                    alt="Character reference"
+                    className="max-h-[200px] rounded-lg object-contain mx-auto"
+                  />
+                  <Button
+                    onClick={() => setCharacterImage(null)}
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                  >
+                    Remove
+                  </Button>
+                  <div className="mt-2 text-center">
+                    <p className="text-xs font-medium text-accent">
+                      ✓ Character locked - All prompts will maintain this exact appearance
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Input Area */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Basic Prompt</label>
+              <label className="text-sm font-medium text-foreground">
+                Scene/Scenario Prompt
+              </label>
               <textarea
                 value={basicPrompt}
                 onChange={(e) => setBasicPrompt(e.target.value)}
-                placeholder="Enter your basic idea... (e.g., 'a woman in a red dress')"
+                placeholder={characterImage 
+                  ? "Describe the scene or scenario for this character... (e.g., 'walking on a beach at sunset')"
+                  : "Enter your basic idea... (e.g., 'a woman in a red dress')"}
                 className="min-h-[100px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
                 disabled={isGeneratingPrompt}
               />
