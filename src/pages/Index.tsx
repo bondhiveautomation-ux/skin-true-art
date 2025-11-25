@@ -24,6 +24,8 @@ const Index = () => {
   const [productImage, setProductImage] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [selectedCameraAngle, setSelectedCameraAngle] = useState<string>("");
+  const [selectedPose, setSelectedPose] = useState<string>("");
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [extractorImage, setExtractorImage] = useState<string | null>(null);
   const [extractedPrompt, setExtractedPrompt] = useState<string>("");
@@ -80,6 +82,27 @@ const Index = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       setProductImage(e.target?.result as string);
+      setGeneratedImage(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBackgroundImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setBackgroundImage(e.target?.result as string);
       setGeneratedImage(null);
     };
     reader.readAsDataURL(file);
@@ -242,7 +265,9 @@ const Index = () => {
           prompt: generationPrompt.trim(),
           productImage: productImage,
           preset: selectedPreset,
-          cameraAngle: selectedCameraAngle || undefined
+          cameraAngle: selectedCameraAngle || undefined,
+          backgroundImage: backgroundImage || undefined,
+          pose: selectedPose || undefined,
         }
       });
 
@@ -292,6 +317,8 @@ const Index = () => {
     setProductImage(null);
     setSelectedPreset("");
     setSelectedCameraAngle("");
+    setBackgroundImage(null);
+    setSelectedPose("");
   };
 
   const handleExtractorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1103,8 +1130,164 @@ const Index = () => {
                     )}
                   </div>
 
+                  {/* Background Integration (Optional) */}
+                  <div className="rounded-lg border border-accent/30 bg-accent/5 p-6 space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                        Background Integration <span className="text-muted-foreground text-sm font-normal">(Optional)</span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Upload a background and select a pose to place your character in a custom scene
+                      </p>
+                    </div>
+
+                    {!backgroundImage ? (
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleBackgroundImageUpload}
+                          className="hidden"
+                          id="background-upload"
+                        />
+                        <label
+                          htmlFor="background-upload"
+                          className="group cursor-pointer block"
+                        >
+                          <div className="flex items-center gap-4 rounded-lg border-2 border-dashed border-border p-6 transition-all hover:border-accent hover:bg-secondary/50">
+                            <div className="rounded-full bg-accent/10 p-3 transition-all group-hover:bg-accent/20">
+                              <Upload className="h-6 w-6 text-accent" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                Upload Background Image
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Beach, park, studio, city, nature, etc.
+                              </p>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="relative rounded-lg border border-border bg-background p-3">
+                          <img
+                            src={backgroundImage}
+                            alt="Background"
+                            className="max-h-[200px] rounded object-contain mx-auto"
+                          />
+                          <Button
+                            onClick={() => {
+                              setBackgroundImage(null);
+                              setSelectedPose("");
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="absolute top-1 right-1"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+
+                        {/* Pose Selection */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-foreground">
+                            Select Character Pose
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setSelectedPose("standing")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPose === "standing"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Standing</p>
+                              <p className="text-xs opacity-80">Standing naturally</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPose("sitting")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPose === "sitting"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Sitting</p>
+                              <p className="text-xs opacity-80">Sitting comfortably</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPose("walking")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPose === "walking"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Walking</p>
+                              <p className="text-xs opacity-80">Walking naturally</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPose("leaning")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPose === "leaning"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Leaning</p>
+                              <p className="text-xs opacity-80">Leaning casually</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPose("arms-crossed")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPose === "arms-crossed"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Arms Crossed</p>
+                              <p className="text-xs opacity-80">Confident pose</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPose("hands-in-pockets")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPose === "hands-in-pockets"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Hands in Pockets</p>
+                              <p className="text-xs opacity-80">Relaxed pose</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPose("dynamic-action")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all col-span-2 ${
+                                selectedPose === "dynamic-action"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Dynamic Action</p>
+                              <p className="text-xs opacity-80">Active, energetic pose</p>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Scenario Prompt */}
-                  {!productImage && (
+                  {!productImage && !backgroundImage && (
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-foreground">
                         Scenario Prompt
@@ -1123,7 +1306,7 @@ const Index = () => {
                   <div className="flex justify-center">
                     <Button
                       onClick={handleGenerateImage}
-                      disabled={isGeneratingImage || (!generationPrompt.trim() && !productImage) || (productImage && !selectedPreset)}
+                      disabled={isGeneratingImage || (!generationPrompt.trim() && !productImage && !backgroundImage) || (productImage && !selectedPreset) || (backgroundImage && !selectedPose)}
                       className="bg-accent text-background hover:bg-accent/90 relative overflow-hidden"
                       size="lg"
                     >
