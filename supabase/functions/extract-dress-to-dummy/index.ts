@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image } = await req.json();
+    const { image, cameraAngle } = await req.json();
 
     if (!image) {
       return new Response(
@@ -28,6 +28,24 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Camera angle instructions
+    const cameraAngleInstructions = cameraAngle ? (() => {
+      switch(cameraAngle) {
+        case 'front':
+          return '\n\nCAMERA ANGLE: Position the mannequin facing directly forward. Front view, straight-on perspective.';
+        case 'side':
+          return '\n\nCAMERA ANGLE: Position the mannequin in profile view. Side angle showing the dress from a 90-degree side perspective.';
+        case 'three-quarter':
+          return '\n\nCAMERA ANGLE: Position the mannequin at a three-quarter angle (45 degrees). Show both the front and side of the dress.';
+        case 'back':
+          return '\n\nCAMERA ANGLE: Position the mannequin facing away from camera. Back view showing the rear design of the dress.';
+        case 'top-down':
+          return '\n\nCAMERA ANGLE: Use an elevated, top-down perspective. Camera positioned above looking down at the mannequin.';
+        default:
+          return '';
+      }
+    })() : '';
 
     const systemPrompt = `You are an expert clothing extraction and mannequin placement AI. Your task is to:
 
@@ -58,7 +76,7 @@ CRITICAL RULES:
 - Do NOT include any body parts, face, or hair
 - Do NOT include any jewelry or accessories
 - Focus ONLY on the clothing item itself
-- Make it look professional and e-commerce ready`;
+- Make it look professional and e-commerce ready${cameraAngleInstructions}`;
 
     console.log('Calling Lovable AI for dress extraction...');
     
