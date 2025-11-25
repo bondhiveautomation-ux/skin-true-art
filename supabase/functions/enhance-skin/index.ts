@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl } = await req.json();
+    const { imageUrl, mode = "preserve" } = await req.json();
     
     if (!imageUrl) {
       throw new Error("No image URL provided");
@@ -23,9 +23,9 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Processing skin enhancement for image");
+    console.log("Processing skin enhancement for image", { mode });
 
-    const enhancementPrompt = `YOU ARE A SKIN TEXTURE SPECIALIST. YOUR ONLY JOB IS TO ADD REALISTIC SKIN PORES AND TEXTURE.
+    const preserveMakeupPrompt = `YOU ARE A SKIN TEXTURE SPECIALIST. YOUR ONLY JOB IS TO ADD REALISTIC SKIN PORES AND TEXTURE.
 
 🚨 CRITICAL: This image has MAKEUP on it. The makeup MUST remain 100% UNTOUCHED.
 Makeup is PAINTED ON TOP OF the skin. You are ONLY adding texture to the skin UNDERNEATH the makeup layer.
@@ -71,7 +71,41 @@ Add a realistic skin texture overlay to exposed skin (pores, micro-detail, organ
 
 Think: "Same person, same makeup, same everything — just add camera-quality skin pores and texture to the bare skin surface."`;
 
+    const removeMakeupPrompt = `YOU ARE A PROFESSIONAL MAKEUP REMOVAL AND SKIN TEXTURE SPECIALIST.
 
+YOUR TASK: Remove ALL makeup from this portrait and reveal natural, realistic skin with proper texture.
+
+STEP 1 - REMOVE ALL MAKEUP COMPLETELY:
+Remove every trace of:
+- Foundation, concealer, powder (reveal natural skin tone and texture underneath)
+- Eyeshadow, eyeliner, mascara (reveal natural eyelids and lashes)
+- Lipstick, lip gloss, lip liner (reveal natural lip color)
+- Blush, contour, highlighter (reveal natural face shape and coloring)
+- Eyebrow makeup (reveal natural eyebrow hair and skin)
+
+STEP 2 - ADD REALISTIC NATURAL SKIN TEXTURE:
+Add natural skin features to ALL visible skin (face, neck, shoulders, arms, hands):
+- Natural pores (more visible on nose/forehead, less on cheeks)
+- Fine lines and natural wrinkles
+- Natural skin imperfections (slight redness, tiny blemishes, natural texture variation)
+- Realistic micro-shadows following natural face contours
+- Natural skin tone with realistic color variation
+- Matte, organic texture (no artificial smoothing or shine)
+
+PRESERVE ABSOLUTELY:
+✓ Facial structure (face shape, jawline, nose, cheekbones)
+✓ Eye shape, iris color, pupil size
+✓ Natural eyebrow shape and hair
+✓ Natural lip shape and structure
+✓ Facial expression
+✓ Hair and hairstyle
+✓ Clothing and accessories
+✓ Background and lighting
+✓ Photo composition
+
+RESULT: A natural, makeup-free portrait with realistic skin texture that looks like the same person photographed without makeup.`;
+
+    const enhancementPrompt = mode === "remove" ? removeMakeupPrompt : preserveMakeupPrompt;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
