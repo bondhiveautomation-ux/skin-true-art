@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, Loader2, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,8 @@ const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const comparisonRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,17 +137,30 @@ const Index = () => {
               {showComparison && enhancedImage ? (
                 // Before/After Comparison
                 <div className="relative overflow-hidden rounded-xl">
-                  <div className="relative aspect-[3/4] w-full max-w-2xl mx-auto">
+                  <div 
+                    ref={comparisonRef}
+                    className="relative aspect-[3/4] w-full max-w-2xl mx-auto select-none"
+                    onMouseMove={(e) => {
+                      if (!isDragging || !comparisonRef.current) return;
+                      const rect = comparisonRef.current.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                      setSliderPosition(percentage);
+                    }}
+                    onMouseUp={() => setIsDragging(false)}
+                    onMouseLeave={() => setIsDragging(false)}
+                  >
                     {/* Enhanced Image (Background) */}
                     <img
                       src={enhancedImage}
                       alt="Enhanced"
-                      className="absolute inset-0 h-full w-full object-contain"
+                      className="absolute inset-0 h-full w-full object-contain pointer-events-none"
+                      draggable={false}
                     />
                     
                     {/* Original Image (Overlay with clip) */}
                     <div
-                      className="absolute inset-0 h-full w-full"
+                      className="absolute inset-0 h-full w-full pointer-events-none"
                       style={{
                         clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
                       }}
@@ -154,42 +169,30 @@ const Index = () => {
                         src={selectedImage}
                         alt="Original"
                         className="h-full w-full object-contain"
+                        draggable={false}
                       />
                     </div>
 
                     {/* Slider */}
                     <div
-                      className="absolute inset-y-0 w-1 bg-accent cursor-ew-resize"
+                      className="absolute inset-y-0 w-1 bg-accent cursor-ew-resize z-10"
                       style={{ left: `${sliderPosition}%` }}
                       onMouseDown={(e) => {
-                        const handleMouseMove = (moveEvent: MouseEvent) => {
-                          const rect = e.currentTarget.parentElement?.getBoundingClientRect();
-                          if (!rect) return;
-                          const x = moveEvent.clientX - rect.left;
-                          const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-                          setSliderPosition(percentage);
-                        };
-
-                        const handleMouseUp = () => {
-                          document.removeEventListener('mousemove', handleMouseMove);
-                          document.removeEventListener('mouseup', handleMouseUp);
-                        };
-
-                        document.addEventListener('mousemove', handleMouseMove);
-                        document.addEventListener('mouseup', handleMouseUp);
+                        e.preventDefault();
+                        setIsDragging(true);
                       }}
                     >
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 rounded-full bg-accent p-2 shadow-lg">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 rounded-full bg-accent p-2 shadow-lg pointer-events-none">
                         <ChevronLeft className="h-4 w-4 text-background" />
                         <ChevronRight className="h-4 w-4 text-background" />
                       </div>
                     </div>
 
                     {/* Labels */}
-                    <div className="absolute bottom-4 left-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm">
+                    <div className="absolute bottom-4 left-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm pointer-events-none">
                       <span className="text-sm font-medium text-foreground">Original</span>
                     </div>
-                    <div className="absolute bottom-4 right-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm">
+                    <div className="absolute bottom-4 right-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm pointer-events-none">
                       <span className="text-sm font-medium text-foreground">Enhanced</span>
                     </div>
                   </div>
