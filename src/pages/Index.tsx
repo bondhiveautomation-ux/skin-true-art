@@ -21,6 +21,8 @@ const Index = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [characterImage, setCharacterImage] = useState<string | null>(null);
+  const [productImage, setProductImage] = useState<string | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<string>("");
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +41,29 @@ const Index = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       setCharacterImage(e.target?.result as string);
+      setGeneratedImage(null);
+      setProductImage(null);
+      setSelectedPreset("");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleProductImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setProductImage(e.target?.result as string);
       setGeneratedImage(null);
     };
     reader.readAsDataURL(file);
@@ -165,10 +190,19 @@ const Index = () => {
       return;
     }
 
-    if (!generationPrompt.trim()) {
+    if (productImage && !selectedPreset) {
+      toast({
+        title: "No preset selected",
+        description: "Please select a styling preset for the product",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!productImage && !generationPrompt.trim()) {
       toast({
         title: "Empty prompt",
-        description: "Please enter a scenario prompt",
+        description: "Please enter a scenario prompt or upload a product",
         variant: "destructive",
       });
       return;
@@ -179,7 +213,9 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('generate-character-image', {
         body: { 
           characterImage: characterImage,
-          prompt: generationPrompt.trim()
+          prompt: generationPrompt.trim(),
+          productImage: productImage,
+          preset: selectedPreset
         }
       });
 
@@ -219,6 +255,8 @@ const Index = () => {
     setCharacterImage(null);
     setGeneratedImage(null);
     setGenerationPrompt("");
+    setProductImage(null);
+    setSelectedPreset("");
   };
 
   return (
@@ -577,25 +615,159 @@ const Index = () => {
                     </div>
                   </div>
 
-                  {/* Scenario Prompt */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Scenario Prompt
-                    </label>
-                    <textarea
-                      value={generationPrompt}
-                      onChange={(e) => setGenerationPrompt(e.target.value)}
-                      placeholder="Describe the scenario... (e.g., 'walking on a beach at sunset, wearing a white dress, golden hour lighting')"
-                      className="min-h-[120px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                      disabled={isGeneratingImage}
-                    />
+                  {/* Product Integration (Optional) */}
+                  <div className="rounded-lg border border-accent/30 bg-accent/5 p-6 space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                        Product Integration <span className="text-muted-foreground text-sm font-normal">(Optional)</span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Upload a product to create styled images with your character
+                      </p>
+                    </div>
+
+                    {!productImage ? (
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProductImageUpload}
+                          className="hidden"
+                          id="product-upload"
+                        />
+                        <label
+                          htmlFor="product-upload"
+                          className="group cursor-pointer block"
+                        >
+                          <div className="flex items-center gap-4 rounded-lg border-2 border-dashed border-border p-6 transition-all hover:border-accent hover:bg-secondary/50">
+                            <div className="rounded-full bg-accent/10 p-3 transition-all group-hover:bg-accent/20">
+                              <Upload className="h-6 w-6 text-accent" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                Upload Product Image
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Saree, dress, jewelry, makeup, shoes, bags, etc.
+                              </p>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="relative rounded-lg border border-border bg-background p-3">
+                          <img
+                            src={productImage}
+                            alt="Product"
+                            className="max-h-[200px] rounded object-contain mx-auto"
+                          />
+                          <Button
+                            onClick={() => {
+                              setProductImage(null);
+                              setSelectedPreset("");
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="absolute top-1 right-1"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+
+                        {/* Preset Selection */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-foreground">
+                            Select Styling Preset
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setSelectedPreset("wearing")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPreset === "wearing"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Wearing</p>
+                              <p className="text-xs opacity-80">Character wearing the product</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPreset("holding")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPreset === "holding"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Holding</p>
+                              <p className="text-xs opacity-80">Character holding the product</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPreset("showcasing")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPreset === "showcasing"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Showcasing</p>
+                              <p className="text-xs opacity-80">Product beside character</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPreset("floating")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all ${
+                                selectedPreset === "floating"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Floating Display</p>
+                              <p className="text-xs opacity-80">Artistic product highlight</p>
+                            </button>
+                            <button
+                              onClick={() => setSelectedPreset("lifestyle")}
+                              disabled={isGeneratingImage}
+                              className={`rounded-lg border p-3 text-left transition-all col-span-2 ${
+                                selectedPreset === "lifestyle"
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              }`}
+                            >
+                              <p className="text-sm font-medium">Lifestyle Interaction</p>
+                              <p className="text-xs opacity-80">Natural interaction with product in context</p>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Scenario Prompt */}
+                  {!productImage && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Scenario Prompt
+                      </label>
+                      <textarea
+                        value={generationPrompt}
+                        onChange={(e) => setGenerationPrompt(e.target.value)}
+                        placeholder="Describe the scenario... (e.g., 'walking on a beach at sunset, wearing a white dress, golden hour lighting')"
+                        className="min-h-[120px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                        disabled={isGeneratingImage}
+                      />
+                    </div>
+                  )}
 
                   {/* Generate Button */}
                   <div className="flex justify-center">
                     <Button
                       onClick={handleGenerateImage}
-                      disabled={isGeneratingImage || !generationPrompt.trim()}
+                      disabled={isGeneratingImage || (!generationPrompt.trim() && !productImage) || (productImage && !selectedPreset)}
                       className="bg-accent text-background hover:bg-accent/90"
                       size="lg"
                     >
