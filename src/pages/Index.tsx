@@ -41,6 +41,16 @@ const Index = () => {
   const [cleanBackground, setCleanBackground] = useState<string | null>(null);
   const [isRemovingPeople, setIsRemovingPeople] = useState(false);
   
+  // Influencer Studio Mode states
+  const [influencerImages, setInfluencerImages] = useState<string[]>([]);
+  const [selectedInfluencerAngle, setSelectedInfluencerAngle] = useState<string>("");
+  const [selectedInfluencerStyle, setSelectedInfluencerStyle] = useState<string>("");
+  const [selectedInfluencerPose, setSelectedInfluencerPose] = useState<string>("");
+  const [selectedInfluencerDress, setSelectedInfluencerDress] = useState<string>("");
+  const [influencerCustomPrompt, setInfluencerCustomPrompt] = useState<string>("");
+  const [generatedInfluencerImage, setGeneratedInfluencerImage] = useState<string | null>(null);
+  const [isGeneratingInfluencer, setIsGeneratingInfluencer] = useState(false);
+  
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -566,6 +576,156 @@ const Index = () => {
   const handleResetPeopleRemoval = () => {
     setPeopleImage(null);
     setCleanBackground(null);
+  };
+
+  // Influencer Studio Mode Handlers
+  const handleInfluencerImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const fileArray = Array.from(files);
+    
+    if (fileArray.length < 8) {
+      toast({
+        title: "Not enough images",
+        description: "Please upload at least 8 images of the same person",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (fileArray.length > 12) {
+      toast({
+        title: "Too many images",
+        description: "Maximum 12 images allowed. First 12 will be used.",
+      });
+    }
+
+    const imagesToProcess = fileArray.slice(0, 12);
+    const imageUrls: string[] = [];
+
+    imagesToProcess.forEach((file, index) => {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file",
+          description: `File ${index + 1} is not an image`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: `Image ${index + 1} is over 20MB`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        imageUrls.push(reader.result as string);
+        if (imageUrls.length === imagesToProcess.length) {
+          setInfluencerImages(imageUrls);
+          toast({
+            title: "Images uploaded",
+            description: `${imageUrls.length} training images loaded successfully`,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleGenerateInfluencer = async () => {
+    if (influencerImages.length < 8) {
+      toast({
+        title: "Not enough images",
+        description: "Please upload at least 8 reference images",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedInfluencerAngle || !selectedInfluencerStyle || !selectedInfluencerPose) {
+      toast({
+        title: "Missing selections",
+        description: "Please select angle, style, and pose",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingInfluencer(true);
+    setGeneratedInfluencerImage(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-influencer-image', {
+        body: {
+          referenceImages: influencerImages,
+          angle: selectedInfluencerAngle,
+          style: selectedInfluencerStyle,
+          pose: selectedInfluencerPose,
+          dress: selectedInfluencerDress,
+          customPrompt: influencerCustomPrompt
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.image) {
+        setGeneratedInfluencerImage(data.image);
+        toast({
+          title: "Success!",
+          description: "Influencer image generated with consistent identity",
+        });
+      } else {
+        toast({
+          title: "No result",
+          description: data?.error || "Failed to generate image",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Influencer generation error:', error);
+      toast({
+        title: "Generation failed",
+        description: error.message || "Failed to generate influencer image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingInfluencer(false);
+    }
+  };
+
+  const handleDownloadInfluencer = (format: 'png' | 'jpg') => {
+    if (!generatedInfluencerImage) return;
+
+    const link = document.createElement('a');
+    link.href = generatedInfluencerImage;
+    link.download = `influencer-${Date.now()}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded",
+      description: `Image saved as ${format.toUpperCase()}`,
+    });
+  };
+
+  const handleResetInfluencer = () => {
+    setInfluencerImages([]);
+    setSelectedInfluencerAngle("");
+    setSelectedInfluencerStyle("");
+    setSelectedInfluencerPose("");
+    setSelectedInfluencerDress("");
+    setInfluencerCustomPrompt("");
+    setGeneratedInfluencerImage(null);
+  };
+
+  const handleRemoveInfluencerImage = (index: number) => {
+    setInfluencerImages(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -1688,6 +1848,363 @@ const Index = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Influencer Studio Mode Section */}
+        <div className="mt-12 bg-card rounded-2xl shadow-2xl p-8 border border-border">
+          <div className="mb-6 text-center">
+            <h2 className="mb-2 text-4xl font-bold text-foreground">
+              Influencer <span className="text-accent">Studio Mode</span>
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Train a consistent AI influencer model and generate unlimited professional photoshoots
+            </p>
+          </div>
+
+          <div className="space-y-8">
+            {/* Image Upload Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-foreground">Upload Influencer Training Images</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Upload 8-12 high-quality photos of the same person (various angles, lighting, expressions)
+                  </p>
+                </div>
+                {influencerImages.length > 0 && (
+                  <Button
+                    onClick={handleResetInfluencer}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Reset All
+                  </Button>
+                )}
+              </div>
+
+              {influencerImages.length === 0 ? (
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleInfluencerImagesUpload}
+                    className="hidden"
+                    id="influencer-upload"
+                  />
+                  <label htmlFor="influencer-upload" className="group cursor-pointer block">
+                    <div className="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-border p-16 transition-all hover:border-accent hover:bg-secondary/50">
+                      <div className="rounded-full bg-accent/10 p-8 transition-all group-hover:bg-accent/20">
+                        <Upload className="h-16 w-16 text-accent" />
+                      </div>
+                      <div className="text-center">
+                        <p className="mb-2 text-xl font-semibold text-foreground">
+                          Upload 8-12 Training Photos
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Select multiple images of the same influencer to train the AI model
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Maximum 20MB per image • JPG, PNG, WEBP
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/10 border border-accent/20">
+                    <div className="rounded-full bg-accent p-2">
+                      <svg className="h-5 w-5 text-background" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground">Model Trained with {influencerImages.length} Images</p>
+                      <p className="text-sm text-muted-foreground">Influencer identity locked for consistent generation</p>
+                    </div>
+                  </div>
+
+                  {/* Image Grid */}
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {influencerImages.map((img, index) => (
+                      <div key={index} className="relative group rounded-lg overflow-hidden border-2 border-border aspect-square">
+                        <img
+                          src={img}
+                          alt={`Training ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          onClick={() => handleRemoveInfluencerImage(index)}
+                          variant="outline"
+                          size="sm"
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                        >
+                          ×
+                        </Button>
+                        <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm py-1 text-center text-xs text-foreground">
+                          #{index + 1}
+                        </div>
+                      </div>
+                    ))}
+                    {influencerImages.length < 12 && (
+                      <label htmlFor="add-more-influencer" className="cursor-pointer">
+                        <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-border aspect-square transition-all hover:border-accent hover:bg-secondary/50">
+                          <div className="text-center">
+                            <Upload className="h-8 w-8 text-accent mx-auto mb-1" />
+                            <p className="text-xs text-muted-foreground">Add More</p>
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleInfluencerImagesUpload}
+                          className="hidden"
+                          id="add-more-influencer"
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Generation Controls */}
+                  <div className="space-y-6 pt-4">
+                    {/* Angle Selection */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="rounded-full bg-accent text-background w-6 h-6 flex items-center justify-center text-xs">1</span>
+                        Camera Angle
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {[
+                          { id: 'front', label: 'Front Angle', desc: 'Face-on view' },
+                          { id: '45-degree', label: '45° Angle', desc: 'Three-quarter' },
+                          { id: 'side-profile', label: 'Side Profile', desc: 'Profile view' },
+                          { id: 'close-up', label: 'Close-Up', desc: 'Portrait shot' },
+                          { id: 'full-body-standing', label: 'Full Body', desc: 'Head to toe' },
+                          { id: 'sitting', label: 'Sitting', desc: 'Seated pose' },
+                          { id: 'over-shoulder', label: 'Over Shoulder', desc: 'Looking back' },
+                          { id: 'walking', label: 'Walking', desc: 'In motion' }
+                        ].map(angle => (
+                          <button
+                            key={angle.id}
+                            onClick={() => setSelectedInfluencerAngle(angle.id)}
+                            disabled={isGeneratingInfluencer}
+                            className={`rounded-lg border p-3 text-left transition-all ${
+                              selectedInfluencerAngle === angle.id
+                                ? "border-accent bg-accent/10 text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                            }`}
+                          >
+                            <p className="text-sm font-medium">{angle.label}</p>
+                            <p className="text-xs opacity-80">{angle.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Style Selection */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="rounded-full bg-accent text-background w-6 h-6 flex items-center justify-center text-xs">2</span>
+                        Photography Style
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {[
+                          { id: 'studio', label: 'Studio', desc: 'Professional setup' },
+                          { id: 'natural-light', label: 'Natural Light', desc: 'Soft daylight' },
+                          { id: 'outdoor', label: 'Outdoor', desc: 'Natural setting' },
+                          { id: 'fashion', label: 'Fashion', desc: 'Editorial style' },
+                          { id: 'home', label: 'Home', desc: 'Cozy interior' },
+                          { id: 'cinematic', label: 'Cinematic', desc: 'Film-like mood' },
+                          { id: 'selfie', label: 'Selfie', desc: 'Personal angle' }
+                        ].map(style => (
+                          <button
+                            key={style.id}
+                            onClick={() => setSelectedInfluencerStyle(style.id)}
+                            disabled={isGeneratingInfluencer}
+                            className={`rounded-lg border p-3 text-left transition-all ${
+                              selectedInfluencerStyle === style.id
+                                ? "border-accent bg-accent/10 text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                            }`}
+                          >
+                            <p className="text-sm font-medium">{style.label}</p>
+                            <p className="text-xs opacity-80">{style.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Pose Selection */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="rounded-full bg-accent text-background w-6 h-6 flex items-center justify-center text-xs">3</span>
+                        Body Pose
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {[
+                          { id: 'standing', label: 'Standing', desc: 'Natural stance' },
+                          { id: 'leaning', label: 'Leaning', desc: 'Casual lean' },
+                          { id: 'sitting', label: 'Sitting', desc: 'Seated position' },
+                          { id: 'walking', label: 'Walking', desc: 'In motion' },
+                          { id: 'hands-on-waist', label: 'Hands on Waist', desc: 'Confident pose' },
+                          { id: 'arms-crossed', label: 'Arms Crossed', desc: 'Power stance' },
+                          { id: 'looking-back', label: 'Looking Back', desc: 'Over shoulder' }
+                        ].map(pose => (
+                          <button
+                            key={pose.id}
+                            onClick={() => setSelectedInfluencerPose(pose.id)}
+                            disabled={isGeneratingInfluencer}
+                            className={`rounded-lg border p-3 text-left transition-all ${
+                              selectedInfluencerPose === pose.id
+                                ? "border-accent bg-accent/10 text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                            }`}
+                          >
+                            <p className="text-sm font-medium">{pose.label}</p>
+                            <p className="text-xs opacity-80">{pose.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Dress Options */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="rounded-full bg-accent text-background w-6 h-6 flex items-center justify-center text-xs">4</span>
+                        Outfit Options
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'keep-reference', label: 'Keep Reference', desc: 'From training photos' },
+                          { id: 'custom-prompt', label: 'Custom', desc: 'Describe in prompt' },
+                          { id: 'auto', label: 'Auto', desc: 'AI decides' }
+                        ].map(dress => (
+                          <button
+                            key={dress.id}
+                            onClick={() => setSelectedInfluencerDress(dress.id)}
+                            disabled={isGeneratingInfluencer}
+                            className={`rounded-lg border p-3 text-left transition-all ${
+                              selectedInfluencerDress === dress.id
+                                ? "border-accent bg-accent/10 text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                            }`}
+                          >
+                            <p className="text-sm font-medium">{dress.label}</p>
+                            <p className="text-xs opacity-80">{dress.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Custom Prompt */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="rounded-full bg-accent text-background w-6 h-6 flex items-center justify-center text-xs">5</span>
+                        Custom Prompt (Optional)
+                      </label>
+                      <textarea
+                        value={influencerCustomPrompt}
+                        onChange={(e) => setInfluencerCustomPrompt(e.target.value)}
+                        placeholder="Add custom details: specific dress, scene description, mood, accessories, colors, etc."
+                        className="min-h-[100px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                        disabled={isGeneratingInfluencer}
+                      />
+                    </div>
+
+                    {/* Generate Button */}
+                    <div className="flex justify-center pt-4">
+                      <Button
+                        onClick={handleGenerateInfluencer}
+                        disabled={
+                          isGeneratingInfluencer ||
+                          influencerImages.length < 8 ||
+                          !selectedInfluencerAngle ||
+                          !selectedInfluencerStyle ||
+                          !selectedInfluencerPose
+                        }
+                        className="bg-accent text-background hover:bg-accent/90"
+                        size="lg"
+                      >
+                        {isGeneratingInfluencer ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Generating Influencer Image...
+                          </>
+                        ) : (
+                          'Generate Influencer Image'
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Generated Image Display */}
+                    {generatedInfluencerImage && (
+                      <div className="space-y-4 rounded-lg border border-accent/20 bg-accent/5 p-6 mt-6">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-semibold text-foreground">Generated Influencer Photo</label>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleDownloadInfluencer('png')}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              PNG
+                            </Button>
+                            <Button
+                              onClick={() => handleDownloadInfluencer('jpg')}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              JPG
+                            </Button>
+                            <Button
+                              onClick={() => setGeneratedInfluencerImage(null)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Clear
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="rounded-lg bg-background p-4">
+                          <img
+                            src={generatedInfluencerImage}
+                            alt="Generated influencer"
+                            className="w-full rounded-lg object-contain"
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={handleGenerateInfluencer}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            Regenerate
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSelectedInfluencerAngle("");
+                              setSelectedInfluencerStyle("");
+                              setSelectedInfluencerPose("");
+                              setSelectedInfluencerDress("");
+                              setInfluencerCustomPrompt("");
+                            }}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            New Settings
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
