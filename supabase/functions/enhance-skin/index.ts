@@ -25,7 +25,42 @@ serve(async (req) => {
 
     console.log("Processing skin enhancement for image");
 
-    const enhancementPrompt = `Enhance the uploaded portrait by adding lifelike human skin texture. Preserve identity 100%. Add natural pores, micro-lines, soft imperfections, and realistic texture across the face. Improve micro-shadows and light falloff without altering the original facial features or expression. Remove smoothing and plastic artifacts. Output a high-resolution, hyper-realistic version of the same face with natural skin depth, subtle imperfections, and cinematic micro-detail. Do NOT beauty-filter, reshape, whiten, or change the face in any way. Keep the exact same person, same face, same expression, but with professional-level natural skin texture.`;
+    const enhancementPrompt = `CRITICAL INSTRUCTIONS - Enhance ONLY the skin texture layer. You are FORBIDDEN from modifying anything else.
+
+LOCKED LAYERS (DO NOT MODIFY):
+- All makeup: eyeshadow, lipstick, lip gloss, contour, blush, eyeliner, mascara, highlighter
+- Lip position, shape, openness, color, and gloss - MUST remain pixel-identical
+- Eyebrows: shape, color, thickness, and positioning
+- Eyelashes: volume, length, and curl
+- Face shape, jawline, nose shape, eye shape, and all facial proportions
+- Facial expression: MUST remain exactly the same
+- Hairstyle and hair color
+- Lighting style and direction
+- Background
+
+ONLY MODIFY: Skin surface texture
+Add to skin ONLY:
+- Natural visible pores (especially on nose, cheeks, forehead)
+- Micro-lines and fine wrinkles
+- Soft organic imperfections and asymmetry
+- Natural micro-shadows around facial contours
+- Realistic skin texture depth with matte finish
+- Preserve natural skin undertones and color variation
+- Remove plastic smoothness and artificial blur
+
+ABSOLUTE PROHIBITIONS:
+- NO makeup removal or modification
+- NO color changes to lips, eyes, or skin tone
+- NO changes to lip position, openness, or gloss
+- NO expression changes (no smile adjustment, eye closing/opening)
+- NO facial feature reshaping (slimming, nose job, eye enlargement)
+- NO whitening or beautification filters
+- NO changes to facial proportions
+
+The result must look like: Same person, same makeup application, same facial expression, same lighting - but photographed with a professional camera that captures real human skin texture instead of phone camera smoothing.
+
+Think of this as adding a "real skin texture overlay" on top of the existing image without touching anything underneath.`;
+
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
