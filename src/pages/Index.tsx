@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Loader2, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,6 +11,10 @@ const Index = () => {
   const [showComparison, setShowComparison] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const comparisonRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -83,6 +87,44 @@ const Index = () => {
     setEnhancedImage(null);
     setShowComparison(false);
     setSliderPosition(50);
+    setZoomLevel(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.5, 4));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.5, 1));
+    if (zoomLevel <= 1.5) {
+      setPanPosition({ x: 0, y: 0 });
+    }
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handlePanStart = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+    }
+  };
+
+  const handlePanMove = (e: React.MouseEvent) => {
+    if (isPanning && zoomLevel > 1) {
+      setPanPosition({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+    }
+  };
+
+  const handlePanEnd = () => {
+    setIsPanning(false);
   };
 
   return (
@@ -135,66 +177,143 @@ const Index = () => {
             <div className="space-y-6">
               {/* Image Display */}
               {showComparison && enhancedImage ? (
-                // Before/After Comparison
-                <div className="relative overflow-hidden rounded-xl">
-                  <div 
-                    ref={comparisonRef}
-                    className="relative aspect-[3/4] w-full max-w-2xl mx-auto select-none"
-                    onMouseMove={(e) => {
-                      if (!isDragging || !comparisonRef.current) return;
-                      const rect = comparisonRef.current.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-                      setSliderPosition(percentage);
-                    }}
-                    onMouseUp={() => setIsDragging(false)}
-                    onMouseLeave={() => setIsDragging(false)}
-                  >
-                    {/* Enhanced Image (Background) */}
-                    <img
-                      src={enhancedImage}
-                      alt="Enhanced"
-                      className="absolute inset-0 h-full w-full object-contain pointer-events-none"
-                      draggable={false}
-                    />
-                    
-                    {/* Original Image (Overlay with clip) */}
-                    <div
-                      className="absolute inset-0 h-full w-full pointer-events-none"
-                      style={{
-                        clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
-                      }}
+                // Before/After Comparison with Zoom
+                <div className="space-y-4">
+                  {/* Zoom Controls */}
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      onClick={handleZoomOut}
+                      disabled={zoomLevel <= 1}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
                     >
-                      <img
-                        src={selectedImage}
-                        alt="Original"
-                        className="h-full w-full object-contain"
-                        draggable={false}
-                      />
-                    </div>
+                      <ZoomOut className="h-4 w-4" />
+                      Zoom Out
+                    </Button>
+                    <Button
+                      onClick={handleResetZoom}
+                      disabled={zoomLevel === 1}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                      Reset ({Math.round(zoomLevel * 100)}%)
+                    </Button>
+                    <Button
+                      onClick={handleZoomIn}
+                      disabled={zoomLevel >= 4}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <ZoomIn className="h-4 w-4" />
+                      Zoom In
+                    </Button>
+                  </div>
 
-                    {/* Slider */}
-                    <div
-                      className="absolute inset-y-0 w-1 bg-accent cursor-ew-resize z-10"
-                      style={{ left: `${sliderPosition}%` }}
+                  <div className="relative overflow-hidden rounded-xl bg-secondary/50">
+                    <div 
+                      ref={comparisonRef}
+                      className="relative aspect-[3/4] w-full max-w-2xl mx-auto select-none"
+                      style={{
+                        cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+                      }}
+                      onMouseMove={(e) => {
+                        if (isDragging && !isPanning && comparisonRef.current) {
+                          const rect = comparisonRef.current.getBoundingClientRect();
+                          const x = e.clientX - rect.left;
+                          const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                          setSliderPosition(percentage);
+                        }
+                        handlePanMove(e);
+                      }}
                       onMouseDown={(e) => {
-                        e.preventDefault();
-                        setIsDragging(true);
+                        if (zoomLevel > 1 && !(e.target as HTMLElement).closest('.slider-handle')) {
+                          handlePanStart(e);
+                        }
+                      }}
+                      onMouseUp={() => {
+                        setIsDragging(false);
+                        handlePanEnd();
+                      }}
+                      onMouseLeave={() => {
+                        setIsDragging(false);
+                        handlePanEnd();
                       }}
                     >
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 rounded-full bg-accent p-2 shadow-lg pointer-events-none">
-                        <ChevronLeft className="h-4 w-4 text-background" />
-                        <ChevronRight className="h-4 w-4 text-background" />
+                      {/* Enhanced Image (Background) */}
+                      <div
+                        className="absolute inset-0 h-full w-full overflow-hidden"
+                        style={{
+                          transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                          transformOrigin: 'center center',
+                          transition: isPanning ? 'none' : 'transform 0.2s ease-out',
+                        }}
+                      >
+                        <img
+                          src={enhancedImage}
+                          alt="Enhanced"
+                          className="h-full w-full object-contain pointer-events-none"
+                          draggable={false}
+                        />
+                      </div>
+                      
+                      {/* Original Image (Overlay with clip) */}
+                      <div
+                        className="absolute inset-0 h-full w-full pointer-events-none overflow-hidden"
+                        style={{
+                          clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                            transformOrigin: 'center center',
+                            transition: isPanning ? 'none' : 'transform 0.2s ease-out',
+                          }}
+                        >
+                          <img
+                            src={selectedImage}
+                            alt="Original"
+                            className="h-full w-full object-contain"
+                            draggable={false}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Slider */}
+                      <div
+                        className="slider-handle absolute inset-y-0 w-1 bg-accent cursor-ew-resize z-10"
+                        style={{ left: `${sliderPosition}%` }}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsDragging(true);
+                        }}
+                      >
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 rounded-full bg-accent p-2 shadow-lg pointer-events-none">
+                          <ChevronLeft className="h-4 w-4 text-background" />
+                          <ChevronRight className="h-4 w-4 text-background" />
+                        </div>
+                      </div>
+
+                      {/* Labels */}
+                      <div className="absolute bottom-4 left-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm pointer-events-none">
+                        <span className="text-sm font-medium text-foreground">Original</span>
+                      </div>
+                      <div className="absolute bottom-4 right-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm pointer-events-none">
+                        <span className="text-sm font-medium text-foreground">Enhanced</span>
                       </div>
                     </div>
 
-                    {/* Labels */}
-                    <div className="absolute bottom-4 left-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm pointer-events-none">
-                      <span className="text-sm font-medium text-foreground">Original</span>
-                    </div>
-                    <div className="absolute bottom-4 right-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm pointer-events-none">
-                      <span className="text-sm font-medium text-foreground">Enhanced</span>
-                    </div>
+                    {/* Pan instruction */}
+                    {zoomLevel > 1 && (
+                      <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg bg-accent/90 px-3 py-1 text-xs text-background backdrop-blur-sm">
+                        Click and drag to pan
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
