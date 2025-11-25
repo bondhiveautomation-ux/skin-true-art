@@ -1,0 +1,4 @@
+project_id = "blyuzmnuhuymcptqinqa"
+
+[functions.enhance-skin]
+verify_jwt = false
