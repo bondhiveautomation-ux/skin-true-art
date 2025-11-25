@@ -3,5 +3,5 @@ project_id = "blyuzmnuhuymcptqinqa"
 [functions.enhance-skin]
 verify_jwt = false
 
-[functions.generate-prompt]
+[functions.generate-character-image]
 verify_jwt = false
