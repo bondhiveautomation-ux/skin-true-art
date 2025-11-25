@@ -54,58 +54,25 @@ serve(async (req) => {
         "dynamic-action": "The character is in a dynamic, active pose with energy and movement. Capture an expressive, engaging action appropriate for the scene. Body should show motion and vitality."
       };
 
-      generationPrompt = `YOU ARE A PROFESSIONAL PHOTO COMPOSITOR SPECIALIZING IN CHARACTER-BACKGROUND INTEGRATION.
+      generationPrompt = `Create a photorealistic image compositing the person from the first image into the scene from the second image.
 
-🚨 ABSOLUTE CHARACTER CONSISTENCY REQUIREMENTS:
+Character Preservation:
+Maintain the exact appearance of the person including facial features, body type, skin tone, hair, and overall identity. Keep their natural proportions and characteristics identical to the reference.
 
-ANALYZE THIS CHARACTER IMAGE AND MEMORIZE EVERY DETAIL:
-- Face shape, structure, and proportions (MUST BE IDENTICAL)
-- Eye shape, color, size, spacing, and expression (MUST BE IDENTICAL)
-- Nose shape, size, and bridge (MUST BE IDENTICAL)
-- Mouth, lips shape, size, and natural expression (MUST BE IDENTICAL)
-- Skin tone, texture, and any distinctive marks (MUST BE IDENTICAL)
-- Hair color, style, texture, and length (MUST BE IDENTICAL)
-- Body type, build, proportions, and posture (MUST BE IDENTICAL)
-- Age appearance and overall facial features (MUST BE IDENTICAL)
+Background Integration:
+Place the person naturally into the background scene while preserving the original environment, lighting, colors, and atmosphere of the background image.
 
-🎯 BACKGROUND INTEGRATION REQUIREMENTS:
-
-ANALYZE THE BACKGROUND IMAGE:
-- Preserve the exact background scene, environment, and setting
-- Maintain original lighting, colors, mood, and atmosphere
-- Keep perspective, depth, and spatial relationships intact
-- Preserve all background objects, textures, and details
-
-📸 CHARACTER POSE: ${pose.toUpperCase().replace('-', ' ')}
+Pose: ${pose.replace('-', ' ')}
 ${poseInstructions[pose]}
 
-🎨 INTEGRATION QUALITY STANDARDS:
-✓ Place the character naturally INTO the background scene
-✓ Match lighting direction and intensity between character and background
-✓ Ensure proper shadows, reflections, and environmental lighting on character
-✓ Character scale and perspective must match the background perfectly
-✓ Seamless blending with no visible edges, halos, or compositing artifacts
-✓ Character should look like they were photographed IN that exact location
-✓ Natural interaction with the environment (if applicable)
-✓ Realistic depth of field and focus matching the background
+Quality Requirements:
+- Match lighting and shadows between the person and background
+- Ensure proper scale and perspective alignment
+- Create seamless blending with natural depth of field
+- Produce a photorealistic result that looks like a professional photograph
+- Maintain high resolution and sharp details
 
-🚨 CRITICAL RULES:
-✓ The character's face and body MUST be 100% identical to reference
-✓ The background scene MUST remain unchanged and intact
-✓ The pose MUST be natural and appropriate for the environment
-✓ NO distortions, unnatural proportions, or physics violations
-✓ NO style mismatches between character and background
-✓ Generate ultra-high-quality, photorealistic output (8K quality)
-✓ Make it look like a real photograph taken in that location
-
-❌ ABSOLUTELY FORBIDDEN:
-- Changing the character's face, body, or identity
-- Altering the background scene, objects, or environment
-- Creating unrealistic lighting mismatches
-- Producing visible compositing seams or artifacts
-- Generating unnatural poses or awkward body positions
-
-Generate a flawless, seamless integration that looks like a professional photograph taken in that exact location.`;
+The final image should appear as if the person was actually photographed in that location with natural, realistic composition.`;
 
       contentArray = [
         { type: "text", text: generationPrompt },
@@ -141,50 +108,25 @@ Generate a flawless, seamless integration that looks like a professional photogr
         lifestyle: "The character is naturally interacting with the product in a realistic lifestyle setting. The interaction should look organic and unforced, as if captured in a real moment. The product and character should blend seamlessly into the scene with natural lighting and authentic body language."
       };
 
-      generationPrompt = `YOU ARE A PRODUCT-CHARACTER INTEGRATION SPECIALIST. YOUR JOB IS TO CREATE PHOTOREALISTIC IMAGES COMBINING A SPECIFIC CHARACTER WITH A PRODUCT.
+      generationPrompt = `Create a professional product photography image featuring the person from the first image with the product from the second image.
 
-🚨 ABSOLUTE CHARACTER CONSISTENCY REQUIREMENTS:
+Character Preservation:
+Maintain the exact appearance of the person including all facial features, body proportions, skin tone, hair style, and natural characteristics from the reference image.
 
-ANALYZE THIS CHARACTER IMAGE AND MEMORIZE EVERY DETAIL:
-- Face shape, structure, and proportions (MUST BE IDENTICAL)
-- Eye shape, color, size, spacing, and expression (MUST BE IDENTICAL)
-- Nose shape, size, and bridge (MUST BE IDENTICAL)
-- Mouth, lips shape, size, and natural expression (MUST BE IDENTICAL)
-- Skin tone, texture, and any distinctive marks (MUST BE IDENTICAL)
-- Hair color, style, texture, and length (MUST BE IDENTICAL)
-- Body type, build, proportions, and posture (MUST BE IDENTICAL)
-- Age appearance and overall facial features (MUST BE IDENTICAL)
+Product Integration:
+Preserve the product's design, colors, patterns, textures, and all details accurately.
 
-🎯 PRODUCT INTEGRATION REQUIREMENTS:
-
-ANALYZE THE PRODUCT IMAGE AND PRESERVE:
-- Product shape, design, and structure (MUST BE IDENTICAL)
-- Product colors, patterns, and textures (MUST BE IDENTICAL)
-- Product size and proportions (MUST BE REALISTIC AND ACCURATE)
-- Product details like logos, embroidery, prints (MUST BE CLEAR AND INTACT)
-- Material appearance (fabric, metal, leather, etc. MUST LOOK AUTHENTIC)
-
-📸 STYLING PRESET: ${preset.toUpperCase()}
+Styling: ${preset}
 ${presetInstructions[preset]}${cameraAngleInstructions}
 
-🚨 CRITICAL QUALITY RULES:
-✓ The character's face and body MUST be 100% identical to the reference
-✓ The product MUST maintain its exact design, colors, and details
-✓ NO distortions, warping, or unnatural proportions
-✓ NO mismatches in scale, perspective, or physics
-✓ NO style inconsistencies between character and product
-✓ Generate ultra-high-quality, photorealistic output (8K quality)
-✓ Use professional photography lighting and composition
-✓ Make it look like a real photoshoot with this exact character and product
+Quality Requirements:
+- Professional photography lighting and composition
+- Natural and realistic interaction between person and product
+- Accurate proportions and proper scale
+- High-resolution photorealistic output
+- Clean, polished result suitable for commercial use
 
-❌ ABSOLUTELY FORBIDDEN:
-- Changing the character's face, body, or identity
-- Altering the product's design, shape, or colors
-- Creating unrealistic proportions or physics violations
-- Adding unwanted elements or modifications
-- Producing low-quality or artificial-looking results
-
-Generate a flawless, natural, and cohesive image that looks like a real professional photoshoot.`;
+Create an image that looks like a real professional photoshoot session.`;
 
       contentArray = [
         { type: "text", text: generationPrompt },
@@ -195,44 +137,22 @@ Generate a flawless, natural, and cohesive image that looks like a real professi
       // Standard scenario generation mode
       console.log("Standard scenario generation for prompt:", prompt);
       
-      generationPrompt = `YOU ARE A CHARACTER-CONSISTENT IMAGE GENERATOR. YOUR ONLY JOB IS TO CREATE A NEW IMAGE WITH THE EXACT SAME CHARACTER.
+      generationPrompt = `Create a photorealistic image of the person from the reference image in a new scenario.
 
-🚨 ABSOLUTE CHARACTER CONSISTENCY REQUIREMENTS:
+Character Preservation:
+Keep the person's appearance identical including facial features, body proportions, skin tone, hair, and all distinctive characteristics.
 
-ANALYZE THIS CHARACTER AND MEMORIZE EVERY DETAIL:
-- Face shape, structure, and proportions (MUST BE IDENTICAL)
-- Eye shape, color, size, spacing, and expression (MUST BE IDENTICAL)
-- Nose shape, size, and bridge (MUST BE IDENTICAL)
-- Mouth, lips shape, size, and natural expression (MUST BE IDENTICAL)
-- Skin tone, texture, and any distinctive marks (MUST BE IDENTICAL)
-- Hair color, style, texture, and length (MUST BE IDENTICAL)
-- Body type, build, proportions, and posture (MUST BE IDENTICAL)
-- Age appearance and overall facial features (MUST BE IDENTICAL)
-- Any distinctive features like freckles, moles, scars, dimples (MUST BE IDENTICAL)
-
-YOUR TASK:
-Create a new photorealistic image where this EXACT character is placed in the following scenario:
-
+Scenario:
 "${prompt}"
 
-🚨 CRITICAL RULES:
-✓ The character's face, body, and all physical features MUST remain 100% identical to the reference
-✓ Only change: the scenario, environment, clothing, pose, and context
-✓ Maintain the same person's identity completely
-✓ Generate a high-quality, photorealistic image (8K quality)
-✓ Use professional photography lighting and composition
-✓ Make it look like the same person photographed in a different situation
+Requirements:
+- Maintain complete character consistency
+- Only change the scenario, setting, clothing, and context
+- Use professional photography quality
+- Create natural, realistic lighting and composition
+- High-resolution output
 
-❌ NEVER change:
-- Face shape, facial features, or proportions
-- Eye shape, color, or characteristics  
-- Skin tone or complexion
-- Body type or build
-- The person's core identity and appearance
-
-Think: "Same person, same face, same body - just in a new scenario."
-
-Generate a photorealistic, ultra-high-quality image maintaining absolute character consistency.`;
+Generate an image showing the same person in this new situation.`;
 
       contentArray = [
         { type: "text", text: generationPrompt },
@@ -279,17 +199,31 @@ Generate a photorealistic, ultra-high-quality image maintaining absolute charact
     const data = await response.json();
     console.log("AI response data:", JSON.stringify(data, null, 2));
     
+    // Check for safety filter blocks
+    const finishReason = data.choices?.[0]?.native_finish_reason || data.choices?.[0]?.finish_reason;
+    if (finishReason === "IMAGE_SAFETY" || finishReason === "SAFETY") {
+      console.log("Image blocked by safety filters");
+      return new Response(
+        JSON.stringify({ 
+          error: "Image generation was blocked by content safety filters. Please try with a different image or scenario. Avoid content that may be considered sensitive or inappropriate." 
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
     const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!generatedImageUrl) {
       console.error("No image in AI response. Full response:", JSON.stringify(data, null, 2));
       
-      // Check if there's an error message from the AI
       const errorMessage = data.error?.message || data.choices?.[0]?.message?.content || "No image generated";
       
       return new Response(
         JSON.stringify({ 
-          error: `Image generation failed: ${errorMessage}. This may be due to content policy restrictions. Please try a different prompt or scenario.` 
+          error: `Image generation failed: ${errorMessage}. Please try a different image or adjust your request.` 
         }),
         {
           status: 400,
