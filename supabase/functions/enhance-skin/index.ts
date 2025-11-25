@@ -25,61 +25,51 @@ serve(async (req) => {
 
     console.log("Processing skin enhancement for image");
 
-    const enhancementPrompt = `CRITICAL INSTRUCTIONS - Enhance ONLY the skin texture layer across ALL VISIBLE SKIN in the entire image.
+    const enhancementPrompt = `YOU ARE A SKIN TEXTURE SPECIALIST. YOUR ONLY JOB IS TO ADD REALISTIC SKIN PORES AND TEXTURE.
 
-SKIN AREAS TO ENHANCE:
-Apply realistic skin texture enhancement to EVERY visible skin area including:
-- Face (forehead, cheeks, nose, chin, around eyes)
-- Neck (front and sides)
-- Chest and décolletage
-- Shoulders and upper back (if visible)
-- Arms (upper arms, forearms)
-- Hands and fingers
-- Any other exposed skin areas
+🚨 CRITICAL: This image has MAKEUP on it. The makeup MUST remain 100% UNTOUCHED.
+Makeup is PAINTED ON TOP OF the skin. You are ONLY adding texture to the skin UNDERNEATH the makeup layer.
+DO NOT remove, lighten, blur, or modify ANY makeup whatsoever.
 
-LOCKED LAYERS (ABSOLUTELY DO NOT MODIFY):
-- All makeup: eyeshadow, foundation, contour, blush, eyeliner, mascara, lipstick, lip gloss, highlighter
-- Lip shape, position, openness, color, shine, and gloss - MUST remain pixel-identical
-- Facial expression: MUST remain exactly the same (no smile changes, eye adjustments)
-- Eyebrows: shape, color, thickness, positioning
-- Eyelashes: volume, length, curl
-- Eye shape, iris color, pupil size
-- Face shape, jawline, nose shape, cheekbones, and all facial proportions
-- Hairstyle, hair color, hair texture
-- Clothing, jewelry, accessories
-- Background elements
-- Lighting style, direction, and color mood
+THINK OF IT THIS WAY:
+- Skin = base layer (you add pores and texture here)
+- Makeup = top layer painted on skin (you NEVER touch this)
 
-ONLY MODIFY: Skin surface texture on ALL visible skin areas
-Apply these texture enhancements to all exposed skin:
-- Natural visible pores (varying density - more on nose/forehead, less on neck/chest)
-- Micro-lines and fine wrinkles appropriate to each skin area
-- Soft organic imperfections and natural asymmetry
-- Realistic micro-shadows that follow skin contours
-- Natural skin texture depth with matte finish (not glossy or plastic)
-- Preserve natural skin undertones and subtle color variations
-- Remove only artificial smoothing, blur, and plastic-looking surfaces
-- Maintain natural skin characteristics for different body areas (face skin differs from neck/arm skin)
+WHAT YOU MUST DO:
+Add realistic skin texture ONLY to visible skin areas:
+- Face, neck, shoulders, chest, arms, hands
+- Add natural pores (more on nose/forehead, less on neck)
+- Add micro-lines, tiny imperfections, organic bumps
+- Add realistic micro-shadows following skin contours
+- Add matte texture depth (not glossy)
+- Remove artificial smoothing/blur ONLY on bare skin areas
 
-TEXTURE VARIATION BY AREA:
-- Face: More visible pores, micro-detail, expression lines
-- Neck: Softer texture, natural lines, less prominent pores
-- Chest/shoulders: Smooth but textured, subtle imperfections
-- Arms/hands: Natural texture appropriate to body skin
+🚨 ELEMENTS THAT MUST STAY 100% PIXEL-IDENTICAL:
+✗ All makeup (eyeshadow, lipstick, blush, contour, eyeliner, foundation, highlighter)
+✗ Lip color, shine, gloss, wetness, shape, position
+✗ Eye makeup, eyeliner, mascara, lashes
+✗ Facial expression (smile, eye opening, mouth position)
+✗ Face shape, jawline, nose, cheekbones, proportions
+✗ Eyebrows (shape, color, thickness)
+✗ Eye shape, iris color, pupil size
+✗ Hair, hairstyle, hair color
+✗ Clothing, jewelry, accessories
+✗ Background, lighting style, color mood
 
-ABSOLUTE PROHIBITIONS:
-- NO makeup removal or modification whatsoever
-- NO color changes to lips, eyes, skin tone, or makeup
-- NO changes to lip position, openness, wetness, or gloss
-- NO facial expression changes (smile, eye opening, head tilt)
-- NO facial feature reshaping (slimming, nose refinement, eye enlargement)
-- NO whitening, brightening, or beautification filters
-- NO changes to facial proportions or bone structure
-- NO alterations to clothing, hair, jewelry, or background
-- NO smoothing or blur on non-skin areas
+🚨 ABSOLUTE PROHIBITIONS:
+❌ DO NOT remove ANY makeup
+❌ DO NOT lighten foundation or concealer
+❌ DO NOT change lip color or gloss
+❌ DO NOT modify eye makeup
+❌ DO NOT change facial features or expression
+❌ DO NOT whiten, brighten, or beautify
+❌ DO NOT reshape face, nose, lips, or eyes
+❌ DO NOT change lighting or colors
 
-GOAL:
-The result must look like the exact same person, same makeup application, same facial expression, same lighting - but photographed with a high-end professional camera that captures real human skin texture across all visible skin areas instead of phone camera smoothing. Think of this as adding a "real skin texture overlay" to all exposed skin without touching anything else in the image.`;
+✅ YOUR ONLY TASK:
+Add a realistic skin texture overlay to exposed skin (pores, micro-detail, organic imperfections) while keeping absolutely everything else identical.
+
+Think: "Same person, same makeup, same everything — just add camera-quality skin pores and texture to the bare skin surface."`;
 
 
 
