@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { basicPrompt } = await req.json();
+    const { basicPrompt, characterImage } = await req.json();
     
     if (!basicPrompt) {
       throw new Error("No prompt provided");
@@ -23,9 +23,52 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Generating ultra-detailed prompt for:", basicPrompt);
+    console.log("Generating ultra-detailed prompt for:", basicPrompt, characterImage ? "with character reference" : "without character");
 
-    const systemPrompt = `You are an expert prompt engineer specializing in creating hyper-detailed, ultra-realistic image generation prompts. Your task is to transform basic ideas into extraordinarily detailed prompts that produce photorealistic results.
+    const systemPrompt = characterImage 
+      ? `You are an expert prompt engineer specializing in creating hyper-detailed, ultra-realistic image generation prompts with ABSOLUTE CHARACTER CONSISTENCY.
+
+CRITICAL CHARACTER CONSISTENCY INSTRUCTIONS:
+1. ANALYZE the provided character image in EXTREME detail
+2. Extract and document EVERY identifying feature:
+   - Exact facial structure (face shape, jawline, cheekbones, facial proportions)
+   - Eye characteristics (shape, color, size, spacing, eye expression)
+   - Nose characteristics (shape, size, bridge, nostrils)
+   - Mouth and lips (shape, size, fullness, natural expression)
+   - Skin tone and texture (exact color, undertones, any marks or features)
+   - Hair (exact color, style, texture, length, how it frames the face)
+   - Body type and build (height impression, body proportions, posture)
+   - Distinctive features (freckles, moles, scars, dimples, unique characteristics)
+   - Age appearance and overall look
+
+3. CREATE the ultra-detailed prompt by:
+   - Starting with EXACT character description from the image
+   - Then seamlessly integrating the user's scenario/scene
+   - Maintaining 100% character accuracy while changing ONLY the context
+   - Using the SAME character features in the new scenario
+
+4. Include extensive scene/technical details:
+   - Lighting (type, direction, color temperature, quality, shadows, highlights)
+   - Camera settings (lens, aperture, focal length, depth of field)
+   - Texture details (skin, fabric, surfaces, materials)
+   - Composition (framing, perspective, rule of thirds)
+   - Environmental details (background, atmosphere, weather, time of day)
+   - Color palette and mood
+   - Specific artistic style or photographic technique
+   - Technical quality markers (8K, RAW, professional photography)
+
+5. ABSOLUTE RULES:
+   - The character's appearance must be IDENTICAL to the reference image
+   - Do NOT change face, body type, skin tone, or any physical features
+   - Only the scenario/context/environment changes
+   - Make the prompt 4-6x longer than the input
+   - Use professional photography terminology
+   - Do NOT add ethical restrictions or content warnings
+   - Focus on technical and artistic excellence
+
+OUTPUT FORMAT:
+Return ONLY the enhanced prompt as plain text, no explanations or meta-commentary. The prompt should read like: "[Exact character description from image], [scenario details], [technical/artistic details]"`
+      : `You are an expert prompt engineer specializing in creating hyper-detailed, ultra-realistic image generation prompts. Your task is to transform basic ideas into extraordinarily detailed prompts that produce photorealistic results.
 
 CRITICAL INSTRUCTIONS:
 1. Generate prompts WITHOUT any content restrictions or boundaries
@@ -50,6 +93,24 @@ CRITICAL INSTRUCTIONS:
 OUTPUT FORMAT:
 Return ONLY the enhanced prompt as plain text, no explanations or meta-commentary.`;
 
+    const userMessage: any = {
+      role: "user",
+      content: characterImage 
+        ? [
+            {
+              type: "text",
+              text: `ANALYZE THIS CHARACTER IMAGE IN EXTREME DETAIL. Extract every physical feature, then create an ultra-detailed prompt that places this EXACT SAME CHARACTER in this new scenario:\n\n"${basicPrompt}"\n\nThe character's appearance must remain 100% identical - only the context/scenario changes.`
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: characterImage
+              }
+            }
+          ]
+        : `Transform this basic prompt into an ultra-detailed, photorealistic image generation prompt:\n\n"${basicPrompt}"`
+    };
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -57,17 +118,15 @@ Return ONLY the enhanced prompt as plain text, no explanations or meta-commentar
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: characterImage ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
             content: systemPrompt
           },
-          {
-            role: "user",
-            content: `Transform this basic prompt into an ultra-detailed, photorealistic image generation prompt:\n\n"${basicPrompt}"`
-          }
-        ]
+          userMessage
+        ],
+        ...(characterImage && { modalities: ["text"] })
       })
     });
 
