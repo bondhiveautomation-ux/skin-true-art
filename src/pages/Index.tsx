@@ -17,9 +17,9 @@ const Index = () => {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const comparisonRef = useRef<HTMLDivElement>(null);
-  const [basicPrompt, setBasicPrompt] = useState("");
-  const [detailedPrompt, setDetailedPrompt] = useState("");
-  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [generationPrompt, setGenerationPrompt] = useState("");
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [characterImage, setCharacterImage] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -39,6 +39,7 @@ const Index = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       setCharacterImage(e.target?.result as string);
+      setGeneratedImage(null);
     };
     reader.readAsDataURL(file);
   };
@@ -154,54 +155,70 @@ const Index = () => {
     setIsPanning(false);
   };
 
-  const handleGeneratePrompt = async () => {
-    if (!basicPrompt.trim()) {
+  const handleGenerateImage = async () => {
+    if (!characterImage) {
       toast({
-        title: "Empty prompt",
-        description: "Please enter a basic prompt first",
+        title: "No character image",
+        description: "Please upload a character reference image first",
         variant: "destructive",
       });
       return;
     }
 
-    setIsGeneratingPrompt(true);
+    if (!generationPrompt.trim()) {
+      toast({
+        title: "Empty prompt",
+        description: "Please enter a scenario prompt",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingImage(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-prompt', {
+      const { data, error } = await supabase.functions.invoke('generate-character-image', {
         body: { 
-          basicPrompt: basicPrompt.trim(),
-          characterImage: characterImage 
+          characterImage: characterImage,
+          prompt: generationPrompt.trim()
         }
       });
 
       if (error) throw error;
 
-      if (data?.detailedPrompt) {
-        setDetailedPrompt(data.detailedPrompt);
+      if (data?.generatedImageUrl) {
+        setGeneratedImage(data.generatedImageUrl);
         toast({
-          title: "Prompt generated",
-          description: characterImage 
-            ? "Character-consistent prompt created successfully" 
-            : "Ultra-detailed prompt created successfully",
+          title: "Image generated",
+          description: "Character-consistent image created successfully",
         });
       }
     } catch (error: any) {
-      console.error('Prompt generation error:', error);
+      console.error('Image generation error:', error);
       toast({
         title: "Generation failed",
-        description: error.message || "Failed to generate prompt. Please try again.",
+        description: error.message || "Failed to generate image. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingPrompt(false);
+      setIsGeneratingImage(false);
     }
   };
 
-  const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(detailedPrompt);
-    toast({
-      title: "Copied",
-      description: "Prompt copied to clipboard",
-    });
+  const handleDownloadGenerated = () => {
+    if (!generatedImage) return;
+    
+    const link = document.createElement('a');
+    link.href = generatedImage;
+    link.download = 'generated-character-image.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleResetGenerator = () => {
+    setCharacterImage(null);
+    setGeneratedImage(null);
+    setGenerationPrompt("");
   };
 
   return (
@@ -488,14 +505,14 @@ const Index = () => {
           )}
         </div>
 
-        {/* Prompt Generator Section */}
+        {/* Character-Consistent Image Generator Section */}
         <div className="mt-12 rounded-2xl border border-border bg-card p-8 shadow-2xl">
           <div className="mb-6 text-center">
             <h2 className="mb-2 text-3xl font-bold text-foreground">
-              Ultra-Detailed <span className="text-accent">Prompt Generator</span>
+              Character-Consistent <span className="text-accent">Image Generator</span>
             </h2>
             <p className="text-muted-foreground">
-              Transform basic ideas into hyper-realistic, professional image generation prompts
+              Generate images with the exact same character in any scenario
             </p>
           </div>
 
@@ -503,10 +520,10 @@ const Index = () => {
             {/* Character Image Upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Character Reference Image (Optional)
+                Character Reference Image
               </label>
               <p className="text-xs text-muted-foreground mb-2">
-                Upload an image to maintain exact character consistency across all generated prompts
+                Upload an influencer or character image - the AI will keep their exact face and body in all generated images
               </p>
               
               {!characterImage ? (
@@ -522,101 +539,103 @@ const Index = () => {
                     htmlFor="character-upload"
                     className="group cursor-pointer block"
                   >
-                    <div className="flex items-center gap-4 rounded-lg border-2 border-dashed border-border p-6 transition-all hover:border-accent hover:bg-secondary/50">
-                      <div className="rounded-full bg-accent/10 p-3 transition-all group-hover:bg-accent/20">
-                        <Upload className="h-6 w-6 text-accent" />
+                    <div className="flex items-center gap-4 rounded-lg border-2 border-dashed border-border p-8 transition-all hover:border-accent hover:bg-secondary/50">
+                      <div className="rounded-full bg-accent/10 p-4 transition-all group-hover:bg-accent/20">
+                        <Upload className="h-8 w-8 text-accent" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">
-                          Upload Character Image
+                        <p className="text-base font-medium text-foreground">
+                          Upload Character Reference
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          Click to select an influencer or character reference
+                        <p className="text-sm text-muted-foreground">
+                          Click to select an influencer or character image
                         </p>
                       </div>
                     </div>
                   </label>
                 </div>
               ) : (
-                <div className="relative rounded-lg border border-accent/20 bg-accent/5 p-4">
-                  <img
-                    src={characterImage}
-                    alt="Character reference"
-                    className="max-h-[200px] rounded-lg object-contain mx-auto"
-                  />
-                  <Button
-                    onClick={() => setCharacterImage(null)}
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                  >
-                    Remove
-                  </Button>
-                  <div className="mt-2 text-center">
-                    <p className="text-xs font-medium text-accent">
-                      ✓ Character locked - All prompts will maintain this exact appearance
-                    </p>
+                <div className="space-y-4">
+                  <div className="relative rounded-lg border border-accent/20 bg-accent/5 p-4">
+                    <img
+                      src={characterImage}
+                      alt="Character reference"
+                      className="max-h-[300px] rounded-lg object-contain mx-auto"
+                    />
+                    <Button
+                      onClick={handleResetGenerator}
+                      variant="outline"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                    >
+                      Reset
+                    </Button>
+                    <div className="mt-3 text-center">
+                      <p className="text-sm font-medium text-accent">
+                        ✓ Character locked - Face and body will remain identical
+                      </p>
+                    </div>
                   </div>
+
+                  {/* Scenario Prompt */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Scenario Prompt
+                    </label>
+                    <textarea
+                      value={generationPrompt}
+                      onChange={(e) => setGenerationPrompt(e.target.value)}
+                      placeholder="Describe the scenario... (e.g., 'walking on a beach at sunset, wearing a white dress, golden hour lighting')"
+                      className="min-h-[120px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                      disabled={isGeneratingImage}
+                    />
+                  </div>
+
+                  {/* Generate Button */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={handleGenerateImage}
+                      disabled={isGeneratingImage || !generationPrompt.trim()}
+                      className="bg-accent text-background hover:bg-accent/90"
+                      size="lg"
+                    >
+                      {isGeneratingImage ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Generating Image...
+                        </>
+                      ) : (
+                        'Generate Character-Consistent Image'
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Generated Image Display */}
+                  {generatedImage && (
+                    <div className="space-y-4 rounded-lg border border-accent/20 bg-accent/5 p-6">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-foreground">Generated Image</label>
+                        <Button
+                          onClick={handleDownloadGenerated}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Download
+                        </Button>
+                      </div>
+                      <div className="rounded-lg bg-background p-4">
+                        <img
+                          src={generatedImage}
+                          alt="Generated"
+                          className="w-full rounded-lg object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-
-            {/* Input Area */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Scene/Scenario Prompt
-              </label>
-              <textarea
-                value={basicPrompt}
-                onChange={(e) => setBasicPrompt(e.target.value)}
-                placeholder={characterImage 
-                  ? "Describe the scene or scenario for this character... (e.g., 'walking on a beach at sunset')"
-                  : "Enter your basic idea... (e.g., 'a woman in a red dress')"}
-                className="min-h-[100px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                disabled={isGeneratingPrompt}
-              />
-            </div>
-
-            {/* Generate Button */}
-            <div className="flex justify-center">
-              <Button
-                onClick={handleGeneratePrompt}
-                disabled={isGeneratingPrompt || !basicPrompt.trim()}
-                className="bg-accent text-background hover:bg-accent/90"
-                size="lg"
-              >
-                {isGeneratingPrompt ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Generating Ultra-Detailed Prompt...
-                  </>
-                ) : (
-                  'Generate Ultra-Detailed Prompt'
-                )}
-              </Button>
-            </div>
-
-            {/* Generated Prompt Display */}
-            {detailedPrompt && (
-              <div className="space-y-3 rounded-lg border border-accent/20 bg-accent/5 p-6">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-foreground">Ultra-Detailed Prompt</label>
-                  <Button
-                    onClick={handleCopyPrompt}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copy to Clipboard
-                  </Button>
-                </div>
-                <div className="max-h-[400px] overflow-y-auto rounded-md bg-background p-4">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                    {detailedPrompt}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
