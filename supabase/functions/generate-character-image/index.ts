@@ -12,18 +12,22 @@ serve(async (req) => {
   }
 
   try {
-    const { characterImage, prompt, productImage, preset, cameraAngle } = await req.json();
+    const { characterImage, prompt, productImage, preset, cameraAngle, backgroundImage, pose } = await req.json();
     
     if (!characterImage) {
       throw new Error("No character reference image provided");
     }
     
-    if (!prompt && !productImage) {
-      throw new Error("No prompt or product provided");
+    if (!prompt && !productImage && !backgroundImage) {
+      throw new Error("No prompt, product, or background provided");
     }
 
     if (productImage && !preset) {
       throw new Error("Product preset not specified");
+    }
+
+    if (backgroundImage && !pose) {
+      throw new Error("Character pose not specified for background integration");
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -36,7 +40,79 @@ serve(async (req) => {
     let generationPrompt: string;
     let contentArray: any[];
 
-    if (productImage && preset) {
+    if (backgroundImage && pose) {
+      // Background integration mode
+      console.log("Background integration mode with pose:", pose);
+      
+      const poseInstructions: Record<string, string> = {
+        standing: "The character is standing naturally and comfortably in the scene. Posture should be relaxed, confident, and appropriate for the environment. Body weight balanced evenly, arms positioned naturally at sides or slightly engaged.",
+        sitting: "The character is sitting comfortably in the scene. Position should look natural and relaxed, with proper sitting posture. Body positioned appropriately for the setting (chair, bench, ground, etc.).",
+        walking: "The character is walking naturally through the scene. Capture mid-stride with realistic body movement, arms swinging naturally, and a natural walking gait. Should look candid and in motion.",
+        leaning: "The character is leaning casually against an object or surface in the scene. Pose should look relaxed and natural, with body weight shifted appropriately. Arms and legs positioned comfortably.",
+        "arms-crossed": "The character has arms crossed in a confident, composed pose. Body language should convey assurance and poise. Stance should be grounded and stable, appropriate for the scene.",
+        "hands-in-pockets": "The character has hands casually placed in pockets. Pose should look relaxed and effortless. Body language should be casual and comfortable, suitable for the environment.",
+        "dynamic-action": "The character is in a dynamic, active pose with energy and movement. Capture an expressive, engaging action appropriate for the scene. Body should show motion and vitality."
+      };
+
+      generationPrompt = `YOU ARE A PROFESSIONAL PHOTO COMPOSITOR SPECIALIZING IN CHARACTER-BACKGROUND INTEGRATION.
+
+🚨 ABSOLUTE CHARACTER CONSISTENCY REQUIREMENTS:
+
+ANALYZE THIS CHARACTER IMAGE AND MEMORIZE EVERY DETAIL:
+- Face shape, structure, and proportions (MUST BE IDENTICAL)
+- Eye shape, color, size, spacing, and expression (MUST BE IDENTICAL)
+- Nose shape, size, and bridge (MUST BE IDENTICAL)
+- Mouth, lips shape, size, and natural expression (MUST BE IDENTICAL)
+- Skin tone, texture, and any distinctive marks (MUST BE IDENTICAL)
+- Hair color, style, texture, and length (MUST BE IDENTICAL)
+- Body type, build, proportions, and posture (MUST BE IDENTICAL)
+- Age appearance and overall facial features (MUST BE IDENTICAL)
+
+🎯 BACKGROUND INTEGRATION REQUIREMENTS:
+
+ANALYZE THE BACKGROUND IMAGE:
+- Preserve the exact background scene, environment, and setting
+- Maintain original lighting, colors, mood, and atmosphere
+- Keep perspective, depth, and spatial relationships intact
+- Preserve all background objects, textures, and details
+
+📸 CHARACTER POSE: ${pose.toUpperCase().replace('-', ' ')}
+${poseInstructions[pose]}
+
+🎨 INTEGRATION QUALITY STANDARDS:
+✓ Place the character naturally INTO the background scene
+✓ Match lighting direction and intensity between character and background
+✓ Ensure proper shadows, reflections, and environmental lighting on character
+✓ Character scale and perspective must match the background perfectly
+✓ Seamless blending with no visible edges, halos, or compositing artifacts
+✓ Character should look like they were photographed IN that exact location
+✓ Natural interaction with the environment (if applicable)
+✓ Realistic depth of field and focus matching the background
+
+🚨 CRITICAL RULES:
+✓ The character's face and body MUST be 100% identical to reference
+✓ The background scene MUST remain unchanged and intact
+✓ The pose MUST be natural and appropriate for the environment
+✓ NO distortions, unnatural proportions, or physics violations
+✓ NO style mismatches between character and background
+✓ Generate ultra-high-quality, photorealistic output (8K quality)
+✓ Make it look like a real photograph taken in that location
+
+❌ ABSOLUTELY FORBIDDEN:
+- Changing the character's face, body, or identity
+- Altering the background scene, objects, or environment
+- Creating unrealistic lighting mismatches
+- Producing visible compositing seams or artifacts
+- Generating unnatural poses or awkward body positions
+
+Generate a flawless, seamless integration that looks like a professional photograph taken in that exact location.`;
+
+      contentArray = [
+        { type: "text", text: generationPrompt },
+        { type: "image_url", image_url: { url: characterImage } },
+        { type: "image_url", image_url: { url: backgroundImage } }
+      ];
+    } else if (productImage && preset) {
       // Product integration mode
       console.log("Product integration mode with preset:", preset);
       
