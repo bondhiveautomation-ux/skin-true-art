@@ -218,7 +218,7 @@ const Index = () => {
                   <div className="relative overflow-hidden rounded-xl bg-secondary/50">
                     <div 
                       ref={comparisonRef}
-                      className="relative aspect-[3/4] w-full max-w-2xl mx-auto select-none"
+                      className="relative w-full max-w-2xl mx-auto select-none"
                       style={{
                         cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
                       }}
@@ -247,7 +247,7 @@ const Index = () => {
                     >
                       {/* Enhanced Image (Background) */}
                       <div
-                        className="absolute inset-0 h-full w-full overflow-hidden"
+                        className="relative w-full"
                         style={{
                           transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                           transformOrigin: 'center center',
@@ -257,19 +257,20 @@ const Index = () => {
                         <img
                           src={enhancedImage}
                           alt="Enhanced"
-                          className="h-full w-full object-contain pointer-events-none"
+                          className="w-full h-auto object-contain pointer-events-none"
                           draggable={false}
                         />
                       </div>
                       
                       {/* Original Image (Overlay with clip) */}
                       <div
-                        className="absolute inset-0 h-full w-full pointer-events-none overflow-hidden"
+                        className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
                         style={{
                           clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
                         }}
                       >
                         <div
+                          className="relative w-full h-full"
                           style={{
                             transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                             transformOrigin: 'center center',
@@ -279,7 +280,7 @@ const Index = () => {
                           <img
                             src={selectedImage}
                             alt="Original"
-                            className="h-full w-full object-contain"
+                            className="w-full h-auto object-contain"
                             draggable={false}
                           />
                         </div>
