@@ -23,6 +23,7 @@ const Index = () => {
   const [characterImage, setCharacterImage] = useState<string | null>(null);
   const [productImage, setProductImage] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
+  const [generationProgress, setGenerationProgress] = useState(0);
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,6 +210,16 @@ const Index = () => {
     }
 
     setIsGeneratingImage(true);
+    setGenerationProgress(0);
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev >= 90) return prev; // Stop at 90% until complete
+        return prev + Math.random() * 15;
+      });
+    }, 500);
+    
     try {
       const { data, error } = await supabase.functions.invoke('generate-character-image', {
         body: { 
@@ -222,11 +233,14 @@ const Index = () => {
       if (error) throw error;
 
       if (data?.generatedImageUrl) {
-        setGeneratedImage(data.generatedImageUrl);
-        toast({
-          title: "Image generated",
-          description: "Character-consistent image created successfully",
-        });
+        setGenerationProgress(100); // Complete the progress
+        setTimeout(() => {
+          setGeneratedImage(data.generatedImageUrl);
+          toast({
+            title: "Image generated",
+            description: "Character-consistent image created successfully",
+          });
+        }, 300); // Small delay to show 100%
       }
     } catch (error: any) {
       console.error('Image generation error:', error);
@@ -236,7 +250,11 @@ const Index = () => {
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingImage(false);
+      clearInterval(progressInterval);
+      setTimeout(() => {
+        setIsGeneratingImage(false);
+        setGenerationProgress(0);
+      }, 500);
     }
   };
 
@@ -768,13 +786,20 @@ const Index = () => {
                     <Button
                       onClick={handleGenerateImage}
                       disabled={isGeneratingImage || (!generationPrompt.trim() && !productImage) || (productImage && !selectedPreset)}
-                      className="bg-accent text-background hover:bg-accent/90"
+                      className="bg-accent text-background hover:bg-accent/90 relative overflow-hidden"
                       size="lg"
                     >
                       {isGeneratingImage ? (
                         <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Generating Image...
+                          <div className="absolute inset-0 bg-accent/20">
+                            <div 
+                              className="h-full bg-accent/40 transition-all duration-300 ease-out"
+                              style={{ width: `${generationProgress}%` }}
+                            />
+                          </div>
+                          <span className="relative z-10">
+                            Generating Image... {Math.round(generationProgress)}%
+                          </span>
                         </>
                       ) : (
                         'Generate Character-Consistent Image'
