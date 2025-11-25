@@ -783,12 +783,20 @@ const Index = () => {
                 </div>
               ) : (
                 // Single Image Display
-                <div className="flex justify-center">
+                <div className="relative flex justify-center">
                   <img
                     src={selectedImage}
                     alt="Selected"
                     className="max-h-[600px] rounded-xl object-contain"
                   />
+                  <Button
+                    onClick={handleReset}
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                  >
+                    Remove
+                  </Button>
                 </div>
               )}
 
@@ -1333,14 +1341,23 @@ const Index = () => {
                     <div className="space-y-4 rounded-lg border border-accent/20 bg-accent/5 p-6">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-medium text-foreground">Generated Image</label>
-                        <Button
-                          onClick={handleDownloadGenerated}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleDownloadGenerated}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                          </Button>
+                          <Button
+                            onClick={() => setGeneratedImage(null)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Remove
+                          </Button>
+                        </div>
                       </div>
                       <div className="rounded-lg bg-background p-4">
                         <img
@@ -1378,12 +1395,23 @@ const Index = () => {
                 className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-background hover:file:bg-accent/90 cursor-pointer"
               />
               {extractorImage && (
-                <div className="mt-4">
+                <div className="mt-4 relative">
                   <img
                     src={extractorImage}
                     alt="Image to analyze"
                     className="w-full max-w-md rounded-lg border-2 border-border"
                   />
+                  <Button
+                    onClick={() => {
+                      setExtractorImage(null);
+                      setExtractedPrompt("");
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                  >
+                    Remove
+                  </Button>
                 </div>
               )}
             </div>
@@ -1406,9 +1434,18 @@ const Index = () => {
 
             {extractedPrompt && (
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-foreground">
-                  Generated Prompt
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-foreground">
+                    Generated Prompt
+                  </label>
+                  <Button
+                    onClick={() => setExtractedPrompt("")}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Clear
+                  </Button>
+                </div>
                 <div className="bg-muted p-4 rounded-lg border border-border">
                   <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                     {extractedPrompt}
@@ -1451,13 +1488,24 @@ const Index = () => {
                 className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-background hover:file:bg-accent/90 cursor-pointer"
               />
               {dressImage && (
-                <div className="mt-4">
+                <div className="mt-4 relative">
                   <p className="text-sm font-medium text-foreground mb-2">Original Image:</p>
                   <img
                     src={dressImage}
                     alt="Person wearing dress"
                     className="w-full max-w-md rounded-lg border-2 border-border"
                   />
+                  <Button
+                    onClick={() => {
+                      setDressImage(null);
+                      setExtractedDressImage(null);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-8 right-2"
+                  >
+                    Remove
+                  </Button>
                 </div>
               )}
             </div>
@@ -1480,9 +1528,18 @@ const Index = () => {
 
             {extractedDressImage && (
               <div className="space-y-4">
-                <label className="block text-sm font-semibold text-foreground">
-                  Dress on Mannequin:
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-foreground">
+                    Dress on Mannequin:
+                  </label>
+                  <Button
+                    onClick={() => setExtractedDressImage(null)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Clear
+                  </Button>
+                </div>
                 <div className="bg-muted p-4 rounded-lg border border-border">
                   <img
                     src={extractedDressImage}
@@ -1536,13 +1593,24 @@ const Index = () => {
                 className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-background hover:file:bg-accent/90 cursor-pointer"
               />
               {peopleImage && (
-                <div className="mt-4">
+                <div className="mt-4 relative">
                   <p className="text-sm font-medium text-foreground mb-2">Original Image:</p>
                   <img
                     src={peopleImage}
                     alt="Image with people"
                     className="w-full max-w-md rounded-lg border-2 border-border"
                   />
+                  <Button
+                    onClick={() => {
+                      setPeopleImage(null);
+                      setCleanBackground(null);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-8 right-2"
+                  >
+                    Remove
+                  </Button>
                 </div>
               )}
             </div>
@@ -1565,9 +1633,18 @@ const Index = () => {
 
             {cleanBackground && (
               <div className="space-y-4">
-                <label className="block text-sm font-semibold text-foreground">
-                  Clean Background:
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-foreground">
+                    Clean Background:
+                  </label>
+                  <Button
+                    onClick={() => setCleanBackground(null)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Clear
+                  </Button>
+                </div>
                 <div className="bg-muted p-4 rounded-lg border border-border">
                   <img
                     src={cleanBackground}
