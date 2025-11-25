@@ -1358,7 +1358,7 @@ const Index = () => {
         </div>
 
         {/* Image Prompt Extractor Section */}
-        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+        <div className="mt-8 bg-card rounded-xl shadow-lg p-8 border border-border">
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-primary mb-2">Image Prompt Extractor</h2>
             <p className="text-muted-foreground">
@@ -1428,7 +1428,7 @@ const Index = () => {
         </div>
 
         {/* Dress-to-Dummy Extractor Section */}
-        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+        <div className="mt-8 bg-card rounded-xl shadow-lg p-8 border border-border">
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-primary mb-2">Extract Dress to Dummy</h2>
             <p className="text-muted-foreground">
@@ -1513,7 +1513,7 @@ const Index = () => {
         </div>
 
         {/* Background Saver (People Removal) Section */}
-        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+        <div className="mt-8 bg-card rounded-xl shadow-lg p-8 border border-border">
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-primary mb-2">Remove People, Keep Background</h2>
             <p className="text-muted-foreground">
