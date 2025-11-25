@@ -36,6 +36,8 @@ const Index = () => {
       setSelectedImage(e.target?.result as string);
       setEnhancedImage(null);
       setShowComparison(false);
+      setZoomLevel(1);
+      setPanPosition({ x: 0, y: 0 });
     };
     reader.readAsDataURL(file);
   };
