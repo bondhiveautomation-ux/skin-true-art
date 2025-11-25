@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.extract-image-prompt]
 verify_jwt = false
+
+[functions.extract-dress-to-dummy]
+verify_jwt = false
