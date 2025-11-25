@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,6 +17,9 @@ const Index = () => {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const comparisonRef = useRef<HTMLDivElement>(null);
+  const [basicPrompt, setBasicPrompt] = useState("");
+  const [detailedPrompt, setDetailedPrompt] = useState("");
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
   const { toast } = useToast();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,6 +131,51 @@ const Index = () => {
 
   const handlePanEnd = () => {
     setIsPanning(false);
+  };
+
+  const handleGeneratePrompt = async () => {
+    if (!basicPrompt.trim()) {
+      toast({
+        title: "Empty prompt",
+        description: "Please enter a basic prompt first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingPrompt(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-prompt', {
+        body: { basicPrompt: basicPrompt.trim() }
+      });
+
+      if (error) throw error;
+
+      if (data?.detailedPrompt) {
+        setDetailedPrompt(data.detailedPrompt);
+        toast({
+          title: "Prompt generated",
+          description: "Ultra-detailed prompt created successfully",
+        });
+      }
+    } catch (error: any) {
+      console.error('Prompt generation error:', error);
+      toast({
+        title: "Generation failed",
+        description: error.message || "Failed to generate prompt. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(detailedPrompt);
+    toast({
+      title: "Copied",
+      description: "Prompt copied to clipboard",
+    });
   };
 
   return (
@@ -412,6 +460,73 @@ const Index = () => {
               )}
             </div>
           )}
+        </div>
+
+        {/* Prompt Generator Section */}
+        <div className="mt-12 rounded-2xl border border-border bg-card p-8 shadow-2xl">
+          <div className="mb-6 text-center">
+            <h2 className="mb-2 text-3xl font-bold text-foreground">
+              Ultra-Detailed <span className="text-accent">Prompt Generator</span>
+            </h2>
+            <p className="text-muted-foreground">
+              Transform basic ideas into hyper-realistic, professional image generation prompts
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {/* Input Area */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Basic Prompt</label>
+              <textarea
+                value={basicPrompt}
+                onChange={(e) => setBasicPrompt(e.target.value)}
+                placeholder="Enter your basic idea... (e.g., 'a woman in a red dress')"
+                className="min-h-[100px] w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                disabled={isGeneratingPrompt}
+              />
+            </div>
+
+            {/* Generate Button */}
+            <div className="flex justify-center">
+              <Button
+                onClick={handleGeneratePrompt}
+                disabled={isGeneratingPrompt || !basicPrompt.trim()}
+                className="bg-accent text-background hover:bg-accent/90"
+                size="lg"
+              >
+                {isGeneratingPrompt ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Generating Ultra-Detailed Prompt...
+                  </>
+                ) : (
+                  'Generate Ultra-Detailed Prompt'
+                )}
+              </Button>
+            </div>
+
+            {/* Generated Prompt Display */}
+            {detailedPrompt && (
+              <div className="space-y-3 rounded-lg border border-accent/20 bg-accent/5 p-6">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-foreground">Ultra-Detailed Prompt</label>
+                  <Button
+                    onClick={handleCopyPrompt}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy to Clipboard
+                  </Button>
+                </div>
+                <div className="max-h-[400px] overflow-y-auto rounded-md bg-background p-4">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                    {detailedPrompt}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Info Footer */}
