@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-character-image]
 verify_jwt = false
+
+[functions.extract-image-prompt]
+verify_jwt = false
