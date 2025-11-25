@@ -27,6 +27,11 @@ const Index = () => {
   const [extractorImage, setExtractorImage] = useState<string | null>(null);
   const [extractedPrompt, setExtractedPrompt] = useState<string>("");
   const [isExtracting, setIsExtracting] = useState(false);
+  
+  // Dress-to-Dummy Extractor states
+  const [dressImage, setDressImage] = useState<string | null>(null);
+  const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
+  const [isExtractingDress, setIsExtractingDress] = useState(false);
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -343,6 +348,94 @@ const Index = () => {
     toast({
       title: "Copied!",
       description: "Prompt copied to clipboard",
+    });
+  };
+
+  const handleDressImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setDressImage(reader.result as string);
+      setExtractedDressImage(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleExtractDress = async () => {
+    if (!dressImage) {
+      toast({
+        title: "No image uploaded",
+        description: "Please upload an image first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsExtractingDress(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', {
+        body: { image: dressImage }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Extraction failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.extractedImage) {
+        setExtractedDressImage(data.extractedImage);
+        toast({
+          title: "Success!",
+          description: "Dress extracted and placed on mannequin",
+        });
+      } else {
+        toast({
+          title: "No result",
+          description: "Failed to extract dress",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Dress extraction error:', error);
+      toast({
+        title: "Extraction failed",
+        description: error.message || "Failed to extract dress. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExtractingDress(false);
+    }
+  };
+
+  const handleDownloadDress = () => {
+    if (!extractedDressImage) return;
+
+    const link = document.createElement('a');
+    link.href = extractedDressImage;
+    link.download = 'extracted-dress-on-dummy.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded!",
+      description: "Image saved to your device",
     });
   };
 
@@ -970,6 +1063,91 @@ const Index = () => {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Prompt
                 </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Dress-to-Dummy Extractor Section */}
+        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-primary mb-2">Extract Dress to Dummy</h2>
+            <p className="text-muted-foreground">
+              Upload a photo of a person wearing an outfit. AI will extract the clothing and place it on a neutral mannequin.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Upload Photo of Person Wearing Dress
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Upload a clear photo where the full dress is visible
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleDressImageUpload}
+                className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-background hover:file:bg-accent/90 cursor-pointer"
+              />
+              {dressImage && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-foreground mb-2">Original Image:</p>
+                  <img
+                    src={dressImage}
+                    alt="Person wearing dress"
+                    className="w-full max-w-md rounded-lg border-2 border-border"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={handleExtractDress}
+              disabled={isExtractingDress || !dressImage}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              size="lg"
+            >
+              {isExtractingDress ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Extracting Dress...
+                </>
+              ) : (
+                'Generate Dress on Dummy'
+              )}
+            </Button>
+
+            {extractedDressImage && (
+              <div className="space-y-4">
+                <label className="block text-sm font-semibold text-foreground">
+                  Dress on Mannequin:
+                </label>
+                <div className="bg-muted p-4 rounded-lg border border-border">
+                  <img
+                    src={extractedDressImage}
+                    alt="Dress on dummy"
+                    className="w-full max-w-md rounded-lg mx-auto"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleDownloadDress}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                  <Button
+                    onClick={handleExtractDress}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Regenerate
+                  </Button>
+                </div>
               </div>
             )}
           </div>
