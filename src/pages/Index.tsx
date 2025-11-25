@@ -8,6 +8,7 @@ const Index = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [enhancementMode, setEnhancementMode] = useState<"preserve" | "remove">("preserve");
   const [showComparison, setShowComparison] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,7 +49,7 @@ const Index = () => {
     setIsProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke('enhance-skin', {
-        body: { imageUrl: selectedImage }
+        body: { imageUrl: selectedImage, mode: enhancementMode }
       });
 
       if (error) throw error;
@@ -177,6 +178,29 @@ const Index = () => {
           ) : (
             // Image Processing & Results
             <div className="space-y-6">
+              {/* Enhancement Mode Selector */}
+              {!showComparison && (
+                <div className="flex items-center justify-center gap-4 pb-4 border-b border-border">
+                  <label className="text-sm font-medium text-foreground">Enhancement Mode:</label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={enhancementMode === "preserve" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setEnhancementMode("preserve")}
+                    >
+                      Preserve Makeup
+                    </Button>
+                    <Button
+                      variant={enhancementMode === "remove" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setEnhancementMode("remove")}
+                    >
+                      Remove Makeup
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Image Display */}
               {showComparison && enhancedImage ? (
                 // Before/After Comparison with Zoom
