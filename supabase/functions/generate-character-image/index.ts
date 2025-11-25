@@ -184,10 +184,25 @@ Generate a photorealistic, ultra-high-quality image maintaining absolute charact
     }
 
     const data = await response.json();
+    console.log("AI response data:", JSON.stringify(data, null, 2));
+    
     const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!generatedImageUrl) {
-      throw new Error("No image generated from AI");
+      console.error("No image in AI response. Full response:", JSON.stringify(data, null, 2));
+      
+      // Check if there's an error message from the AI
+      const errorMessage = data.error?.message || data.choices?.[0]?.message?.content || "No image generated";
+      
+      return new Response(
+        JSON.stringify({ 
+          error: `Image generation failed: ${errorMessage}. This may be due to content policy restrictions. Please try a different prompt or scenario.` 
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     console.log("Character-consistent image generated successfully");
