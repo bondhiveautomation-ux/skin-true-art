@@ -24,6 +24,9 @@ const Index = () => {
   const [productImage, setProductImage] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [generationProgress, setGenerationProgress] = useState(0);
+  const [extractorImage, setExtractorImage] = useState<string | null>(null);
+  const [extractedPrompt, setExtractedPrompt] = useState<string>("");
+  const [isExtracting, setIsExtracting] = useState(false);
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -275,6 +278,72 @@ const Index = () => {
     setGenerationPrompt("");
     setProductImage(null);
     setSelectedPreset("");
+  };
+
+  const handleExtractorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload an image smaller than 20MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setExtractorImage(reader.result as string);
+        setExtractedPrompt("");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleExtractPrompt = async () => {
+    if (!extractorImage) {
+      toast({
+        title: "No image uploaded",
+        description: "Please upload an image first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-image-prompt', {
+        body: { image: extractorImage }
+      });
+
+      if (error) throw error;
+
+      if (data?.prompt) {
+        setExtractedPrompt(data.prompt);
+        toast({
+          title: "Prompt extracted",
+          description: "Image analyzed successfully",
+        });
+      }
+    } catch (error: any) {
+      console.error('Prompt extraction error:', error);
+      toast({
+        title: "Extraction failed",
+        description: error.message || "Failed to extract prompt from image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(extractedPrompt);
+    toast({
+      title: "Copied!",
+      description: "Prompt copied to clipboard",
+    });
   };
 
   return (
@@ -833,6 +902,76 @@ const Index = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Image Prompt Extractor Section */}
+        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-primary mb-2">Image Prompt Extractor</h2>
+            <p className="text-muted-foreground">
+              Upload any image and get a detailed, generator-ready prompt that can recreate it
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Upload Image to Analyze
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleExtractorImageUpload}
+                className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-background hover:file:bg-accent/90 cursor-pointer"
+              />
+              {extractorImage && (
+                <div className="mt-4">
+                  <img
+                    src={extractorImage}
+                    alt="Image to analyze"
+                    className="w-full max-w-md rounded-lg border-2 border-border"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={handleExtractPrompt}
+              disabled={isExtracting || !extractorImage}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              size="lg"
+            >
+              {isExtracting ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Analyzing Image...
+                </>
+              ) : (
+                'Extract Prompt'
+              )}
+            </Button>
+
+            {extractedPrompt && (
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-foreground">
+                  Generated Prompt
+                </label>
+                <div className="bg-muted p-4 rounded-lg border border-border">
+                  <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                    {extractedPrompt}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleCopyPrompt}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Prompt
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
