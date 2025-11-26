@@ -26,10 +26,10 @@ serve(async (req) => {
 
     console.log("Music generation request:", { mode, language, genre, instrumentalType });
 
-    let musicPrompt = "";
+    let output;
     
     if (mode === "lyrics") {
-      // Lyrics-to-Song Mode
+      // Lyrics-to-Song Mode - Use minimax/music-1.5 for vocal generation
       if (!lyrics || !language || !genre) {
         return new Response(
           JSON.stringify({ error: "Missing required fields: lyrics, language, and genre are required" }),
@@ -40,17 +40,27 @@ serve(async (req) => {
         );
       }
 
-      // Build comprehensive prompt for lyrics-to-song
-      musicPrompt = `Generate a ${genre} song with vocals singing these lyrics in ${language}: "${lyrics}". `;
-      
+      // Build style prompt for minimax model
+      let stylePrompt = `${genre}`;
       if (prompt) {
-        musicPrompt += `Additional style guidance: ${prompt}. `;
+        stylePrompt += `, ${prompt}`;
       }
       
-      musicPrompt += `The song should have realistic vocals, proper melody, background music, and professional mastering that matches the ${genre} genre.`;
+      console.log("Generating song with vocals:", { lyrics: lyrics.substring(0, 100), stylePrompt });
+
+      // Use minimax/music-1.5 model which supports vocals
+      output = await replicate.run(
+        "minimax/music-1.5",
+        {
+          input: {
+            lyrics: lyrics,
+            prompt: stylePrompt
+          }
+        }
+      );
       
     } else if (mode === "instrumental") {
-      // Instrumental-Only Mode
+      // Instrumental-Only Mode - Use MusicGen for instrumentals
       if (!instrumentalType) {
         return new Response(
           JSON.stringify({ error: "Missing required field: instrumentalType is required" }),
@@ -62,13 +72,29 @@ serve(async (req) => {
       }
 
       // Build comprehensive prompt for instrumental
-      musicPrompt = `Generate a high-quality ${instrumentalType} instrumental track. `;
+      let musicPrompt = `Generate a high-quality ${instrumentalType} instrumental track. `;
       
       if (prompt) {
         musicPrompt += `Style guidance: ${prompt}. `;
       }
       
       musicPrompt += `The music should be professionally mixed with clean audio quality, suitable for royalty-free use.`;
+      
+      console.log("Generated instrumental prompt:", musicPrompt);
+
+      // Use MusicGen model from Meta for instrumentals
+      output = await replicate.run(
+        "meta/musicgen:671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb",
+        {
+          input: {
+            prompt: musicPrompt,
+            model_version: "stereo-large",
+            output_format: "mp3",
+            normalization_strategy: "peak",
+            duration: 30,
+          }
+        }
+      );
       
     } else {
       return new Response(
@@ -79,22 +105,6 @@ serve(async (req) => {
         }
       );
     }
-
-    console.log("Generated music prompt:", musicPrompt);
-
-    // Use MusicGen model from Meta
-    const output = await replicate.run(
-      "meta/musicgen:671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb",
-      {
-        input: {
-          prompt: musicPrompt,
-          model_version: "stereo-large",
-          output_format: "mp3",
-          normalization_strategy: "peak",
-          duration: 30, // Start with 30 seconds, can be adjusted
-        }
-      }
-    );
 
     console.log("Music generation response:", output);
 
