@@ -1,6 +1,9 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy, Music } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,6 +43,16 @@ const Index = () => {
   const [peopleImage, setPeopleImage] = useState<string | null>(null);
   const [cleanBackground, setCleanBackground] = useState<string | null>(null);
   const [isRemovingPeople, setIsRemovingPeople] = useState(false);
+  
+  // Music Generator states
+  const [musicMode, setMusicMode] = useState<"lyrics" | "instrumental">("lyrics");
+  const [musicLyrics, setMusicLyrics] = useState("");
+  const [musicLanguage, setMusicLanguage] = useState("English");
+  const [musicGenre, setMusicGenre] = useState("");
+  const [instrumentalType, setInstrumentalType] = useState("");
+  const [musicPrompt, setMusicPrompt] = useState("");
+  const [generatedMusicUrl, setGeneratedMusicUrl] = useState<string | null>(null);
+  const [isGeneratingMusic, setIsGeneratingMusic] = useState(false);
   
   const { toast } = useToast();
 
@@ -567,6 +580,88 @@ const Index = () => {
     setPeopleImage(null);
     setCleanBackground(null);
   };
+
+  const handleGenerateMusic = async () => {
+    if (musicMode === "lyrics" && (!musicLyrics || !musicLanguage || !musicGenre)) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide lyrics, select language, and choose a genre",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (musicMode === "instrumental" && !instrumentalType) {
+      toast({
+        title: "Missing Information",
+        description: "Please select an instrumental type",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingMusic(true);
+    setGeneratedMusicUrl(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-music', {
+        body: {
+          mode: musicMode,
+          lyrics: musicMode === "lyrics" ? musicLyrics : undefined,
+          language: musicMode === "lyrics" ? musicLanguage : undefined,
+          genre: musicMode === "lyrics" ? musicGenre : undefined,
+          instrumentalType: musicMode === "instrumental" ? instrumentalType : undefined,
+          prompt: musicPrompt || undefined,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.audioUrl) {
+        setGeneratedMusicUrl(data.audioUrl);
+        toast({
+          title: "Music Generated!",
+          description: "Your music is ready to listen and download",
+        });
+      }
+    } catch (error) {
+      console.error('Music generation error:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate music",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingMusic(false);
+    }
+  };
+
+  const handleDownloadMusic = (format: 'mp3' | 'wav') => {
+    if (!generatedMusicUrl) return;
+
+    const link = document.createElement('a');
+    link.href = generatedMusicUrl;
+    link.download = `generated-music.${format}`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Downloaded!",
+      description: `Music saved as ${format.toUpperCase()}`,
+    });
+  };
+
+  const handleResetMusicGenerator = () => {
+    setMusicLyrics("");
+    setMusicLanguage("English");
+    setMusicGenre("");
+    setInstrumentalType("");
+    setMusicPrompt("");
+    setGeneratedMusicUrl(null);
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary p-6 md:p-12">
@@ -1689,6 +1784,209 @@ const Index = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* AI Song & Music Generator */}
+        <div className="mt-20 rounded-2xl bg-card p-8 shadow-lg border border-border">
+          <div className="mb-8 text-center">
+            <h2 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-3">
+              <Music className="h-8 w-8 text-accent" />
+              AI Song & Music Generator
+            </h2>
+            <p className="text-muted-foreground">
+              Create professional songs with vocals or high-quality instrumental tracks
+            </p>
+          </div>
+
+          <Tabs value={musicMode} onValueChange={(value) => setMusicMode(value as "lyrics" | "instrumental")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="lyrics">Lyrics to Song</TabsTrigger>
+              <TabsTrigger value="instrumental">Instrumental Only</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="lyrics" className="space-y-6">
+              {/* Language Selector */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Lyrics Language
+                </label>
+                <Select value={musicLanguage} onValueChange={setMusicLanguage}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="English">English</SelectItem>
+                    <SelectItem value="Hindi">Hindi</SelectItem>
+                    <SelectItem value="Bangla">Bangla</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Lyrics Input */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Your Lyrics
+                </label>
+                <Textarea
+                  value={musicLyrics}
+                  onChange={(e) => setMusicLyrics(e.target.value)}
+                  placeholder="Enter your song lyrics here..."
+                  className="min-h-[200px] resize-none"
+                />
+              </div>
+
+              {/* Genre Selector */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Music Genre / Style
+                </label>
+                <Select value={musicGenre} onValueChange={setMusicGenre}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select genre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Romantic">Romantic</SelectItem>
+                    <SelectItem value="Sad">Sad</SelectItem>
+                    <SelectItem value="Lo-fi">Lo-fi</SelectItem>
+                    <SelectItem value="Bollywood style">Bollywood Style</SelectItem>
+                    <SelectItem value="Classical">Classical</SelectItem>
+                    <SelectItem value="Acoustic">Acoustic</SelectItem>
+                    <SelectItem value="EDM">EDM</SelectItem>
+                    <SelectItem value="Hip-hop">Hip-hop</SelectItem>
+                    <SelectItem value="Pop">Pop</SelectItem>
+                    <SelectItem value="Modern slow reverb">Modern Slow Reverb</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Optional Prompt */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Additional Style Guidance (Optional)
+                </label>
+                <Textarea
+                  value={musicPrompt}
+                  onChange={(e) => setMusicPrompt(e.target.value)}
+                  placeholder="Describe the vibe, mood, tempo, instruments, or cinematic style..."
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="instrumental" className="space-y-6">
+              {/* Instrumental Type Selector */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Instrumental Type
+                </label>
+                <Select value={instrumentalType} onValueChange={setInstrumentalType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select instrumental type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Lo-fi beats">Lo-fi Beats</SelectItem>
+                    <SelectItem value="Cinematic background score">Cinematic Background Score</SelectItem>
+                    <SelectItem value="Emotional piano">Emotional Piano</SelectItem>
+                    <SelectItem value="Sad violin">Sad Violin</SelectItem>
+                    <SelectItem value="EDM drop">EDM Drop</SelectItem>
+                    <SelectItem value="Hip-hop beat">Hip-hop Beat</SelectItem>
+                    <SelectItem value="Relaxing spa music">Relaxing Spa Music</SelectItem>
+                    <SelectItem value="Horror ambience">Horror Ambience</SelectItem>
+                    <SelectItem value="Romantic guitar">Romantic Guitar</SelectItem>
+                    <SelectItem value="Upbeat modern electronic">Upbeat Modern Electronic</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Optional Prompt */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Additional Style Guidance (Optional)
+                </label>
+                <Textarea
+                  value={musicPrompt}
+                  onChange={(e) => setMusicPrompt(e.target.value)}
+                  placeholder="Guide the style: mood, tempo, energy, specific instruments..."
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Generate Button */}
+          <div className="mt-8 flex justify-center">
+            <Button
+              onClick={handleGenerateMusic}
+              disabled={isGeneratingMusic}
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 px-12"
+            >
+              {isGeneratingMusic ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Generating Music...
+                </>
+              ) : (
+                <>
+                  <Music className="mr-2 h-5 w-5" />
+                  Generate {musicMode === "lyrics" ? "Song" : "Instrumental"}
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Audio Player and Download */}
+          {generatedMusicUrl && (
+            <div className="mt-8 space-y-4">
+              <div className="rounded-lg bg-muted p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Your Generated Music</h3>
+                <audio
+                  controls
+                  className="w-full"
+                  src={generatedMusicUrl}
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => handleDownloadMusic('mp3')}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download MP3
+                  </Button>
+                  <Button
+                    onClick={() => handleDownloadMusic('wav')}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download WAV
+                  </Button>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleGenerateMusic}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Regenerate
+                  </Button>
+                  <Button
+                    onClick={handleResetMusicGenerator}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    New Music
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Info Footer */}
