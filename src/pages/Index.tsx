@@ -60,6 +60,12 @@ const Index = () => {
   const [poseTransferResult, setPoseTransferResult] = useState<string | null>(null);
   const [isTransferringPose, setIsTransferringPose] = useState(false);
   
+  // Makeup Studio states
+  const [makeupImage, setMakeupImage] = useState<string | null>(null);
+  const [selectedMakeupStyle, setSelectedMakeupStyle] = useState<string>("");
+  const [makeupResult, setMakeupResult] = useState<string | null>(null);
+  const [isApplyingMakeup, setIsApplyingMakeup] = useState(false);
+  
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -791,6 +797,119 @@ const Index = () => {
     setPoseReferenceImage(null);
     setPoseTransferResult(null);
   };
+
+  // Makeup Studio handlers
+  const handleMakeupImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setMakeupImage(reader.result as string);
+      setMakeupResult(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleApplyMakeup = async () => {
+    if (!makeupImage) {
+      toast({
+        title: "Missing Image",
+        description: "Please upload a face photo first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedMakeupStyle) {
+      toast({
+        title: "No Style Selected",
+        description: "Please select a makeup style",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsApplyingMakeup(true);
+    setMakeupResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('apply-makeup', {
+        body: {
+          image: makeupImage,
+          makeupStyle: selectedMakeupStyle,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Makeup Application Failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.generatedImageUrl) {
+        setMakeupResult(data.generatedImageUrl);
+        toast({
+          title: "Makeup Applied!",
+          description: "Your look has been created successfully",
+        });
+      }
+    } catch (error: any) {
+      console.error('Makeup application error:', error);
+      toast({
+        title: "Application Failed",
+        description: error.message || "Failed to apply makeup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsApplyingMakeup(false);
+    }
+  };
+
+  const handleDownloadMakeup = () => {
+    if (!makeupResult) return;
+
+    const link = document.createElement('a');
+    link.href = makeupResult;
+    link.download = 'makeup-result.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded!",
+      description: "Image saved to your device",
+    });
+  };
+
+  const handleResetMakeup = () => {
+    setMakeupImage(null);
+    setSelectedMakeupStyle("");
+    setMakeupResult(null);
+  };
+
+  const makeupStyles = [
+    { id: "soft-glam", name: "Soft Glam", description: "Subtle contour, nude lips, warm eyeshadow", emoji: "✨" },
+    { id: "bridal-glow", name: "Bridal Glow", description: "Dewy base, highlighted cheeks, bold lashes", emoji: "💍" },
+    { id: "bold-night-out", name: "Bold Night Out", description: "Smokey eyes, winged liner, deep lipstick", emoji: "🌙" },
+    { id: "clean-girl", name: "Clean Girl", description: "Minimal makeup, glossy lips, fresh skin", emoji: "🌿" },
+    { id: "instagram-trendy", name: "Instagram Trendy", description: "Sharp brows, light contour, vibrant eyeshadow", emoji: "📸" },
+    { id: "matte-professional", name: "Matte Professional", description: "Smooth matte finish, neutral tones", emoji: "💼" },
+    { id: "classic-red-glam", name: "Classic Red Glam", description: "Red lips, cat eyeliner, vintage glamour", emoji: "💄" },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary p-6 md:p-12">
@@ -2329,6 +2448,193 @@ const Index = () => {
                   className="w-full"
                 >
                   Try New Pose
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Make Me Up – AI Makeup Studio Section */}
+        <div className="mt-16 rounded-2xl border border-border bg-card p-8 shadow-2xl">
+          <h2 className="text-3xl font-bold text-foreground mb-2">
+            Make Me Up – <span className="text-accent">AI Makeup Studio</span>
+          </h2>
+          <p className="text-muted-foreground mb-8">
+            Apply professional makeup styles while preserving your natural features and identity
+          </p>
+
+          {/* Image Upload */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Upload a Clear Face Photo
+            </label>
+            <p className="text-xs text-muted-foreground mb-3">
+              For best results, use a well-lit photo with face clearly visible
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleMakeupImageUpload}
+              className="hidden"
+              id="makeup-image-upload"
+            />
+            <label
+              htmlFor="makeup-image-upload"
+              className="block cursor-pointer max-w-md"
+            >
+              {makeupImage ? (
+                <div className="relative rounded-lg overflow-hidden border border-border">
+                  <img
+                    src={makeupImage}
+                    alt="Face"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <p className="text-white font-medium">Click to change</p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMakeupImage(null);
+                      setMakeupResult(null);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-border p-8 transition-all hover:border-accent hover:bg-secondary/50">
+                  <Upload className="h-10 w-10 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Upload face photo</span>
+                </div>
+              )}
+            </label>
+          </div>
+
+          {/* Makeup Style Selection */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-foreground mb-4">
+              Select Makeup Style
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {makeupStyles.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => setSelectedMakeupStyle(style.id)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-md ${
+                    selectedMakeupStyle === style.id
+                      ? "border-accent bg-accent/10"
+                      : "border-border hover:border-accent/50"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">{style.emoji}</span>
+                    <div>
+                      <h4 className="font-semibold text-foreground text-sm">{style.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{style.description}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Generate Button */}
+          <div className="flex justify-center mb-8">
+            <Button
+              onClick={handleApplyMakeup}
+              disabled={isApplyingMakeup || !makeupImage || !selectedMakeupStyle}
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 px-12"
+            >
+              {isApplyingMakeup ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Applying Makeup...
+                </>
+              ) : (
+                "Apply Selected Makeup"
+              )}
+            </Button>
+          </div>
+
+          {/* Results */}
+          {makeupResult && (
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold text-foreground text-center">Your Look</h3>
+              
+              {/* Before/After Thumbnails */}
+              <div className="flex justify-center gap-6 flex-wrap">
+                {makeupImage && (
+                  <div className="text-center">
+                    <img
+                      src={makeupImage}
+                      alt="Original"
+                      className="w-28 h-28 object-cover rounded-lg border border-border"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">Original</p>
+                  </div>
+                )}
+                <div className="text-center">
+                  <img
+                    src={makeupResult}
+                    alt="With Makeup"
+                    className="w-28 h-28 object-cover rounded-lg border-2 border-accent"
+                  />
+                  <p className="text-xs text-accent mt-2">
+                    {makeupStyles.find(s => s.id === selectedMakeupStyle)?.name}
+                  </p>
+                </div>
+              </div>
+
+              {/* Full Result Image */}
+              <div className="rounded-lg overflow-hidden border border-border max-w-2xl mx-auto">
+                <img
+                  src={makeupResult}
+                  alt="Makeup Result"
+                  className="w-full object-contain bg-muted"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3 max-w-md mx-auto">
+                <Button
+                  onClick={handleDownloadMakeup}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleApplyMakeup}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={isApplyingMakeup}
+                  >
+                    Regenerate
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedMakeupStyle("");
+                      setMakeupResult(null);
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Try Another Style
+                  </Button>
+                </div>
+                <Button
+                  onClick={handleResetMakeup}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Start Over
                 </Button>
               </div>
             </div>
