@@ -54,6 +54,12 @@ const Index = () => {
   const [generatedMusicUrl, setGeneratedMusicUrl] = useState<string | null>(null);
   const [isGeneratingMusic, setIsGeneratingMusic] = useState(false);
   
+  // Pose Transfer states
+  const [poseInfluencerImage, setPoseInfluencerImage] = useState<string | null>(null);
+  const [poseReferenceImage, setPoseReferenceImage] = useState<string | null>(null);
+  const [poseTransferResult, setPoseTransferResult] = useState<string | null>(null);
+  const [isTransferringPose, setIsTransferringPose] = useState(false);
+  
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -662,6 +668,129 @@ const Index = () => {
     setGeneratedMusicUrl(null);
   };
 
+  // Pose Transfer handlers
+  const handlePoseInfluencerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPoseInfluencerImage(reader.result as string);
+      setPoseTransferResult(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePoseReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPoseReferenceImage(reader.result as string);
+      setPoseTransferResult(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePoseTransfer = async () => {
+    if (!poseInfluencerImage) {
+      toast({
+        title: "Missing Influencer Image",
+        description: "Please upload the main influencer photo",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!poseReferenceImage) {
+      toast({
+        title: "Missing Pose Reference",
+        description: "Please upload a pose reference image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsTransferringPose(true);
+    setPoseTransferResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('pose-transfer', {
+        body: {
+          influencerImage: poseInfluencerImage,
+          poseReferenceImage: poseReferenceImage,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Transfer Failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.generatedImageUrl) {
+        setPoseTransferResult(data.generatedImageUrl);
+        toast({
+          title: "Pose Transfer Complete!",
+          description: "Your influencer has been recreated in the new pose",
+        });
+      }
+    } catch (error: any) {
+      console.error('Pose transfer error:', error);
+      toast({
+        title: "Transfer Failed",
+        description: error.message || "Failed to transfer pose. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTransferringPose(false);
+    }
+  };
+
+  const handleDownloadPoseTransfer = () => {
+    if (!poseTransferResult) return;
+
+    const link = document.createElement('a');
+    link.href = poseTransferResult;
+    link.download = 'pose-transfer-result.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded!",
+      description: "Image saved to your device",
+    });
+  };
+
+  const handleResetPoseTransfer = () => {
+    setPoseInfluencerImage(null);
+    setPoseReferenceImage(null);
+    setPoseTransferResult(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary p-6 md:p-12">
@@ -1984,6 +2113,223 @@ const Index = () => {
                     New Music
                   </Button>
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Pose Transfer Studio Section */}
+        <div className="mt-16 rounded-2xl border border-border bg-card p-8 shadow-2xl">
+          <h2 className="text-3xl font-bold text-foreground mb-2">
+            Pose Transfer <span className="text-accent">Studio</span>
+          </h2>
+          <p className="text-muted-foreground mb-8">
+            Transfer any pose to your influencer while keeping their face, outfit, and background intact
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            {/* Influencer Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Upload Influencer Photo
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                This face, outfit & background will be kept
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePoseInfluencerUpload}
+                className="hidden"
+                id="pose-influencer-upload"
+              />
+              <label
+                htmlFor="pose-influencer-upload"
+                className="block cursor-pointer"
+              >
+                {poseInfluencerImage ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={poseInfluencerImage}
+                      alt="Influencer"
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white font-medium">Click to change</p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPoseInfluencerImage(null);
+                        setPoseTransferResult(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-border p-8 transition-all hover:border-accent hover:bg-secondary/50">
+                    <Upload className="h-10 w-10 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Upload influencer image</span>
+                  </div>
+                )}
+              </label>
+            </div>
+
+            {/* Pose Reference Upload */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Upload Pose Reference
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Only the pose/body position will be used
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePoseReferenceUpload}
+                className="hidden"
+                id="pose-reference-upload"
+              />
+              <label
+                htmlFor="pose-reference-upload"
+                className="block cursor-pointer"
+              >
+                {poseReferenceImage ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={poseReferenceImage}
+                      alt="Pose Reference"
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white font-medium">Click to change</p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPoseReferenceImage(null);
+                        setPoseTransferResult(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-border p-8 transition-all hover:border-accent hover:bg-secondary/50">
+                    <Upload className="h-10 w-10 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Upload pose reference</span>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Info Note */}
+          <div className="bg-muted/50 rounded-lg p-4 mb-8">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">How it works:</strong> The AI will keep your influencer's face, outfit, and background from the first image, and apply only the pose from the reference photo. The result will look like a real photoshoot where the influencer changed their pose.
+            </p>
+          </div>
+
+          {/* Generate Button */}
+          <div className="flex justify-center mb-8">
+            <Button
+              onClick={handlePoseTransfer}
+              disabled={isTransferringPose || !poseInfluencerImage || !poseReferenceImage}
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 px-12"
+            >
+              {isTransferringPose ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Transferring Pose...
+                </>
+              ) : (
+                "Generate Pose Transfer"
+              )}
+            </Button>
+          </div>
+
+          {/* Results */}
+          {poseTransferResult && (
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold text-foreground text-center">Result</h3>
+              
+              {/* Thumbnails */}
+              <div className="flex justify-center gap-4 flex-wrap">
+                {poseInfluencerImage && (
+                  <div className="text-center">
+                    <img
+                      src={poseInfluencerImage}
+                      alt="Original"
+                      className="w-24 h-24 object-cover rounded-lg border border-border"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Original</p>
+                  </div>
+                )}
+                {poseReferenceImage && (
+                  <div className="text-center">
+                    <img
+                      src={poseReferenceImage}
+                      alt="Pose Ref"
+                      className="w-24 h-24 object-cover rounded-lg border border-border"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Pose Ref</p>
+                  </div>
+                )}
+                <div className="text-center">
+                  <img
+                    src={poseTransferResult}
+                    alt="Result"
+                    className="w-24 h-24 object-cover rounded-lg border-2 border-accent"
+                  />
+                  <p className="text-xs text-accent mt-1">Result</p>
+                </div>
+              </div>
+
+              {/* Full Result Image */}
+              <div className="rounded-lg overflow-hidden border border-border">
+                <img
+                  src={poseTransferResult}
+                  alt="Pose Transfer Result"
+                  className="w-full max-h-[600px] object-contain bg-muted"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleDownloadPoseTransfer}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                  <Button
+                    onClick={handlePoseTransfer}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={isTransferringPose}
+                  >
+                    Regenerate
+                  </Button>
+                </div>
+                <Button
+                  onClick={handleResetPoseTransfer}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Try New Pose
+                </Button>
               </div>
             </div>
           )}
