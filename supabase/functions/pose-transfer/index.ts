@@ -48,37 +48,33 @@ serve(async (req) => {
 
     console.log("Processing pose transfer request...");
 
-    const poseTransferPrompt = `You are a professional pose transfer AI. Your task is to recreate the person from IMAGE 1 in the exact pose shown in IMAGE 2.
+    const poseTransferPrompt = `TASK: Generate a new image of the person from IMAGE 1 in the exact body pose from IMAGE 2.
 
-CRITICAL REQUIREMENTS - MUST FOLLOW EXACTLY:
+STEP 1 - ANALYZE IMAGE 1 (Main Subject):
+Memorize every detail: face, hair, skin tone, body shape, clothing, accessories, makeup, background, lighting.
 
-FROM IMAGE 1 (Influencer Photo) - KEEP EVERYTHING:
-- Keep the EXACT same face - every facial feature must be identical
-- Keep the EXACT same body shape and proportions
-- Keep the EXACT same outfit/clothing - every detail, color, pattern, texture
-- Keep the EXACT same background - same environment, lighting, colors
-- Keep the EXACT same overall style, aesthetic, and lighting mood
-- Keep any accessories, jewelry, makeup exactly as they appear
+STEP 2 - ANALYZE IMAGE 2 (Pose Reference):
+Extract ONLY the body pose: how arms are positioned, how legs are positioned, body angle, head tilt, shoulder position, hand placement.
 
-FROM IMAGE 2 (Pose Reference) - USE ONLY THE POSE:
-- Extract ONLY the body position, posture, and gesture
-- Use the arm positions, leg positions, body angle, head tilt
-- DO NOT use the face from this image
-- DO NOT use the clothing from this image
-- DO NOT use the background from this image
-- DO NOT use any style elements from this image
+STEP 3 - GENERATE NEW IMAGE:
+Create the person from IMAGE 1 with:
+✓ SAME face (identical features, expression style)
+✓ SAME body proportions and shape
+✓ SAME clothing (exact outfit, colors, patterns, textures)
+✓ SAME background (environment, colors, elements)
+✓ SAME lighting style and mood
+✓ SAME accessories, jewelry, makeup
+✓ NEW pose matching IMAGE 2's body position
 
-OUTPUT REQUIREMENTS:
-- Generate a HIGH-RESOLUTION image
-- The result should look like the same person from Image 1 simply changed their pose
-- Natural, realistic, photoshoot-quality result
-- No ghosting, no double limbs, no artifacts
-- No blending of faces or features between the two images
-- The background should seamlessly accommodate the new pose
-- Clothing should naturally drape and fold according to the new pose
-- Maintain consistent lighting and shadows for the new pose
+FORBIDDEN:
+✗ Do NOT use face from IMAGE 2
+✗ Do NOT use clothing from IMAGE 2
+✗ Do NOT use background from IMAGE 2
+✗ Do NOT blend or morph features
+✗ Do NOT create ghosting or double limbs
+✗ Do NOT change the person's identity
 
-The final image must be indistinguishable from a real photograph of the influencer in that pose.`;
+The output must look like a professional photograph of the same person who simply moved into a different pose.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
