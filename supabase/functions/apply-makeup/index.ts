@@ -68,7 +68,42 @@ const makeupStyles: Record<string, string> = {
 - Full lashes
 - Defined arched brows
 - Soft contour and rosy blush
-- Timeless Hollywood glamour, vintage elegance`
+- Timeless Hollywood glamour, vintage elegance`,
+
+  "bridal-luxe-glam": `BRIDAL LUXE GLAM MAKEUP (South Asian Bridal Inspired):
+
+FACE BASE:
+- Flawless full-coverage base with smooth matte finish and soft luminosity
+- Bright under-eye highlight to lift and brighten
+- Subtle sculpting and contour on cheekbones, jawline, and temples
+- Warm-toned golden highlighter on high points (cheekbones, nose bridge, cupid's bow)
+
+EYES:
+- Champagne-gold shimmer on the center of eyelids
+- Soft rose-pink transition shade in the crease
+- Well-blended deep plum/burgundy outer-corner shadow for subtle depth
+- Thick, dramatic false-lash effect (full, voluminous lashes)
+- Clean, defined black eyeliner with subtle wing
+- Lower lash line softly smudged with warm brown tone
+- Well-groomed, bold eyebrows with natural arch, filled and defined
+
+CHEEKS:
+- Warm peach-rose blush on the apples of cheeks
+- Golden highlighter blended seamlessly into cheekbone for bridal glow
+
+LIPS:
+- Deep berry-red matte bold lipstick
+- Crisp, defined lip edges for a professional bridal finish
+- No gloss, purely matte luxe finish
+
+OVERALL STYLE:
+- Balanced warm undertone throughout
+- High-definition editorial glam
+- Smooth, seamless blending everywhere
+- Bridal editorial finish - luxurious and regal
+- Keep skin texture natural with visible pores and real details
+- NO facial reshaping, NO skin smoothing, NO distortion
+- This is professional South Asian bridal glam makeup application only`
 };
 
 serve(async (req) => {
