@@ -17,3 +17,12 @@ verify_jwt = false
 
 [functions.generate-music]
 verify_jwt = false
+
+[functions.pose-transfer]
+verify_jwt = false
+
+[functions.apply-makeup]
+verify_jwt = false
+
+[functions.full-look-transfer]
+verify_jwt = false

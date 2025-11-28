@@ -66,6 +66,12 @@ const Index = () => {
   const [makeupResult, setMakeupResult] = useState<string | null>(null);
   const [isApplyingMakeup, setIsApplyingMakeup] = useState(false);
   
+  // Full Look Transfer states
+  const [fullLookFaceImage, setFullLookFaceImage] = useState<string | null>(null);
+  const [fullLookReferenceImage, setFullLookReferenceImage] = useState<string | null>(null);
+  const [fullLookResult, setFullLookResult] = useState<string | null>(null);
+  const [isTransferringLook, setIsTransferringLook] = useState(false);
+  
   const { toast } = useToast();
 
   const handleCharacterImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -899,6 +905,130 @@ const Index = () => {
     setMakeupImage(null);
     setSelectedMakeupStyle("");
     setMakeupResult(null);
+  };
+
+  // Full Look Transfer handlers
+  const handleFullLookFaceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFullLookFaceImage(reader.result as string);
+      setFullLookResult(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFullLookReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFullLookReferenceImage(reader.result as string);
+      setFullLookResult(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFullLookTransfer = async () => {
+    if (!fullLookFaceImage) {
+      toast({
+        title: "Missing Face Image",
+        description: "Please upload the influencer face photo",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!fullLookReferenceImage) {
+      toast({
+        title: "Missing Reference Image",
+        description: "Please upload the reference look image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsTransferringLook(true);
+    setFullLookResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('full-look-transfer', {
+        body: {
+          influencerFaceImage: fullLookFaceImage,
+          referenceLookImage: fullLookReferenceImage,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Transfer Failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.generatedImageUrl) {
+        setFullLookResult(data.generatedImageUrl);
+        toast({
+          title: "Full Look Transfer Complete!",
+          description: "Your influencer look has been created successfully",
+        });
+      }
+    } catch (error: any) {
+      console.error('Full look transfer error:', error);
+      toast({
+        title: "Transfer Failed",
+        description: error.message || "Failed to transfer look. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTransferringLook(false);
+    }
+  };
+
+  const handleDownloadFullLook = () => {
+    if (!fullLookResult) return;
+
+    const link = document.createElement('a');
+    link.href = fullLookResult;
+    link.download = 'full-look-transfer-result.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded!",
+      description: "Image saved to your device",
+    });
+  };
+
+  const handleResetFullLook = () => {
+    setFullLookFaceImage(null);
+    setFullLookReferenceImage(null);
+    setFullLookResult(null);
   };
 
   const makeupStyles = [
@@ -2632,6 +2762,230 @@ const Index = () => {
                 </div>
                 <Button
                   onClick={handleResetMakeup}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Start Over
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Full Look Transfer (Face Keep) Section */}
+        <div className="mt-16 rounded-2xl border border-border bg-card p-8 shadow-2xl">
+          <h2 className="text-3xl font-bold text-foreground mb-2">
+            Full Look Transfer <span className="text-accent">(Face Keep)</span>
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            Transfer dress, ornaments, pose, and location from a reference image while keeping your influencer's face
+          </p>
+          <p className="text-sm text-accent/80 mb-8 bg-accent/10 p-3 rounded-lg">
+            💡 The AI will keep the influencer's face from Image 1 and copy the dress, pose, jewellery, and background from Image 2.
+          </p>
+
+          {/* Image Uploads */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {/* Influencer Face Image */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Image 1: Influencer Face
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Upload photo of the influencer whose face you want to keep
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFullLookFaceUpload}
+                className="hidden"
+                id="full-look-face-upload"
+              />
+              <label
+                htmlFor="full-look-face-upload"
+                className="block cursor-pointer"
+              >
+                {fullLookFaceImage ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={fullLookFaceImage}
+                      alt="Influencer Face"
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white font-medium">Click to change</p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setFullLookFaceImage(null);
+                        setFullLookResult(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-border p-8 transition-all hover:border-accent hover:bg-secondary/50 h-64 justify-center">
+                    <Upload className="h-10 w-10 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground text-center">Upload influencer face photo</span>
+                  </div>
+                )}
+              </label>
+            </div>
+
+            {/* Reference Look Image */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Image 2: Reference Look
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Upload reference image – dress, pose, ornaments & location will be copied
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFullLookReferenceUpload}
+                className="hidden"
+                id="full-look-reference-upload"
+              />
+              <label
+                htmlFor="full-look-reference-upload"
+                className="block cursor-pointer"
+              >
+                {fullLookReferenceImage ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={fullLookReferenceImage}
+                      alt="Reference Look"
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white font-medium">Click to change</p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setFullLookReferenceImage(null);
+                        setFullLookResult(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-border p-8 transition-all hover:border-accent hover:bg-secondary/50 h-64 justify-center">
+                    <Upload className="h-10 w-10 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground text-center">Upload reference look photo</span>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Generate Button */}
+          <div className="flex justify-center mb-8">
+            <Button
+              onClick={handleFullLookTransfer}
+              disabled={isTransferringLook || !fullLookFaceImage || !fullLookReferenceImage}
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 px-12"
+            >
+              {isTransferringLook ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Generating Full Look...
+                </>
+              ) : (
+                "Generate Full Look"
+              )}
+            </Button>
+          </div>
+
+          {/* Results */}
+          {fullLookResult && (
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold text-foreground text-center">Your Full Look</h3>
+              
+              {/* Source Thumbnails */}
+              <div className="flex justify-center gap-6 flex-wrap">
+                {fullLookFaceImage && (
+                  <div className="text-center">
+                    <img
+                      src={fullLookFaceImage}
+                      alt="Influencer"
+                      className="w-24 h-24 object-cover rounded-lg border border-border"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Face Source</p>
+                  </div>
+                )}
+                {fullLookReferenceImage && (
+                  <div className="text-center">
+                    <img
+                      src={fullLookReferenceImage}
+                      alt="Reference"
+                      className="w-24 h-24 object-cover rounded-lg border border-border"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Look Reference</p>
+                  </div>
+                )}
+                <div className="text-center">
+                  <img
+                    src={fullLookResult}
+                    alt="Result"
+                    className="w-24 h-24 object-cover rounded-lg border-2 border-accent"
+                  />
+                  <p className="text-xs text-accent mt-1">Result</p>
+                </div>
+              </div>
+
+              {/* Full Result Image */}
+              <div className="rounded-lg overflow-hidden border border-border max-w-2xl mx-auto">
+                <img
+                  src={fullLookResult}
+                  alt="Full Look Transfer Result"
+                  className="w-full object-contain bg-muted"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3 max-w-md mx-auto">
+                <Button
+                  onClick={handleDownloadFullLook}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleFullLookTransfer}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={isTransferringLook}
+                  >
+                    Regenerate
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFullLookReferenceImage(null);
+                      setFullLookResult(null);
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Try Another Look
+                  </Button>
+                </div>
+                <Button
+                  onClick={handleResetFullLook}
                   variant="outline"
                   className="w-full"
                 >
