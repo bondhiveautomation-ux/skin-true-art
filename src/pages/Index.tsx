@@ -904,6 +904,7 @@ const Index = () => {
   const makeupStyles = [
     { id: "soft-glam", name: "Soft Glam", description: "Subtle contour, nude lips, warm eyeshadow", emoji: "✨" },
     { id: "bridal-glow", name: "Bridal Glow", description: "Dewy base, highlighted cheeks, bold lashes", emoji: "💍" },
+    { id: "bridal-luxe-glam", name: "Bridal Luxe Glam", description: "South Asian bridal glam, champagne-gold eyes, berry-red lips", emoji: "👑" },
     { id: "bold-night-out", name: "Bold Night Out", description: "Smokey eyes, winged liner, deep lipstick", emoji: "🌙" },
     { id: "clean-girl", name: "Clean Girl", description: "Minimal makeup, glossy lips, fresh skin", emoji: "🌿" },
     { id: "instagram-trendy", name: "Instagram Trendy", description: "Sharp brows, light contour, vibrant eyeshadow", emoji: "📸" },
