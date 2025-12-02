@@ -24,6 +24,8 @@ const Index = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [characterImage, setCharacterImage] = useState<string | null>(null);
+  const [characterLeftProfile, setCharacterLeftProfile] = useState<string | null>(null);
+  const [characterRightProfile, setCharacterRightProfile] = useState<string | null>(null);
   const [productImage, setProductImage] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [selectedCameraAngle, setSelectedCameraAngle] = useState<string>("");
@@ -293,6 +295,8 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('generate-character-image', {
         body: { 
           characterImage: characterImage,
+          characterLeftProfile: characterLeftProfile || undefined,
+          characterRightProfile: characterRightProfile || undefined,
           prompt: generationPrompt.trim(),
           productImage: productImage,
           preset: selectedPreset,
@@ -343,6 +347,8 @@ const Index = () => {
 
   const handleResetGenerator = () => {
     setCharacterImage(null);
+    setCharacterLeftProfile(null);
+    setCharacterRightProfile(null);
     setGeneratedImage(null);
     setGenerationPrompt("");
     setProductImage(null);
@@ -350,6 +356,30 @@ const Index = () => {
     setSelectedCameraAngle("");
     setBackgroundImage(null);
     setSelectedPose("");
+  };
+
+  const handleSideProfileUpload = (side: 'left' | 'right') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (side === 'left') {
+        setCharacterLeftProfile(e.target?.result as string);
+      } else {
+        setCharacterRightProfile(e.target?.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleExtractorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1403,6 +1433,102 @@ const Index = () => {
                       <p className="text-sm font-medium text-accent">
                         ✓ Character locked - Face and body will remain identical
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Side Profile Images (Optional) */}
+                  <div className="rounded-lg border border-border bg-secondary/30 p-4 space-y-3">
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-foreground">
+                        Side Profile Images <span className="text-muted-foreground text-xs font-normal">(Optional - Improves Consistency)</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Upload side profile images for better character consistency across angles
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Left Side Profile */}
+                      <div>
+                        {!characterLeftProfile ? (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleSideProfileUpload('left')}
+                              className="hidden"
+                              id="left-profile-upload"
+                            />
+                            <label
+                              htmlFor="left-profile-upload"
+                              className="group cursor-pointer block"
+                            >
+                              <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border p-4 transition-all hover:border-accent hover:bg-secondary/50">
+                                <Upload className="h-5 w-5 text-muted-foreground group-hover:text-accent" />
+                                <p className="text-xs text-muted-foreground text-center">Left Side Profile</p>
+                              </div>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="relative rounded-lg border border-border bg-background p-2">
+                            <img
+                              src={characterLeftProfile}
+                              alt="Left profile"
+                              className="h-[80px] w-full rounded object-cover"
+                            />
+                            <Button
+                              onClick={() => setCharacterLeftProfile(null)}
+                              variant="outline"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-6 w-6"
+                            >
+                              ×
+                            </Button>
+                            <p className="text-xs text-center text-muted-foreground mt-1">Left Profile</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Side Profile */}
+                      <div>
+                        {!characterRightProfile ? (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleSideProfileUpload('right')}
+                              className="hidden"
+                              id="right-profile-upload"
+                            />
+                            <label
+                              htmlFor="right-profile-upload"
+                              className="group cursor-pointer block"
+                            >
+                              <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border p-4 transition-all hover:border-accent hover:bg-secondary/50">
+                                <Upload className="h-5 w-5 text-muted-foreground group-hover:text-accent" />
+                                <p className="text-xs text-muted-foreground text-center">Right Side Profile</p>
+                              </div>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="relative rounded-lg border border-border bg-background p-2">
+                            <img
+                              src={characterRightProfile}
+                              alt="Right profile"
+                              className="h-[80px] w-full rounded object-cover"
+                            />
+                            <Button
+                              onClick={() => setCharacterRightProfile(null)}
+                              variant="outline"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-6 w-6"
+                            >
+                              ×
+                            </Button>
+                            <p className="text-xs text-center text-muted-foreground mt-1">Right Profile</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 

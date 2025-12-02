@@ -12,11 +12,13 @@ serve(async (req) => {
   }
 
   try {
-    const { characterImage, prompt, productImage, preset, cameraAngle, backgroundImage, pose } = await req.json();
+    const { characterImage, characterLeftProfile, characterRightProfile, prompt, productImage, preset, cameraAngle, backgroundImage, pose } = await req.json();
     
     if (!characterImage) {
       throw new Error("No character reference image provided");
     }
+    
+    const hasMultipleReferenceImages = characterLeftProfile || characterRightProfile;
     
     if (!prompt && !productImage && !backgroundImage) {
       throw new Error("No prompt, product, or background provided");
@@ -36,6 +38,24 @@ serve(async (req) => {
     }
 
     console.log("Generating image with character consistency");
+    console.log("Has side profiles:", hasMultipleReferenceImages ? "yes" : "no");
+
+    // Helper to build character reference images array
+    const buildCharacterReferenceImages = () => {
+      const images = [{ type: "image_url", image_url: { url: characterImage } }];
+      if (characterLeftProfile) {
+        images.push({ type: "image_url", image_url: { url: characterLeftProfile } });
+      }
+      if (characterRightProfile) {
+        images.push({ type: "image_url", image_url: { url: characterRightProfile } });
+      }
+      return images;
+    };
+
+    const multiReferenceNote = hasMultipleReferenceImages 
+      ? `\n\nMultiple Reference Images Provided:
+You have been given multiple reference images of the same person from different angles. Use ALL provided reference images to ensure maximum character consistency. The main image shows the primary view, and additional side profile images help maintain accurate facial structure and features from all angles.`
+      : '';
 
     let generationPrompt: string;
     let contentArray: any[];
@@ -54,10 +74,10 @@ serve(async (req) => {
         "dynamic-action": "The character is in a dynamic, active pose with energy and movement. Capture an expressive, engaging action appropriate for the scene. Body should show motion and vitality."
       };
 
-      generationPrompt = `Create a photorealistic image compositing the person from the first image into the scene from the second image.
+      generationPrompt = `Create a photorealistic image compositing the person from the reference images into the scene from the background image.
 
 Character Preservation:
-Maintain the exact appearance of the person including facial features, body type, skin tone, hair, and overall identity. Keep their natural proportions and characteristics identical to the reference.
+Maintain the exact appearance of the person including facial features, body type, skin tone, hair, and overall identity. Keep their natural proportions and characteristics identical to the reference images.${multiReferenceNote}
 
 Background Integration:
 Place the person naturally into the background scene while preserving the original environment, lighting, colors, and atmosphere of the background image.
@@ -76,7 +96,7 @@ The final image should appear as if the person was actually photographed in that
 
       contentArray = [
         { type: "text", text: generationPrompt },
-        { type: "image_url", image_url: { url: characterImage } },
+        ...buildCharacterReferenceImages(),
         { type: "image_url", image_url: { url: backgroundImage } }
       ];
     } else if (productImage && preset) {
@@ -108,10 +128,10 @@ The final image should appear as if the person was actually photographed in that
         lifestyle: "The character is naturally interacting with the product in a realistic lifestyle setting. The interaction should look organic and unforced, as if captured in a real moment. The product and character should blend seamlessly into the scene with natural lighting and authentic body language."
       };
 
-      generationPrompt = `Create a professional product photography image featuring the person from the first image with the product from the second image.
+      generationPrompt = `Create a professional product photography image featuring the person from the reference images with the product from the product image.
 
 Character Preservation:
-Maintain the exact appearance of the person including all facial features, body proportions, skin tone, hair style, and natural characteristics from the reference image.
+Maintain the exact appearance of the person including all facial features, body proportions, skin tone, hair style, and natural characteristics from the reference images.${multiReferenceNote}
 
 Product Integration:
 Preserve the product's design, colors, patterns, textures, and all details accurately.
@@ -130,17 +150,17 @@ Create an image that looks like a real professional photoshoot session.`;
 
       contentArray = [
         { type: "text", text: generationPrompt },
-        { type: "image_url", image_url: { url: characterImage } },
+        ...buildCharacterReferenceImages(),
         { type: "image_url", image_url: { url: productImage } }
       ];
     } else {
       // Standard scenario generation mode
       console.log("Standard scenario generation for prompt:", prompt);
       
-      generationPrompt = `Create a photorealistic image of the person from the reference image in a new scenario.
+      generationPrompt = `Create a photorealistic image of the person from the reference images in a new scenario.
 
 Character Preservation:
-Keep the person's appearance identical including facial features, body proportions, skin tone, hair, and all distinctive characteristics.
+Keep the person's appearance identical including facial features, body proportions, skin tone, hair, and all distinctive characteristics.${multiReferenceNote}
 
 Scenario:
 "${prompt}"
@@ -156,7 +176,7 @@ Generate an image showing the same person in this new situation.`;
 
       contentArray = [
         { type: "text", text: generationPrompt },
-        { type: "image_url", image_url: { url: characterImage } }
+        ...buildCharacterReferenceImages()
       ];
     }
 
