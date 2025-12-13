@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Coins } from "lucide-react";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
   onSignOut?: () => void;
   userEmail?: string;
+  credits?: number | null;
 }
 
-export const Navbar = ({ onNavigate, onSignOut, userEmail }: NavbarProps) => {
+export const Navbar = ({ onNavigate, onSignOut, userEmail, credits }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -59,6 +60,12 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail }: NavbarProps) => {
 
           {/* User section */}
           <div className="flex items-center gap-4">
+            {credits !== null && credits !== undefined && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                <Coins className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">{credits}</span>
+              </div>
+            )}
             {userEmail && (
               <span className="hidden sm:block text-sm text-muted-foreground truncate max-w-[150px]">
                 {userEmail}

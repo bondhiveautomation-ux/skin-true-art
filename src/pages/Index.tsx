@@ -6,6 +6,7 @@ import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCredits } from "@/hooks/useCredits";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { ToolSection } from "@/components/layout/ToolSection";
@@ -22,6 +23,8 @@ import { SelectionGrid } from "@/components/ui/SelectionGrid";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut, isAuthenticated } = useAuth();
+  const { credits, deductCredit, hasCredits } = useCredits();
+  const { toast } = useToast();
   
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -91,7 +94,6 @@ const Index = () => {
   const [fullLookResult, setFullLookResult] = useState<string | null>(null);
   const [isTransferringLook, setIsTransferringLook] = useState(false);
   
-  const { toast } = useToast();
 
   // Show loading state while checking auth
   if (loading) {
@@ -156,6 +158,15 @@ const Index = () => {
 
   const handleEnhance = async () => {
     if (!selectedImage) return;
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
     setIsProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke('enhance-skin', {
@@ -258,6 +269,15 @@ const Index = () => {
       toast({ title: "Empty prompt", description: "Please enter a scenario prompt, upload a product, or add a background", variant: "destructive" });
       return;
     }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
 
     setIsGeneratingImage(true);
     setGenerationProgress(0);
@@ -327,6 +347,15 @@ const Index = () => {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
       return;
     }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
     setIsExtracting(true);
     try {
       const { data, error } = await supabase.functions.invoke('extract-image-prompt', { body: { image: extractorImage } });
@@ -353,6 +382,15 @@ const Index = () => {
   const handleExtractDress = async () => {
     if (!dressImage) {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
+      return;
+    }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
       return;
     }
     setIsExtractingDress(true);
@@ -390,6 +428,15 @@ const Index = () => {
   const handleRemovePeople = async () => {
     if (!peopleImage) {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
+      return;
+    }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
       return;
     }
     setIsRemovingPeople(true);
@@ -437,6 +484,15 @@ const Index = () => {
     }
     if (!poseReferenceImage) {
       toast({ title: "Missing Pose Reference", description: "Please upload a pose reference image", variant: "destructive" });
+      return;
+    }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
       return;
     }
     setIsTransferringPose(true);
@@ -500,6 +556,15 @@ const Index = () => {
       toast({ title: "No Style Selected", description: "Please select a makeup style", variant: "destructive" });
       return;
     }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
     setIsApplyingMakeup(true);
     setMakeupResult(null);
     try {
@@ -549,6 +614,15 @@ const Index = () => {
     }
     if (!fullLookReferenceImage) {
       toast({ title: "Missing Reference Image", description: "Please upload the reference look image", variant: "destructive" });
+      return;
+    }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
       return;
     }
     setIsTransferringLook(true);
@@ -618,7 +692,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} />
+      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} credits={credits} />
       
       {/* Hero Section */}
       <Hero onExplore={() => scrollToSection("features")} />
