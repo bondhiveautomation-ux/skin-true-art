@@ -5,7 +5,6 @@ interface ToolSectionProps {
   title: string;
   subtitle: string;
   description?: string;
-  badge?: string;
   children: ReactNode;
 }
 
@@ -14,34 +13,25 @@ export const ToolSection = ({
   title, 
   subtitle, 
   description,
-  badge,
   children 
 }: ToolSectionProps) => {
   return (
-    <section id={id} className="relative py-24 scroll-mt-20">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
-      
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id={id} className="py-16 lg:py-20 scroll-mt-20">
+      <div className="max-w-5xl mx-auto px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-12">
-          {badge && (
-            <span className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary uppercase tracking-wider mb-4">
-              {badge}
-            </span>
-          )}
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-foreground mb-4">
-            {title} <span className="gradient-text">{subtitle}</span>
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight mb-2">
+            {title} <span className="text-muted-foreground">{subtitle}</span>
           </h2>
           {description && (
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm text-muted-foreground max-w-xl mx-auto">
               {description}
             </p>
           )}
         </div>
 
         {/* Content */}
-        <div className="glass-card p-8 sm:p-10">
+        <div className="glass-card p-6 sm:p-8">
           {children}
         </div>
       </div>

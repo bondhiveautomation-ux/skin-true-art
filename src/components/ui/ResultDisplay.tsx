@@ -25,41 +25,41 @@ export const ResultDisplay = ({
   resetLabel = "Start Over",
 }: ResultDisplayProps) => {
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      <h3 className="font-display text-2xl font-semibold text-foreground text-center">
-        Your Result
+    <div className="space-y-6 animate-fade-in">
+      <h3 className="text-lg font-medium text-foreground text-center">
+        Result
       </h3>
 
       {/* Thumbnails comparison */}
       {originalImages.length > 0 && (
-        <div className="flex items-center justify-center gap-4 flex-wrap">
+        <div className="flex items-center justify-center gap-3 flex-wrap">
           {originalImages.map((img, index) => (
             <div key={index} className="text-center">
-              <div className="w-20 h-20 rounded-xl overflow-hidden border border-border bg-secondary/30">
+              <div className="w-16 h-16 rounded-lg overflow-hidden border border-border bg-secondary/30">
                 <img
                   src={img.src}
                   alt={img.label}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">{img.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">{img.label}</p>
             </div>
           ))}
           <div className="text-center">
-            <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary bg-secondary/30 ring-4 ring-primary/20">
+            <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-foreground/20 bg-secondary/30">
               <img
                 src={result}
                 alt="Result"
                 className="w-full h-full object-cover"
               />
             </div>
-            <p className="text-xs text-primary font-medium mt-2">Result</p>
+            <p className="text-xs text-foreground font-medium mt-1">Result</p>
           </div>
         </div>
       )}
 
       {/* Full result image */}
-      <div className="rounded-2xl overflow-hidden border border-border bg-secondary/30 max-w-2xl mx-auto">
+      <div className="rounded-xl overflow-hidden border border-border bg-secondary/30 max-w-xl mx-auto">
         <img
           src={result}
           alt="Generated result"
@@ -68,10 +68,10 @@ export const ResultDisplay = ({
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-sm mx-auto">
         <Button
           onClick={onDownload}
-          className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="w-full sm:w-auto btn-glow bg-foreground text-background hover:bg-foreground/90"
         >
           <Download className="mr-2 h-4 w-4" />
           {downloadLabel}
