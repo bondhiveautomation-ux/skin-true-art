@@ -35,7 +35,7 @@ export const SelectionGrid = ({
   };
 
   return (
-    <div className={`grid ${columnClasses[columns]} gap-3`}>
+    <div className={`grid ${columnClasses[columns]} gap-2`}>
       {options.map((option) => (
         <button
           key={option.id}
@@ -43,23 +43,18 @@ export const SelectionGrid = ({
           disabled={disabled}
           className={`relative rounded-xl border text-left transition-all duration-300 ${sizeClasses[size]} ${
             selectedId === option.id
-              ? "border-primary bg-primary/10 text-foreground shadow-lg shadow-primary/10"
-              : "border-border bg-secondary/30 text-muted-foreground hover:border-primary/50 hover:bg-secondary/50"
+              ? "border-foreground/30 bg-accent text-foreground"
+              : "border-border bg-secondary/30 text-muted-foreground hover:border-border hover:bg-secondary/50"
           } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         >
-          {/* Selection indicator */}
-          {selectedId === option.id && (
-            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
-          )}
-          
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2">
             {option.emoji && (
-              <span className="text-xl flex-shrink-0">{option.emoji}</span>
+              <span className="text-base flex-shrink-0">{option.emoji}</span>
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{option.name}</p>
               {option.description && (
-                <p className="text-xs opacity-70 mt-1 line-clamp-2">
+                <p className="text-xs opacity-60 mt-0.5 line-clamp-2">
                   {option.description}
                 </p>
               )}

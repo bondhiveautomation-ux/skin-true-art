@@ -1,20 +1,23 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy, Sparkles, Check } from "lucide-react";
+import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { ToolSection } from "@/components/layout/ToolSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { ValueSection } from "@/components/landing/ValueSection";
+import { CTASection } from "@/components/landing/CTASection";
+import { Footer } from "@/components/landing/Footer";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { ResultDisplay } from "@/components/ui/ResultDisplay";
 import { SelectionGrid } from "@/components/ui/SelectionGrid";
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState("hero");
-  
   // Skin Enhancement states
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
@@ -80,7 +83,6 @@ const Index = () => {
 
   // Scroll to section handler
   const scrollToSection = (sectionId: string) => {
-    setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -591,18 +593,41 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar activeSection={activeSection} onSectionChange={scrollToSection} />
+      <Navbar onNavigate={scrollToSection} />
       
       {/* Hero Section */}
-      <Hero onExplore={() => scrollToSection("skin-enhancement")} />
+      <Hero onExplore={() => scrollToSection("features")} />
+
+      {/* Features Section */}
+      <FeaturesSection id="features" />
+
+      {/* How It Works Section */}
+      <HowItWorksSection id="how-it-works" />
+
+      {/* Value Section */}
+      <ValueSection />
+
+      {/* CTA Section */}
+      <CTASection onGetStarted={() => scrollToSection("tools")} />
+
+      {/* Tools Section Divider */}
+      <div id="tools" className="pt-16 lg:pt-24">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center mb-12">
+          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+            Tools
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+            Start creating
+          </h2>
+        </div>
+      </div>
 
       {/* Skin Enhancement Section */}
       <ToolSection
         id="skin-enhancement"
         title="Skin Texture"
         subtitle="Enhancement"
-        description="Ultra-realistic skin enhancement that preserves your identity"
-        badge="AI-Powered"
+        description="Enhance facial skin texture naturally while preserving realism"
       >
         {!selectedImage ? (
           <div className="flex justify-center">
@@ -626,7 +651,7 @@ const Index = () => {
                     variant={enhancementMode === "preserve" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setEnhancementMode("preserve")}
-                    className={enhancementMode === "preserve" ? "bg-primary" : ""}
+                    className={enhancementMode === "preserve" ? "bg-foreground text-background" : ""}
                   >
                     Preserve Makeup
                   </Button>
@@ -634,7 +659,7 @@ const Index = () => {
                     variant={enhancementMode === "remove" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setEnhancementMode("remove")}
-                    className={enhancementMode === "remove" ? "bg-primary" : ""}
+                    className={enhancementMode === "remove" ? "bg-foreground text-background" : ""}
                   >
                     Remove Makeup
                   </Button>
@@ -657,10 +682,10 @@ const Index = () => {
                   </Button>
                 </div>
 
-                <div className="relative overflow-hidden rounded-2xl bg-secondary/30">
+                <div className="relative overflow-hidden rounded-xl bg-secondary/30">
                   <div
                     ref={comparisonRef}
-                    className="relative w-full max-w-2xl mx-auto select-none"
+                    className="relative w-full max-w-xl mx-auto select-none"
                     style={{ cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
                     onMouseMove={(e) => {
                       if (isDragging && !isPanning && comparisonRef.current) {
@@ -704,35 +729,35 @@ const Index = () => {
                       </div>
                     </div>
                     <div
-                      className="slider-handle absolute inset-y-0 w-1 bg-primary cursor-ew-resize z-10"
+                      className="slider-handle absolute inset-y-0 w-0.5 bg-foreground/50 cursor-ew-resize z-10"
                       style={{ left: `${sliderPosition}%` }}
                       onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
                     >
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 rounded-full bg-primary p-2 shadow-lg">
-                        <ChevronLeft className="h-4 w-4 text-primary-foreground" />
-                        <ChevronRight className="h-4 w-4 text-primary-foreground" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded-full bg-foreground p-1.5 shadow-lg">
+                        <ChevronLeft className="h-3 w-3 text-background" />
+                        <ChevronRight className="h-3 w-3 text-background" />
                       </div>
                     </div>
-                    <div className="absolute bottom-4 left-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm">
-                      <span className="text-sm font-medium text-foreground">Original</span>
+                    <div className="absolute bottom-3 left-3 rounded-md bg-background/80 px-2 py-1 backdrop-blur-sm">
+                      <span className="text-xs font-medium text-foreground">Original</span>
                     </div>
-                    <div className="absolute bottom-4 right-4 rounded-lg bg-background/80 px-3 py-1 backdrop-blur-sm">
-                      <span className="text-sm font-medium text-foreground">Enhanced</span>
+                    <div className="absolute bottom-3 right-3 rounded-md bg-background/80 px-2 py-1 backdrop-blur-sm">
+                      <span className="text-xs font-medium text-foreground">Enhanced</span>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="relative flex justify-center">
-                <img src={selectedImage} alt="Selected" className="max-h-[500px] rounded-2xl object-contain" />
-                <Button onClick={handleReset} variant="outline" size="sm" className="absolute top-3 right-3">
+                <img src={selectedImage} alt="Selected" className="max-h-[400px] rounded-xl object-contain" />
+                <Button onClick={handleReset} variant="outline" size="sm" className="absolute top-2 right-2">
                   Remove
                 </Button>
               </div>
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-3">
               {!showComparison ? (
                 <>
                   <LoadingButton
@@ -740,17 +765,16 @@ const Index = () => {
                     isLoading={isProcessing}
                     loadingText="Enhancing..."
                     size="lg"
-                    className="bg-primary hover:bg-primary/90"
+                    className="btn-glow bg-foreground text-background hover:bg-foreground/90"
                   >
-                    <Sparkles className="mr-2 h-5 w-5" />
                     Enhance Skin Texture
                   </LoadingButton>
                   <Button onClick={handleReset} variant="outline" size="lg">Cancel</Button>
                 </>
               ) : (
                 <>
-                  <Button onClick={handleDownload} size="lg" className="bg-primary hover:bg-primary/90">
-                    <Download className="mr-2 h-5 w-5" /> Download Enhanced
+                  <Button onClick={handleDownload} size="lg" className="btn-glow bg-foreground text-background hover:bg-foreground/90">
+                    <Download className="mr-2 h-4 w-4" /> Download Enhanced
                   </Button>
                   <Button onClick={handleReset} variant="outline" size="lg">Upload New Photo</Button>
                 </>
@@ -765,23 +789,21 @@ const Index = () => {
         id="character-generator"
         title="Character-Consistent"
         subtitle="Image Generator"
-        description="Generate images with the exact same character in any scenario"
-        badge="Pro Feature"
+        description="Generate new images while keeping the exact same face and identity"
       >
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Character Upload */}
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-4">
             <ImageUploader
               id="character-upload"
               image={characterImage}
               onUpload={handleCharacterImageUpload}
               onRemove={() => { setCharacterImage(null); setGeneratedImage(null); }}
               label="Character Reference"
-              description="Upload an influencer or character image"
+              description="Main character image"
               aspectRatio="portrait"
             />
             
-            {/* Side profiles */}
             {characterImage && (
               <>
                 <ImageUploader
@@ -809,18 +831,18 @@ const Index = () => {
           {characterImage && (
             <>
               {/* Product upload */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-4">
                 <ImageUploader
                   id="product-upload"
                   image={productImage}
                   onUpload={handleProductImageUpload}
                   onRemove={() => { setProductImage(null); setSelectedPreset(""); }}
                   label="Product Image (Optional)"
-                  description="Upload a product for the character to showcase"
+                  description="Product for character to showcase"
                 />
                 
                 {productImage && (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <label className="block text-sm font-medium text-foreground">Styling Preset</label>
                     <SelectionGrid
                       options={presetOptions}
@@ -835,18 +857,18 @@ const Index = () => {
               </div>
 
               {/* Background */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-4">
                 <ImageUploader
                   id="background-upload"
                   image={backgroundImage}
                   onUpload={handleBackgroundImageUpload}
                   onRemove={() => { setBackgroundImage(null); setSelectedPose(""); }}
                   label="Background Image (Optional)"
-                  description="Custom background for your character"
+                  description="Custom background"
                 />
                 
                 {backgroundImage && (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <label className="block text-sm font-medium text-foreground">Character Pose</label>
                     <SelectionGrid
                       options={poseOptions}
@@ -862,13 +884,13 @@ const Index = () => {
 
               {/* Prompt input */}
               {!productImage && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <label className="block text-sm font-medium text-foreground">Scenario Prompt</label>
                   <Textarea
                     value={generationPrompt}
                     onChange={(e) => setGenerationPrompt(e.target.value)}
                     placeholder="Describe the scenario you want to generate..."
-                    className="min-h-[100px] bg-secondary/30 border-border/50 focus:border-primary/50"
+                    className="min-h-[80px] bg-secondary/30 border-border/50"
                   />
                 </div>
               )}
@@ -880,9 +902,8 @@ const Index = () => {
                   isLoading={isGeneratingImage}
                   loadingText={`Generating... ${Math.round(generationProgress)}%`}
                   size="lg"
-                  className="bg-primary hover:bg-primary/90 px-12"
+                  className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
                 >
-                  <Sparkles className="mr-2 h-5 w-5" />
                   Generate Image
                 </LoadingButton>
               </div>
@@ -908,18 +929,16 @@ const Index = () => {
         id="prompt-extractor"
         title="Image Prompt"
         subtitle="Extractor"
-        description="Extract detailed prompts from any image for recreation"
-        badge="Utility"
+        description="Extract detailed AI prompts from any image"
       >
         <div className="space-y-6">
-          <div className="max-w-md mx-auto">
+          <div className="max-w-sm mx-auto">
             <ImageUploader
               id="extractor-upload"
               image={extractorImage}
               onUpload={handleExtractorImageUpload}
               onRemove={() => { setExtractorImage(null); setExtractedPrompt(""); }}
               label="Upload Image to Analyze"
-              description="The AI will extract a detailed prompt from this image"
             />
           </div>
 
@@ -930,14 +949,14 @@ const Index = () => {
               loadingText="Analyzing..."
               disabled={!extractorImage}
               size="lg"
-              className="bg-primary hover:bg-primary/90"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90"
             >
               Extract Prompt
             </LoadingButton>
           </div>
 
           {extractedPrompt && (
-            <div className="space-y-4 max-w-2xl mx-auto animate-fade-in-up">
+            <div className="space-y-3 max-w-xl mx-auto animate-fade-in">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Extracted Prompt</label>
                 <Button onClick={handleCopyPrompt} variant="outline" size="sm">
@@ -957,18 +976,16 @@ const Index = () => {
         id="dress-extractor"
         title="Dress-to-Dummy"
         subtitle="Extractor"
-        description="Extract clothing from photos and display on a neutral mannequin"
-        badge="E-commerce"
+        description="Isolate outfits cleanly from reference images"
       >
         <div className="space-y-6">
-          <div className="max-w-md mx-auto">
+          <div className="max-w-sm mx-auto">
             <ImageUploader
               id="dress-upload"
               image={dressImage}
               onUpload={handleDressImageUpload}
               onRemove={() => { setDressImage(null); setExtractedDressImage(null); }}
               label="Upload Photo of Person Wearing Outfit"
-              description="The AI will extract the clothing and place it on a mannequin"
             />
           </div>
 
@@ -979,7 +996,7 @@ const Index = () => {
               loadingText="Extracting..."
               disabled={!dressImage}
               size="lg"
-              className="bg-primary hover:bg-primary/90"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90"
             >
               Generate Dress on Dummy
             </LoadingButton>
@@ -1003,18 +1020,16 @@ const Index = () => {
         id="background-saver"
         title="Remove People,"
         subtitle="Keep Background"
-        description="AI-powered people removal while preserving the original background"
-        badge="Editor"
+        description="Remove unwanted people while preserving the background"
       >
         <div className="space-y-6">
-          <div className="max-w-md mx-auto">
+          <div className="max-w-sm mx-auto">
             <ImageUploader
               id="people-upload"
               image={peopleImage}
               onUpload={handlePeopleImageUpload}
               onRemove={handleResetPeopleRemoval}
               label="Upload Image with People"
-              description="Clear photo where people are visible"
             />
           </div>
 
@@ -1025,23 +1040,21 @@ const Index = () => {
               loadingText="Removing People..."
               disabled={!peopleImage}
               size="lg"
-              className="bg-primary hover:bg-primary/90"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90"
             >
               Generate Clean Background
             </LoadingButton>
           </div>
 
           {cleanBackground && (
-            <div className="space-y-6 animate-fade-in-up">
-              <ResultDisplay
-                result={cleanBackground}
-                originalImages={peopleImage ? [{ src: peopleImage, label: "Original" }] : []}
-                onDownload={() => handleDownloadBackground('png')}
-                onRegenerate={handleRemovePeople}
-                onReset={handleResetPeopleRemoval}
-                isProcessing={isRemovingPeople}
-              />
-            </div>
+            <ResultDisplay
+              result={cleanBackground}
+              originalImages={peopleImage ? [{ src: peopleImage, label: "Original" }] : []}
+              onDownload={() => handleDownloadBackground('png')}
+              onRegenerate={handleRemovePeople}
+              onReset={handleResetPeopleRemoval}
+              isProcessing={isRemovingPeople}
+            />
           )}
         </div>
       </ToolSection>
@@ -1051,11 +1064,10 @@ const Index = () => {
         id="pose-transfer"
         title="Pose Transfer"
         subtitle="Studio"
-        description="Transfer any pose to your influencer while keeping their identity intact"
-        badge="Pro Feature"
+        description="Apply the pose from one image to another character"
       >
-        <div className="space-y-8">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
             <ImageUploader
               id="pose-influencer"
               image={poseInfluencerImage}
@@ -1071,15 +1083,9 @@ const Index = () => {
               onUpload={handlePoseReferenceUpload}
               onRemove={() => { setPoseReferenceImage(null); setPoseTransferResult(null); }}
               label="Pose Reference"
-              description="Only the pose/body position will be used"
+              description="Only the pose will be used"
               aspectRatio="portrait"
             />
-          </div>
-
-          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-            <p className="text-sm text-muted-foreground">
-              <strong className="text-foreground">How it works:</strong> The AI keeps your influencer's face, outfit, and background from the first image, and applies only the pose from the reference photo.
-            </p>
           </div>
 
           <div className="flex justify-center">
@@ -1089,7 +1095,7 @@ const Index = () => {
               loadingText="Transferring Pose..."
               disabled={!poseInfluencerImage || !poseReferenceImage}
               size="lg"
-              className="bg-primary hover:bg-primary/90 px-12"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
             >
               Generate Pose Transfer
             </LoadingButton>
@@ -1117,23 +1123,21 @@ const Index = () => {
         id="makeup-studio"
         title="Make Me Up –"
         subtitle="AI Makeup Studio"
-        description="Apply professional makeup styles while preserving your natural features"
-        badge="Beauty"
+        description="Apply professional-grade makeup styles digitally"
       >
-        <div className="space-y-8">
-          <div className="max-w-md mx-auto">
+        <div className="space-y-6">
+          <div className="max-w-sm mx-auto">
             <ImageUploader
               id="makeup-upload"
               image={makeupImage}
               onUpload={handleMakeupImageUpload}
               onRemove={handleResetMakeup}
               label="Upload a Clear Face Photo"
-              description="Front-facing portrait works best"
             />
           </div>
 
           {makeupImage && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <label className="block text-sm font-medium text-foreground text-center">Select Makeup Style</label>
               <SelectionGrid
                 options={makeupStyles}
@@ -1152,7 +1156,7 @@ const Index = () => {
               loadingText="Applying Makeup..."
               disabled={!makeupImage || !selectedMakeupStyle}
               size="lg"
-              className="bg-primary hover:bg-primary/90 px-12"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
             >
               Apply Selected Makeup
             </LoadingButton>
@@ -1177,24 +1181,17 @@ const Index = () => {
         id="full-look-transfer"
         title="Full Look Transfer"
         subtitle="(Face Keep)"
-        description="Transfer dress, ornaments, pose, and location while keeping your influencer's face"
-        badge="Virtual Try-On"
+        description="Transfer the complete look while keeping the original face"
       >
-        <div className="space-y-8">
-          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
-            <p className="text-sm text-muted-foreground">
-              💡 The AI will keep the influencer's face from Image 1 and copy the dress, pose, jewellery, and background from Image 2.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
             <ImageUploader
               id="face-upload"
               image={fullLookFaceImage}
               onUpload={handleFullLookFaceUpload}
               onRemove={() => { setFullLookFaceImage(null); setFullLookResult(null); }}
               label="Image 1: Influencer Face"
-              description="The face/identity you want to keep"
+              description="The face/identity to keep"
               aspectRatio="portrait"
             />
             <ImageUploader
@@ -1203,7 +1200,7 @@ const Index = () => {
               onUpload={handleFullLookReferenceUpload}
               onRemove={() => { setFullLookReferenceImage(null); setFullLookResult(null); }}
               label="Image 2: Reference Look"
-              description="Dress, pose, ornaments & location will be copied"
+              description="Outfit, pose & style to copy"
               aspectRatio="portrait"
             />
           </div>
@@ -1215,7 +1212,7 @@ const Index = () => {
               loadingText="Generating Full Look..."
               disabled={!fullLookFaceImage || !fullLookReferenceImage}
               size="lg"
-              className="bg-primary hover:bg-primary/90 px-12"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
             >
               Generate Full Look
             </LoadingButton>
@@ -1225,7 +1222,7 @@ const Index = () => {
             <ResultDisplay
               result={fullLookResult}
               originalImages={[
-                ...(fullLookFaceImage ? [{ src: fullLookFaceImage, label: "Face Source" }] : []),
+                ...(fullLookFaceImage ? [{ src: fullLookFaceImage, label: "Face" }] : []),
                 ...(fullLookReferenceImage ? [{ src: fullLookReferenceImage, label: "Look Ref" }] : []),
               ]}
               onDownload={handleDownloadFullLook}
@@ -1239,22 +1236,7 @@ const Index = () => {
       </ToolSection>
 
       {/* Footer */}
-      <footer className="py-16 border-t border-border/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-semibold text-foreground">Influencer Tool</span>
-          </div>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            AI-powered creative tools for influencers, creators, and brands. Transform your creative vision with professional-grade results.
-          </p>
-          <div className="mt-6 text-xs text-muted-foreground/60">
-            © 2024 Influencer Tool. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
