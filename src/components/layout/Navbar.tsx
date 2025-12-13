@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
+  onSignOut?: () => void;
+  userEmail?: string;
 }
 
-export const Navbar = ({ onNavigate }: NavbarProps) => {
+export const Navbar = ({ onNavigate, onSignOut, userEmail }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -54,13 +57,31 @@ export const Navbar = ({ onNavigate }: NavbarProps) => {
             </button>
           </nav>
 
-          {/* CTA */}
-          <Button 
-            onClick={() => onNavigate("tools")}
-            className="btn-glow bg-foreground text-background hover:bg-foreground/90 text-sm font-medium px-5"
-          >
-            Get Started
-          </Button>
+          {/* User section */}
+          <div className="flex items-center gap-4">
+            {userEmail && (
+              <span className="hidden sm:block text-sm text-muted-foreground truncate max-w-[150px]">
+                {userEmail}
+              </span>
+            )}
+            {onSignOut ? (
+              <Button 
+                onClick={onSignOut}
+                variant="outline"
+                className="text-sm font-medium px-4 border-border/50 hover:bg-accent/50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => onNavigate("tools")}
+                className="btn-glow bg-foreground text-background hover:bg-foreground/90 text-sm font-medium px-5"
+              >
+                Get Started
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </header>
