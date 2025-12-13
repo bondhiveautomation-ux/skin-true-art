@@ -1,0 +1,323 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  ArrowLeft, 
+  Loader2, 
+  Trash2, 
+  Plus, 
+  Minus, 
+  Users, 
+  History,
+  Coins,
+  RefreshCw
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
+const Admin = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, refetchUsers, refetchHistory } = useAdmin();
+  const { toast } = useToast();
+  const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
+  const [processingUser, setProcessingUser] = useState<string | null>(null);
+
+  if (authLoading || adminLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Access denied. Admin privileges required.</p>
+        <Button onClick={() => navigate("/")} variant="outline">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+      </div>
+    );
+  }
+
+  const handleAddCredits = async (userId: string, amount: number) => {
+    const currentUser = users.find(u => u.user_id === userId);
+    if (!currentUser) return;
+    
+    setProcessingUser(userId);
+    const newCredits = Math.max(0, currentUser.credits + amount);
+    const success = await updateCredits(userId, newCredits);
+    
+    if (success) {
+      toast({ title: "Credits updated", description: `Added ${amount} credits` });
+    } else {
+      toast({ title: "Failed to update credits", variant: "destructive" });
+    }
+    setProcessingUser(null);
+  };
+
+  const handleSetCredits = async (userId: string) => {
+    const value = creditInputs[userId];
+    if (!value) return;
+    
+    const newCredits = parseInt(value, 10);
+    if (isNaN(newCredits) || newCredits < 0) {
+      toast({ title: "Invalid credit amount", variant: "destructive" });
+      return;
+    }
+
+    setProcessingUser(userId);
+    const success = await updateCredits(userId, newCredits);
+    
+    if (success) {
+      toast({ title: "Credits updated", description: `Set credits to ${newCredits}` });
+      setCreditInputs(prev => ({ ...prev, [userId]: "" }));
+    } else {
+      toast({ title: "Failed to update credits", variant: "destructive" });
+    }
+    setProcessingUser(null);
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (userId === user.id) {
+      toast({ title: "Cannot delete yourself", variant: "destructive" });
+      return;
+    }
+
+    setProcessingUser(userId);
+    const success = await deleteUser(userId);
+    
+    if (success) {
+      toast({ title: "User deleted successfully" });
+    } else {
+      toast({ title: "Failed to delete user", variant: "destructive" });
+    }
+    setProcessingUser(null);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button onClick={() => navigate("/")} variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <h1 className="text-xl font-semibold">Admin Panel</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => { refetchUsers(); refetchHistory(); }} variant="outline" size="sm">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="w-4 h-4" />
+              Users ({users.length})
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-2">
+              <History className="w-4 h-4" />
+              Generation History
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Credits</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.user_id}>
+                      <TableCell className="font-medium">
+                        {u.email}
+                        {u.user_id === user.id && (
+                          <span className="ml-2 text-xs text-primary">(You)</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{u.full_name || "-"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Coins className="w-4 h-4 text-primary" />
+                          <span className="font-medium">{u.credits}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {formatDate(u.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Quick add/remove credits */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddCredits(u.user_id, -1)}
+                            disabled={processingUser === u.user_id || u.credits <= 0}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddCredits(u.user_id, 1)}
+                            disabled={processingUser === u.user_id}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                          
+                          {/* Set specific credits */}
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              placeholder="Set"
+                              className="w-20 h-8 text-sm"
+                              value={creditInputs[u.user_id] || ""}
+                              onChange={(e) => setCreditInputs(prev => ({ 
+                                ...prev, 
+                                [u.user_id]: e.target.value 
+                              }))}
+                              min={0}
+                            />
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleSetCredits(u.user_id)}
+                              disabled={processingUser === u.user_id || !creditInputs[u.user_id]}
+                            >
+                              Set
+                            </Button>
+                          </div>
+
+                          {/* Delete user */}
+                          {u.user_id !== user.id && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  disabled={processingUser === u.user_id}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete {u.email}? This action cannot be undone. All their data will be permanently removed.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteUser(u.user_id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history">
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Feature</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                        No generation history yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    history.map((h) => (
+                      <TableRow key={h.id}>
+                        <TableCell className="font-medium">{h.user_email}</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-sm">
+                            {h.feature_name}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {formatDate(h.created_at)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+};
+
+export default Admin;

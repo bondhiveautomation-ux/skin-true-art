@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Coins } from "lucide-react";
+import { LogOut, Coins, Shield } from "lucide-react";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
   onSignOut?: () => void;
   userEmail?: string;
   credits?: number | null;
+  isAdmin?: boolean;
 }
 
-export const Navbar = ({ onNavigate, onSignOut, userEmail, credits }: NavbarProps) => {
+export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: NavbarProps) => {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -59,7 +62,18 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits }: NavbarProp
           </nav>
 
           {/* User section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button
+                onClick={() => navigate("/admin")}
+                variant="outline"
+                size="sm"
+                className="border-primary/30 text-primary hover:bg-primary/10"
+              >
+                <Shield className="w-4 h-4 mr-1.5" />
+                Admin
+              </Button>
+            )}
             {credits !== null && credits !== undefined && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
                 <Coins className="w-4 h-4 text-primary" />
