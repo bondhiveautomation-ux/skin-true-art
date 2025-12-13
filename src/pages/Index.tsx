@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { ToolSection } from "@/components/layout/ToolSection";
@@ -23,8 +24,22 @@ import { SelectionGrid } from "@/components/ui/SelectionGrid";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut, isAuthenticated } = useAuth();
-  const { credits, deductCredit, hasCredits } = useCredits();
+  const { credits, deductCredit, hasCredits, refetchCredits } = useCredits();
+  const { isAdmin } = useAdmin();
   const { toast } = useToast();
+
+  // Helper function to log generation
+  const logGeneration = async (featureName: string) => {
+    if (!user?.id) return;
+    try {
+      await supabase.rpc('log_generation', {
+        p_user_id: user.id,
+        p_feature_name: featureName
+      });
+    } catch (error) {
+      console.error("Failed to log generation:", error);
+    }
+  };
   
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -176,6 +191,7 @@ const Index = () => {
       if (data?.enhancedImageUrl) {
         setEnhancedImage(data.enhancedImageUrl);
         setShowComparison(true);
+        await logGeneration("Skin Enhancement");
         toast({ title: "Enhancement complete", description: "Your portrait has been enhanced" });
       }
     } catch (error: any) {
@@ -303,6 +319,7 @@ const Index = () => {
       if (data?.generatedImageUrl) {
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
+        await logGeneration("Character Generator");
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
       }
     } catch (error: any) {
@@ -362,6 +379,7 @@ const Index = () => {
       if (error) throw error;
       if (data?.prompt) {
         setExtractedPrompt(data.prompt);
+        await logGeneration("Prompt Extractor");
         toast({ title: "Prompt extracted", description: "Image analyzed successfully" });
       }
     } catch (error: any) {
@@ -403,6 +421,7 @@ const Index = () => {
       }
       if (data?.extractedImage) {
         setExtractedDressImage(data.extractedImage);
+        await logGeneration("Dress Extractor");
         toast({ title: "Success!", description: "Dress extracted and placed on mannequin" });
       }
     } catch (error: any) {
@@ -449,6 +468,7 @@ const Index = () => {
       }
       if (data?.cleanBackground) {
         setCleanBackground(data.cleanBackground);
+        await logGeneration("Background Saver");
         toast({ title: "Success!", description: "People removed successfully" });
       }
     } catch (error: any) {
@@ -508,6 +528,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setPoseTransferResult(data.generatedImageUrl);
+        await logGeneration("Pose Transfer");
         toast({ title: "Pose Transfer Complete!", description: "Your influencer has been recreated in the new pose" });
       }
     } catch (error: any) {
@@ -578,6 +599,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setMakeupResult(data.generatedImageUrl);
+        await logGeneration("Makeup Studio");
         toast({ title: "Makeup Applied!", description: "Your look has been created successfully" });
       }
     } catch (error: any) {
@@ -638,6 +660,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setFullLookResult(data.generatedImageUrl);
+        await logGeneration("Full Look Transfer");
         toast({ title: "Full Look Transfer Complete!", description: "Your influencer look has been created successfully" });
       }
     } catch (error: any) {
@@ -692,7 +715,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} credits={credits} />
+      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} credits={credits} isAdmin={isAdmin} />
       
       {/* Hero Section */}
       <Hero onExplore={() => scrollToSection("features")} />
