@@ -1,9 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { ToolSection } from "@/components/layout/ToolSection";
@@ -18,6 +20,16 @@ import { ResultDisplay } from "@/components/ui/ResultDisplay";
 import { SelectionGrid } from "@/components/ui/SelectionGrid";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading, signOut, isAuthenticated } = useAuth();
+  
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [loading, isAuthenticated, navigate]);
+
   // Skin Enhancement states
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
@@ -80,6 +92,15 @@ const Index = () => {
   const [isTransferringLook, setIsTransferringLook] = useState(false);
   
   const { toast } = useToast();
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Scroll to section handler
   const scrollToSection = (sectionId: string) => {
@@ -593,7 +614,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onNavigate={scrollToSection} />
+      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} />
       
       {/* Hero Section */}
       <Hero onExplore={() => scrollToSection("features")} />
