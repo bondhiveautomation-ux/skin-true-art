@@ -250,8 +250,12 @@ const Index = () => {
       toast({ title: "No preset selected", description: "Please select a styling preset for the product", variant: "destructive" });
       return;
     }
-    if (!productImage && !generationPrompt.trim()) {
-      toast({ title: "Empty prompt", description: "Please enter a scenario prompt or upload a product", variant: "destructive" });
+    if (backgroundImage && !selectedPose) {
+      toast({ title: "No pose selected", description: "Please select a character pose for the background integration", variant: "destructive" });
+      return;
+    }
+    if (!productImage && !backgroundImage && !generationPrompt.trim()) {
+      toast({ title: "Empty prompt", description: "Please enter a scenario prompt, upload a product, or add a background", variant: "destructive" });
       return;
     }
 
