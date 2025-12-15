@@ -162,6 +162,44 @@ export const useAdmin = () => {
     }
   }, [user?.id, isAdmin, fetchUsers]);
 
+  // Create new user (admin only)
+  const createUser = useCallback(async (email: string, password: string, fullName?: string): Promise<{ success: boolean; error?: string }> => {
+    if (!user?.id || !isAdmin) return { success: false, error: "Unauthorized" };
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      if (!token) {
+        return { success: false, error: "No active session" };
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ email, password, full_name: fullName }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return { success: false, error: result.error || "Failed to create user" };
+      }
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error("Error creating user:", error);
+      return { success: false, error: "Failed to create user" };
+    }
+  }, [user?.id, isAdmin, fetchUsers]);
+
   useEffect(() => {
     if (isAdmin) {
       fetchUsers();
@@ -176,6 +214,7 @@ export const useAdmin = () => {
     history,
     updateCredits,
     deleteUser,
+    createUser,
     refetchUsers: fetchUsers,
     refetchHistory: fetchHistory,
   };

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft, 
@@ -14,7 +15,8 @@ import {
   Users, 
   History,
   Coins,
-  RefreshCw
+  RefreshCw,
+  UserPlus
 } from "lucide-react";
 import {
   Table,
@@ -45,10 +47,16 @@ import {
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, refetchUsers, refetchHistory } = useAdmin();
+  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, createUser, refetchUsers, refetchHistory } = useAdmin();
   const { toast } = useToast();
   const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
   const [processingUser, setProcessingUser] = useState<string | null>(null);
+  
+  // New user form state
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [creatingUser, setCreatingUser] = useState(false);
 
   if (authLoading || adminLoading) {
     return (
@@ -129,6 +137,31 @@ const Admin = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  const handleCreateUser = async () => {
+    if (!newUserEmail || !newUserPassword) {
+      toast({ title: "Email and password are required", variant: "destructive" });
+      return;
+    }
+
+    if (newUserPassword.length < 6) {
+      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+
+    setCreatingUser(true);
+    const result = await createUser(newUserEmail, newUserPassword, newUserName || undefined);
+    
+    if (result.success) {
+      toast({ title: "User created successfully", description: `${newUserEmail} can now log in` });
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserName("");
+    } else {
+      toast({ title: "Failed to create user", description: result.error, variant: "destructive" });
+    }
+    setCreatingUser(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -165,6 +198,60 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="users">
+            {/* Create New User Form */}
+            <div className="mb-6 p-4 rounded-lg border border-border bg-card">
+              <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Create New User
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-email">Email *</Label>
+                  <Input
+                    id="new-email"
+                    type="email"
+                    placeholder="user@example.com"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Password *</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Min 6 characters"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-name">Full Name (optional)</Label>
+                  <Input
+                    id="new-name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleCreateUser} 
+                    disabled={creatingUser || !newUserEmail || !newUserPassword}
+                    className="w-full"
+                  >
+                    {creatingUser ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <UserPlus className="w-4 h-4 mr-2" />
+                    )}
+                    Create User
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="rounded-lg border border-border overflow-hidden">
               <Table>
                 <TableHeader>
