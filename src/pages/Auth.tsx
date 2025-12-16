@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, Sparkles } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -88,46 +88,52 @@ const Auth = () => {
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      {/* Background effects */}
+    <div className="min-h-screen bg-gradient-to-b from-ivory via-cream to-background flex items-center justify-center px-4">
+      {/* Luxury background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-gold/5 rounded-full blur-3xl" />
+        <div className="absolute inset-0 silk-texture" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-10 h-10 rounded-xl gold-icon flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-gold" />
+            </div>
+          </div>
+          <h1 className="font-serif text-3xl font-semibold text-charcoal tracking-tight">
             Influencer Tool
           </h1>
-          <p className="text-muted-foreground text-sm mt-2">
+          <p className="text-charcoal-muted text-sm mt-2 tracking-wide">
             Premium AI Creator Studio
           </p>
         </div>
 
         {/* Login card */}
-        <div className="glass-card p-8">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mx-auto mb-6">
-            <Lock className="w-6 h-6 text-primary" />
+        <div className="glass-card p-8 lg:p-10 border border-gold/15">
+          <div className="flex items-center justify-center w-14 h-14 rounded-2xl gold-icon mx-auto mb-6">
+            <Lock className="w-6 h-6 text-gold" />
           </div>
           
-          <h2 className="text-xl font-medium text-foreground text-center mb-2">
+          <h2 className="font-serif text-xl font-semibold text-charcoal text-center mb-2">
             Sign in to your account
           </h2>
-          <p className="text-sm text-muted-foreground text-center mb-6">
+          <p className="text-sm text-charcoal-muted text-center mb-8">
             Enter your credentials to access the tools
           </p>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm text-foreground/80">
+              <Label htmlFor="email" className="text-sm text-charcoal font-medium">
                 Email
               </Label>
               <Input
@@ -136,13 +142,13 @@ const Auth = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-background/50 border-border/50 focus:border-primary/50"
+                className="bg-ivory/50 border-gold/20 focus:border-gold/50 focus:ring-gold/20 h-11"
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm text-foreground/80">
+              <Label htmlFor="password" className="text-sm text-charcoal font-medium">
                 Password
               </Label>
               <Input
@@ -151,14 +157,16 @@ const Auth = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-background/50 border-border/50 focus:border-primary/50"
+                className="bg-ivory/50 border-gold/20 focus:border-gold/50 focus:ring-gold/20 h-11"
                 disabled={loading}
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full btn-glow"
+              variant="luxury"
+              size="lg"
+              className="w-full mt-2"
               disabled={loading}
             >
               {loading ? (
@@ -172,7 +180,9 @@ const Auth = () => {
             </Button>
           </form>
 
-          <p className="text-xs text-muted-foreground text-center mt-6">
+          <div className="luxury-divider my-6" />
+
+          <p className="text-xs text-charcoal-muted/60 text-center">
             Access is by invitation only. Contact the administrator for an account.
           </p>
         </div>
