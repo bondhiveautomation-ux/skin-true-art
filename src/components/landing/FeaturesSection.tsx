@@ -1,4 +1,4 @@
-import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Video } from "lucide-react";
+import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers } from "lucide-react";
 
 const features = [
   {
@@ -48,12 +48,6 @@ const features = [
     name: "Full Look Transfer (Face Keep)",
     description: "Transfer the complete look—outfit, lighting, and style—while keeping the original face unchanged.",
     sectionId: "full-look-transfer"
-  },
-  {
-    icon: Video,
-    name: "Image to Video Generator",
-    description: "Transform any image into a stunning 5-second cinematic video with smooth motion and professional quality.",
-    sectionId: "image-to-video"
   }
 ];
 
