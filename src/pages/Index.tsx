@@ -109,6 +109,12 @@ const Index = () => {
   const [fullLookResult, setFullLookResult] = useState<string | null>(null);
   const [isTransferringLook, setIsTransferringLook] = useState(false);
   
+  // Image to Video states
+  const [videoSourceImage, setVideoSourceImage] = useState<string | null>(null);
+  const [selectedVideoPreset, setSelectedVideoPreset] = useState<string>("");
+  const [customVideoPrompt, setCustomVideoPrompt] = useState<string>("");
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
 
   // Show loading state while checking auth
   if (loading) {
@@ -685,6 +691,84 @@ const Index = () => {
     setFullLookReferenceImage(null);
     setFullLookResult(null);
   };
+
+  // ==================== IMAGE TO VIDEO ====================
+  const handleVideoSourceUpload = createImageUploadHandler(setVideoSourceImage, [
+    () => setGeneratedVideoUrl(null),
+    () => setSelectedVideoPreset(""),
+    () => setCustomVideoPrompt(""),
+  ]);
+
+  const handleGenerateVideo = async () => {
+    if (!videoSourceImage) {
+      toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
+      return;
+    }
+    if (!customVideoPrompt.trim() && !selectedVideoPreset) {
+      toast({ title: "No style selected", description: "Please select a video style or enter a custom prompt", variant: "destructive" });
+      return;
+    }
+    if (!hasCredits) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    const success = await deductCredit();
+    if (!success) {
+      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+      return;
+    }
+    setIsGeneratingVideo(true);
+    setGeneratedVideoUrl(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('image-to-video', {
+        body: { 
+          image: videoSourceImage, 
+          preset: customVideoPrompt.trim() ? null : selectedVideoPreset,
+          customPrompt: customVideoPrompt.trim() || null,
+          userId: user?.id
+        }
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Video Generation Failed", description: data.error, variant: "destructive" });
+        return;
+      }
+      if (data?.videoUrl) {
+        setGeneratedVideoUrl(data.videoUrl);
+        toast({ title: "Video Generated!", description: "Your 5-second cinematic video is ready" });
+      }
+    } catch (error: any) {
+      toast({ title: "Video Generation Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsGeneratingVideo(false);
+    }
+  };
+
+  const handleDownloadVideo = () => {
+    if (!generatedVideoUrl) return;
+    const link = document.createElement('a');
+    link.href = generatedVideoUrl;
+    link.download = 'generated-video.mp4';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleResetVideo = () => {
+    setVideoSourceImage(null);
+    setSelectedVideoPreset("");
+    setCustomVideoPrompt("");
+    setGeneratedVideoUrl(null);
+  };
+
+  // Video preset options
+  const videoPresetOptions = [
+    { id: "fashion-walk", name: "Fashion Walk", emoji: "👗", description: "Runway-style motion with flowing fabric" },
+    { id: "studio-portrait", name: "Studio Portrait Motion", emoji: "📸", description: "Gentle head movement, soft camera push-in" },
+    { id: "lifestyle-reel", name: "Lifestyle Reel", emoji: "🎬", description: "Casual movement, social-media-ready" },
+    { id: "product-showcase", name: "Product Showcase", emoji: "✨", description: "Smooth camera pan, premium highlight" },
+    { id: "cinematic-mood", name: "Cinematic Mood", emoji: "🎥", description: "Slow dramatic movement, film-style" },
+  ];
 
   // Preset options
   const presetOptions = [
@@ -1353,6 +1437,141 @@ const Index = () => {
               isProcessing={isTransferringLook}
               resetLabel="Try Another Look"
             />
+          )}
+        </div>
+      </ToolSection>
+
+      {/* Image to Video Generator Section */}
+      <ToolSection
+        id="image-to-video"
+        title="Image to Video"
+        subtitle="Generator"
+        description="Transform any image into a stunning 5-second cinematic video"
+      >
+        <div className="space-y-6">
+          {/* Image Upload */}
+          <div className="max-w-sm mx-auto">
+            <ImageUploader
+              id="video-source-upload"
+              image={videoSourceImage}
+              onUpload={handleVideoSourceUpload}
+              onRemove={handleResetVideo}
+              label="Upload Your Image"
+              description="This image will be animated into a 5-second video"
+            />
+          </div>
+
+          {videoSourceImage && !generatedVideoUrl && (
+            <>
+              {/* Video Preset Selection */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-foreground text-center">
+                  Select Video Style
+                </label>
+                <p className="text-xs text-muted-foreground text-center mb-4">
+                  Choose a preset style or use a custom prompt below
+                </p>
+                <SelectionGrid
+                  options={videoPresetOptions}
+                  selectedId={selectedVideoPreset}
+                  onSelect={(id) => {
+                    setSelectedVideoPreset(id);
+                    if (customVideoPrompt.trim()) {
+                      setCustomVideoPrompt("");
+                    }
+                  }}
+                  disabled={isGeneratingVideo || !!customVideoPrompt.trim()}
+                  columns={3}
+                />
+              </div>
+
+              {/* Custom Prompt Box */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  Custom Video Prompt (Optional)
+                </label>
+                <Textarea
+                  placeholder="You can ignore presets and write your own prompt if you want full control. Describe the motion, camera movement, and style you want..."
+                  value={customVideoPrompt}
+                  onChange={(e) => {
+                    setCustomVideoPrompt(e.target.value);
+                    if (e.target.value.trim() && selectedVideoPreset) {
+                      setSelectedVideoPreset("");
+                    }
+                  }}
+                  className="min-h-[100px] bg-secondary/30 border-border/50"
+                  disabled={isGeneratingVideo}
+                />
+                <p className="text-xs text-muted-foreground">
+                  If you enter a custom prompt, the preset selection will be ignored.
+                </p>
+              </div>
+
+              {/* Generate Button */}
+              <div className="flex justify-center">
+                <LoadingButton
+                  onClick={handleGenerateVideo}
+                  isLoading={isGeneratingVideo}
+                  loadingText="Generating Video... (This may take a few minutes)"
+                  disabled={!videoSourceImage || (!selectedVideoPreset && !customVideoPrompt.trim())}
+                  size="lg"
+                  className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
+                >
+                  Generate 5-Second Video
+                </LoadingButton>
+              </div>
+            </>
+          )}
+
+          {/* Video Result Display */}
+          {generatedVideoUrl && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Your Generated Video</h3>
+                <div className="max-w-xl mx-auto rounded-xl overflow-hidden bg-secondary/30 border border-border/50">
+                  <video 
+                    src={generatedVideoUrl} 
+                    controls 
+                    className="w-full h-auto"
+                    poster={videoSourceImage || undefined}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+              
+              {/* Original image thumbnail */}
+              {videoSourceImage && (
+                <div className="flex justify-center">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-2">Original Image</p>
+                    <img 
+                      src={videoSourceImage} 
+                      alt="Original" 
+                      className="w-20 h-20 object-cover rounded-lg border border-border/50"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={handleDownloadVideo} size="lg" className="btn-glow bg-foreground text-background hover:bg-foreground/90">
+                  <Download className="mr-2 h-4 w-4" /> Download Video
+                </Button>
+                <Button 
+                  onClick={() => setGeneratedVideoUrl(null)} 
+                  variant="outline" 
+                  size="lg"
+                  disabled={isGeneratingVideo}
+                >
+                  Regenerate
+                </Button>
+                <Button onClick={handleResetVideo} variant="outline" size="lg">
+                  Start Over
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </ToolSection>
