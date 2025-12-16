@@ -16,6 +16,8 @@ interface GenerationHistory {
   feature_name: string;
   created_at: string;
   user_email?: string;
+  input_images: string[];
+  output_images: string[];
 }
 
 export const useAdmin = () => {
@@ -86,14 +88,14 @@ export const useAdmin = () => {
     }
   }, [isAdmin]);
 
-  // Fetch generation history
+  // Fetch generation history with images
   const fetchHistory = useCallback(async () => {
     if (!isAdmin) return;
 
     try {
       const { data, error } = await supabase
         .from('generation_history')
-        .select('id, user_id, feature_name, created_at')
+        .select('id, user_id, feature_name, created_at, input_images, output_images')
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -109,6 +111,8 @@ export const useAdmin = () => {
       const historyWithEmails: GenerationHistory[] = (data || []).map(h => ({
         ...h,
         user_email: emailMap.get(h.user_id) || 'Unknown',
+        input_images: h.input_images || [],
+        output_images: h.output_images || [],
       }));
 
       setHistory(historyWithEmails);

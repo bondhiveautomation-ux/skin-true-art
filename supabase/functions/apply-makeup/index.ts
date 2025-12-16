@@ -1,9 +1,50 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Helper to upload base64 image to Supabase storage
+async function uploadImageToStorage(
+  supabase: any,
+  base64Data: string,
+  userId: string,
+  prefix: string
+): Promise<string | null> {
+  try {
+    const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) return null;
+    
+    const extension = matches[1];
+    const base64Content = matches[2];
+    const buffer = Uint8Array.from(atob(base64Content), c => c.charCodeAt(0));
+    
+    const fileName = `${userId}/${prefix}_${Date.now()}.${extension}`;
+    
+    const { error } = await supabase.storage
+      .from('generation-images')
+      .upload(fileName, buffer, {
+        contentType: `image/${extension}`,
+        upsert: false
+      });
+    
+    if (error) {
+      console.error("Storage upload error:", error);
+      return null;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('generation-images')
+      .getPublicUrl(fileName);
+    
+    return urlData?.publicUrl || null;
+  } catch (error) {
+    console.error("Error uploading to storage:", error);
+    return null;
+  }
+}
 
 const makeupStyles: Record<string, string> = {
   "soft-glam": `SOFT GLAM MAKEUP:
@@ -112,7 +153,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, makeupStyle } = await req.json();
+    const { image, makeupStyle, userId } = await req.json();
 
     if (!image) {
       return new Response(
@@ -137,7 +178,12 @@ serve(async (req) => {
       );
     }
 
-    console.log("Processing makeup application:", makeupStyle);
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log("Processing makeup application:", makeupStyle, { userId });
 
     const styleDescription = makeupStyles[makeupStyle];
 
@@ -229,6 +275,38 @@ Generate a HIGH-RESOLUTION image of the SAME person with the specified makeup pr
         JSON.stringify({ error: "No image was generated. The AI may have blocked the request due to content filters." }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Save images and log generation if userId is provided
+    if (userId) {
+      let inputStorageUrl: string | null = null;
+      let outputStorageUrl: string | null = null;
+
+      if (image.startsWith('data:image')) {
+        inputStorageUrl = await uploadImageToStorage(supabase, image, userId, 'input_makeup');
+      } else {
+        inputStorageUrl = image;
+      }
+
+      if (generatedImageUrl.startsWith('data:image')) {
+        outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_makeup');
+      }
+
+      const inputImages = inputStorageUrl ? [inputStorageUrl] : [];
+      const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+
+      const { error: logError } = await supabase.rpc('log_generation', {
+        p_user_id: userId,
+        p_feature_name: 'Makeup Studio',
+        p_input_images: inputImages,
+        p_output_images: outputImages
+      });
+
+      if (logError) {
+        console.error("Error logging generation:", logError);
+      } else {
+        console.log("Generation logged with images");
+      }
     }
 
     return new Response(
