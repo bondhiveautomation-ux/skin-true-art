@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Coins, Shield } from "lucide-react";
+import { LogOut, Coins, Shield, Sparkles } from "lucide-react";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
@@ -25,39 +25,44 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "header-blur border-b border-border/50" : ""
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled ? "header-blur shadow-soft" : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo - Text only */}
+        <div className="flex items-center justify-between h-18 lg:h-22 py-4">
+          {/* Logo - Elegant serif */}
           <button 
             onClick={() => onNavigate("hero")}
-            className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 group"
           >
-            Influencer Tool
+            <div className="w-8 h-8 rounded-lg gold-icon flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-gold" />
+            </div>
+            <span className="font-serif text-xl lg:text-2xl font-semibold text-charcoal tracking-tight group-hover:text-gold transition-colors duration-300">
+              Influencer Tool
+            </span>
           </button>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-10">
             <button 
               onClick={() => onNavigate("features")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-charcoal-muted hover:text-gold transition-colors duration-300 tracking-wide"
             >
               Features
             </button>
             <button 
               onClick={() => onNavigate("how-it-works")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-charcoal-muted hover:text-gold transition-colors duration-300 tracking-wide"
             >
               How It Works
             </button>
             <button 
               onClick={() => onNavigate("tools")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-charcoal-muted hover:text-gold transition-colors duration-300 tracking-wide"
             >
-              Tools
+              Studio
             </button>
           </nav>
 
@@ -66,22 +71,21 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
             {isAdmin && (
               <Button
                 onClick={() => navigate("/admin")}
-                variant="outline"
+                variant="gold-outline"
                 size="sm"
-                className="border-primary/30 text-primary hover:bg-primary/10"
               >
                 <Shield className="w-4 h-4 mr-1.5" />
                 Admin
               </Button>
             )}
             {credits !== null && credits !== undefined && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <Coins className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">{credits}</span>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/30">
+                <Coins className="w-4 h-4 text-gold" />
+                <span className="text-sm font-semibold text-gold">{credits}</span>
               </div>
             )}
             {userEmail && (
-              <span className="hidden sm:block text-sm text-muted-foreground truncate max-w-[150px]">
+              <span className="hidden sm:block text-sm text-charcoal-muted truncate max-w-[150px]">
                 {userEmail}
               </span>
             )}
@@ -89,7 +93,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               <Button 
                 onClick={onSignOut}
                 variant="outline"
-                className="text-sm font-medium px-4 border-border/50 hover:bg-accent/50"
+                className="text-sm font-medium border-charcoal/20 hover:border-gold/40 hover:bg-gold/5"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
@@ -97,7 +101,8 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
             ) : (
               <Button 
                 onClick={() => onNavigate("tools")}
-                className="btn-glow bg-foreground text-background hover:bg-foreground/90 text-sm font-medium px-5"
+                variant="gold"
+                size="default"
               >
                 Get Started
               </Button>
