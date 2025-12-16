@@ -185,13 +185,13 @@ const Index = () => {
     setIsProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke('enhance-skin', {
-        body: { imageUrl: selectedImage, mode: enhancementMode }
+        body: { imageUrl: selectedImage, mode: enhancementMode, userId: user?.id }
       });
       if (error) throw error;
       if (data?.enhancedImageUrl) {
         setEnhancedImage(data.enhancedImageUrl);
         setShowComparison(true);
-        await logGeneration("Skin Enhancement");
+        // Generation is now logged by the edge function with images
         toast({ title: "Enhancement complete", description: "Your portrait has been enhanced" });
       }
     } catch (error: any) {

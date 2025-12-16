@@ -1,36 +1,70 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to upload base64 image to Supabase storage
+async function uploadImageToStorage(
+  supabase: any,
+  base64Data: string,
+  userId: string,
+  prefix: string
+): Promise<string | null> {
+  try {
+    const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) return null;
+    
+    const extension = matches[1];
+    const base64Content = matches[2];
+    const buffer = Uint8Array.from(atob(base64Content), c => c.charCodeAt(0));
+    
+    const fileName = `${userId}/${prefix}_${Date.now()}.${extension}`;
+    
+    const { error } = await supabase.storage
+      .from('generation-images')
+      .upload(fileName, buffer, {
+        contentType: `image/${extension}`,
+        upsert: false
+      });
+    
+    if (error) {
+      console.error("Storage upload error:", error);
+      return null;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('generation-images')
+      .getPublicUrl(fileName);
+    
+    return urlData?.publicUrl || null;
+  } catch (error) {
+    console.error("Error uploading to storage:", error);
+    return null;
+  }
+}
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { influencerImage, poseReferenceImage } = await req.json();
+    const { influencerImage, poseReferenceImage, userId } = await req.json();
 
     if (!influencerImage) {
       return new Response(
         JSON.stringify({ error: "Missing influencer image" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!poseReferenceImage) {
       return new Response(
         JSON.stringify({ error: "Missing pose reference image" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -39,14 +73,16 @@ serve(async (req) => {
       console.error('LOVABLE_API_KEY is not configured');
       return new Response(
         JSON.stringify({ error: "API key not configured" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log("Processing pose transfer request...");
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log("Processing pose transfer request...", { userId });
 
     const poseTransferPrompt = `TASK: Generate a new image of the person from IMAGE 1 in the exact body pose from IMAGE 2.
 
@@ -88,34 +124,12 @@ The output must look like a professional photograph of the same person who simpl
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: poseTransferPrompt
-              },
-              {
-                type: "text",
-                text: "IMAGE 1 - INFLUENCER PHOTO (keep face, body, outfit, background from this):"
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: influencerImage
-                }
-              },
-              {
-                type: "text",
-                text: "IMAGE 2 - POSE REFERENCE (use ONLY the pose/body position from this):"
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: poseReferenceImage
-                }
-              },
-              {
-                type: "text",
-                text: "Now generate the influencer from Image 1 in the exact pose from Image 2. Keep everything from Image 1 except apply the pose from Image 2."
-              }
+              { type: "text", text: poseTransferPrompt },
+              { type: "text", text: "IMAGE 1 - INFLUENCER PHOTO (keep face, body, outfit, background from this):" },
+              { type: "image_url", image_url: { url: influencerImage } },
+              { type: "text", text: "IMAGE 2 - POSE REFERENCE (use ONLY the pose/body position from this):" },
+              { type: "image_url", image_url: { url: poseReferenceImage } },
+              { type: "text", text: "Now generate the influencer from Image 1 in the exact pose from Image 2. Keep everything from Image 1 except apply the pose from Image 2." }
             ]
           }
         ],
@@ -130,29 +144,20 @@ The output must look like a professional photograph of the same person who simpl
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { 
-            status: 429, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       if (response.status === 402) {
         return new Response(
           JSON.stringify({ error: "API credits depleted. Please add credits to continue." }),
-          { 
-            status: 402, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       return new Response(
         JSON.stringify({ error: "Failed to process pose transfer" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -165,28 +170,62 @@ The output must look like a professional photograph of the same person who simpl
       console.error("No image in response:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ error: "No image was generated. The AI may have blocked the request due to content filters." }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Save images and log generation if userId is provided
+    if (userId) {
+      const inputUrls: string[] = [];
+      let outputStorageUrl: string | null = null;
+
+      // Upload influencer image
+      if (influencerImage.startsWith('data:image')) {
+        const url = await uploadImageToStorage(supabase, influencerImage, userId, 'input_pose_influencer');
+        if (url) inputUrls.push(url);
+      } else {
+        inputUrls.push(influencerImage);
+      }
+
+      // Upload pose reference image
+      if (poseReferenceImage.startsWith('data:image')) {
+        const url = await uploadImageToStorage(supabase, poseReferenceImage, userId, 'input_pose_reference');
+        if (url) inputUrls.push(url);
+      } else {
+        inputUrls.push(poseReferenceImage);
+      }
+
+      // Upload output image
+      if (generatedImageUrl.startsWith('data:image')) {
+        outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_pose');
+      }
+
+      const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+
+      const { error: logError } = await supabase.rpc('log_generation', {
+        p_user_id: userId,
+        p_feature_name: 'Pose Transfer',
+        p_input_images: inputUrls,
+        p_output_images: outputImages
+      });
+
+      if (logError) {
+        console.error("Error logging generation:", logError);
+      } else {
+        console.log("Generation logged with images:", { inputCount: inputUrls.length, outputCount: outputImages.length });
+      }
     }
 
     return new Response(
       JSON.stringify({ generatedImageUrl }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Pose transfer error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error occurred" }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

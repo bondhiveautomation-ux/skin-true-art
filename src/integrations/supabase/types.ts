@@ -19,18 +19,24 @@ export type Database = {
           created_at: string
           feature_name: string
           id: string
+          input_images: string[] | null
+          output_images: string[] | null
           user_id: string
         }
         Insert: {
           created_at?: string
           feature_name: string
           id?: string
+          input_images?: string[] | null
+          output_images?: string[] | null
           user_id: string
         }
         Update: {
           created_at?: string
           feature_name?: string
           id?: string
+          input_images?: string[] | null
+          output_images?: string[] | null
           user_id?: string
         }
         Relationships: []
@@ -133,10 +139,20 @@ export type Database = {
         }
         Returns: boolean
       }
-      log_generation: {
-        Args: { p_feature_name: string; p_user_id: string }
-        Returns: undefined
-      }
+      log_generation:
+        | {
+            Args: { p_feature_name: string; p_user_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_feature_name: string
+              p_input_images?: string[]
+              p_output_images?: string[]
+              p_user_id: string
+            }
+            Returns: string
+          }
     }
     Enums: {
       app_role: "admin" | "user"

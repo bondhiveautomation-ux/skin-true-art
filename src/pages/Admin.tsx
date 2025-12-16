@@ -16,7 +16,11 @@ import {
   History,
   Coins,
   RefreshCw,
-  UserPlus
+  UserPlus,
+  Image,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink
 } from "lucide-react";
 import {
   Table,
@@ -43,6 +47,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -51,6 +62,7 @@ const Admin = () => {
   const { toast } = useToast();
   const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
   const [processingUser, setProcessingUser] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   
   // New user form state
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -61,7 +73,7 @@ const Admin = () => {
   if (authLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-gold" />
       </div>
     );
   }
@@ -162,17 +174,58 @@ const Admin = () => {
     setCreatingUser(false);
   };
 
+  const toggleRow = (id: string) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className="relative group overflow-hidden rounded-lg border border-border hover:border-gold/50 transition-all">
+          <img 
+            src={src} 
+            alt={alt}
+            className="w-16 h-16 object-cover transition-transform group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-charcoal/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <ExternalLink className="w-4 h-4 text-cream" />
+          </div>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>{alt}</DialogTitle>
+        </DialogHeader>
+        <div className="flex items-center justify-center">
+          <img 
+            src={src} 
+            alt={alt}
+            className="max-h-[70vh] object-contain rounded-lg"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-gold/10 bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button onClick={() => navigate("/")} variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-xl font-semibold">Admin Panel</h1>
+            <h1 className="font-serif text-xl font-semibold text-charcoal">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={() => { refetchUsers(); refetchHistory(); }} variant="outline" size="sm">
@@ -199,9 +252,9 @@ const Admin = () => {
 
           <TabsContent value="users">
             {/* Create New User Form */}
-            <div className="mb-6 p-4 rounded-lg border border-border bg-card">
-              <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
-                <UserPlus className="w-4 h-4" />
+            <div className="mb-6 p-4 rounded-lg border border-gold/10 bg-card">
+              <h3 className="text-sm font-medium mb-4 flex items-center gap-2 text-charcoal">
+                <UserPlus className="w-4 h-4 text-gold" />
                 Create New User
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -239,6 +292,7 @@ const Admin = () => {
                   <Button 
                     onClick={handleCreateUser} 
                     disabled={creatingUser || !newUserEmail || !newUserPassword}
+                    variant="gold"
                     className="w-full"
                   >
                     {creatingUser ? (
@@ -252,10 +306,10 @@ const Admin = () => {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="rounded-lg border border-gold/10 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-card/50">
                     <TableHead>Email</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Credits</TableHead>
@@ -269,13 +323,13 @@ const Admin = () => {
                       <TableCell className="font-medium">
                         {u.email}
                         {u.user_id === user.id && (
-                          <span className="ml-2 text-xs text-primary">(You)</span>
+                          <span className="ml-2 text-xs text-gold">(You)</span>
                         )}
                       </TableCell>
                       <TableCell>{u.full_name || "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Coins className="w-4 h-4 text-primary" />
+                          <Coins className="w-4 h-4 text-gold" />
                           <span className="font-medium">{u.credits}</span>
                         </div>
                       </TableCell>
@@ -366,36 +420,105 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="history">
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="rounded-lg border border-gold/10 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-card/50">
+                    <TableHead className="w-10"></TableHead>
                     <TableHead>User</TableHead>
                     <TableHead>Feature</TableHead>
+                    <TableHead>Images</TableHead>
                     <TableHead>Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {history.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                         No generation history yet
                       </TableCell>
                     </TableRow>
                   ) : (
-                    history.map((h) => (
-                      <TableRow key={h.id}>
-                        <TableCell className="font-medium">{h.user_email}</TableCell>
-                        <TableCell>
-                          <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-sm">
-                            {h.feature_name}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {formatDate(h.created_at)}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    history.map((h) => {
+                      const hasImages = h.input_images.length > 0 || h.output_images.length > 0;
+                      const isExpanded = expandedRows.has(h.id);
+                      
+                      return (
+                        <>
+                          <TableRow key={h.id} className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""} onClick={() => hasImages && toggleRow(h.id)}>
+                            <TableCell>
+                              {hasImages && (
+                                <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
+                                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </Button>
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">{h.user_email}</TableCell>
+                            <TableCell>
+                              <span className="px-2 py-1 rounded-full bg-gold/10 text-gold text-sm font-medium">
+                                {h.feature_name}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              {hasImages ? (
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                  <Image className="w-4 h-4" />
+                                  <span>{h.input_images.length} in / {h.output_images.length} out</span>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-muted-foreground/50">No images</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {formatDate(h.created_at)}
+                            </TableCell>
+                          </TableRow>
+                          
+                          {/* Expanded row for images */}
+                          {isExpanded && hasImages && (
+                            <TableRow key={`${h.id}-images`}>
+                              <TableCell colSpan={5} className="bg-accent/20 p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  {/* Input Images */}
+                                  <div>
+                                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                      Input Images ({h.input_images.length})
+                                    </h4>
+                                    {h.input_images.length > 0 ? (
+                                      <div className="flex flex-wrap gap-2">
+                                        {h.input_images.map((img, idx) => (
+                                          <ImageThumbnail key={idx} src={img} alt={`Input ${idx + 1}`} />
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">No input images recorded</p>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Output Images */}
+                                  <div>
+                                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                      Output Images ({h.output_images.length})
+                                    </h4>
+                                    {h.output_images.length > 0 ? (
+                                      <div className="flex flex-wrap gap-2">
+                                        {h.output_images.map((img, idx) => (
+                                          <ImageThumbnail key={idx} src={img} alt={`Output ${idx + 1}`} />
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">No output images recorded</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

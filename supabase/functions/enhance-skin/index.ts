@@ -1,10 +1,56 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Helper to upload base64 image to Supabase storage
+async function uploadImageToStorage(
+  supabase: any,
+  base64Data: string,
+  userId: string,
+  prefix: string
+): Promise<string | null> {
+  try {
+    // Extract base64 content and mime type
+    const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) {
+      console.error("Invalid base64 image format");
+      return null;
+    }
+    
+    const extension = matches[1];
+    const base64Content = matches[2];
+    const buffer = Uint8Array.from(atob(base64Content), c => c.charCodeAt(0));
+    
+    const fileName = `${userId}/${prefix}_${Date.now()}.${extension}`;
+    
+    const { data, error } = await supabase.storage
+      .from('generation-images')
+      .upload(fileName, buffer, {
+        contentType: `image/${extension}`,
+        upsert: false
+      });
+    
+    if (error) {
+      console.error("Storage upload error:", error);
+      return null;
+    }
+    
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('generation-images')
+      .getPublicUrl(fileName);
+    
+    return urlData?.publicUrl || null;
+  } catch (error) {
+    console.error("Error uploading to storage:", error);
+    return null;
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,7 +58,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, mode = "preserve" } = await req.json();
+    const { imageUrl, mode = "preserve", userId } = await req.json();
     
     if (!imageUrl) {
       throw new Error("No image URL provided");
@@ -23,7 +69,12 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Processing skin enhancement for image", { mode });
+    // Initialize Supabase client for storage
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log("Processing skin enhancement for image", { mode, userId });
 
     const preserveMakeupPrompt = `YOU ARE A SKIN TEXTURE SPECIALIST. YOUR ONLY JOB IS TO ADD REALISTIC SKIN PORES AND TEXTURE.
 
@@ -162,6 +213,41 @@ RESULT: A natural, makeup-free portrait with realistic skin texture that looks l
     }
 
     console.log("Skin enhancement completed successfully");
+
+    // Save images to storage and log generation if userId is provided
+    let inputStorageUrl: string | null = null;
+    let outputStorageUrl: string | null = null;
+
+    if (userId) {
+      // Upload input image (if it's base64)
+      if (imageUrl.startsWith('data:image')) {
+        inputStorageUrl = await uploadImageToStorage(supabase, imageUrl, userId, 'input');
+      } else {
+        inputStorageUrl = imageUrl; // Use original URL if not base64
+      }
+
+      // Upload output image
+      if (enhancedImageUrl.startsWith('data:image')) {
+        outputStorageUrl = await uploadImageToStorage(supabase, enhancedImageUrl, userId, 'output');
+      }
+
+      // Log generation with image URLs
+      const inputImages = inputStorageUrl ? [inputStorageUrl] : [];
+      const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+
+      const { error: logError } = await supabase.rpc('log_generation', {
+        p_user_id: userId,
+        p_feature_name: 'Skin Enhancement',
+        p_input_images: inputImages,
+        p_output_images: outputImages
+      });
+
+      if (logError) {
+        console.error("Error logging generation:", logError);
+      } else {
+        console.log("Generation logged with images:", { inputImages, outputImages });
+      }
+    }
 
     return new Response(
       JSON.stringify({ enhancedImageUrl }),
