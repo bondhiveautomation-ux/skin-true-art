@@ -38,62 +38,25 @@ serve(async (req) => {
 
     console.log("Processing full look transfer request...");
 
-    const fullLookTransferPrompt = `TASK: Create a seamless face swap - place the face from IMAGE 1 onto the person in IMAGE 2, keeping everything else from IMAGE 2.
+    // We treat IMAGE 2 as the immutable base and perform an EDIT:
+    // replace ONLY the face with the identity from IMAGE 1.
+    const fullLookTransferPrompt = `You are an expert photo editor.
 
-STEP 1 - ANALYZE IMAGE 1 (Influencer Face):
-Study and memorize every facial detail:
-- Face shape, jawline, chin structure
-- Eyes (shape, color, spacing, eyelids)
-- Nose (shape, bridge, nostrils)
-- Lips (shape, fullness, color)
-- Eyebrows (shape, thickness, arch)
-- Skin tone and texture
-- Facial expression nuances
-- Any unique facial features or marks
+GOAL (FACE KEEP): Edit IMAGE 2 by replacing ONLY the face with the face/identity from IMAGE 1.
 
-STEP 2 - ANALYZE IMAGE 2 (Reference Look - Full Template):
-This is your BASE IMAGE. Keep EVERYTHING from this image:
-- Exact outfit/dress/saree (every fold, pattern, color, texture)
-- All jewelry and ornaments (necklace, earrings, bangles, maang tikka, nose ring)
-- Exact body pose and posture
-- Hand positions and gestures
-- Background and location (every detail)
-- Lighting setup and color grading
-- Overall composition and framing
-- Hair styling (from Image 2)
+HARD RULES (must follow):
+- IMAGE 2 is the BASE. Keep EVERYTHING from IMAGE 2 pixel-consistent:
+  outfit/dress, jewelry, body shape, pose, background, lighting, color grading, camera framing, hair from IMAGE 2.
+- Replace ONLY the face area (forehead/eyes/nose/mouth/cheeks/chin) with the identity from IMAGE 1.
+- The final face must be 100% recognizable as IMAGE 1 (identity preservation).
+- Match IMAGE 2 lighting on the inserted face (shadows/highlights/white balance) so it blends naturally.
+- NO double face, NO ghosting, NO seams at jaw/neck.
 
-STEP 3 - GENERATE THE FINAL IMAGE:
-Create a new image where:
-✓ The FACE is from IMAGE 1 (influencer's exact face, features, identity)
-✓ EVERYTHING ELSE is from IMAGE 2:
-  - Same dress/outfit with identical details
-  - Same jewelry and accessories
-  - Same pose and body position
-  - Same background and location
-  - Same lighting and mood
-  - Same hair styling from Image 2
-✓ Face must be seamlessly blended:
-  - Match skin tone to Image 2's lighting
-  - Natural neck and jawline transition
-  - Consistent shadow and highlight placement
-  - No visible seams or edges
+CRITICAL VALIDATION:
+- Do NOT return IMAGE 2 unchanged.
+- If you cannot perform the face replacement, you must FAIL (do not output an unchanged image).
 
-CRITICAL REQUIREMENTS:
-✓ Face identity must be 100% recognizable as the person from IMAGE 1
-✓ Dress, ornaments, pose, location must be exactly as in IMAGE 2
-✓ Seamless blending at neck/jawline area
-✓ Lighting on face matches the scene from IMAGE 2
-✓ High-resolution, professional quality output
-
-FORBIDDEN:
-✗ Do NOT change or mix facial features between images
-✗ Do NOT alter the outfit, jewelry, or accessories from IMAGE 2
-✗ Do NOT change the background or location from IMAGE 2
-✗ Do NOT create ghosting, double features, or artifacts
-✗ Do NOT distort body proportions
-✗ Do NOT create unnatural skin tone transitions
-
-The output must look like a professional photograph where the influencer from Image 1 is actually wearing the exact look and standing in the exact location shown in Image 2.`;
+Output: generate the final edited image.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -102,63 +65,49 @@ The output must look like a professional photograph where the influencer from Im
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        // "Nano banana" image model tends to behave better for image edits.
+        model: "google/gemini-2.5-flash-image",
         messages: [
           {
             role: "user",
             content: [
+              { type: "text", text: fullLookTransferPrompt },
+              { type: "text", text: "IMAGE 1 (use ONLY this face/identity):" },
+              { type: "image_url", image_url: { url: influencerFaceImage } },
+              { type: "text", text: "IMAGE 2 (BASE image — keep everything except the face):" },
+              { type: "image_url", image_url: { url: referenceLookImage } },
               {
                 type: "text",
-                text: fullLookTransferPrompt
+                text: "Now output the edited IMAGE 2 with the face replaced by IMAGE 1 (everything else identical to IMAGE 2).",
               },
-              {
-                type: "text",
-                text: "IMAGE 1 - INFLUENCER FACE (use ONLY the face/identity from this):"
-              },
-              {
-                type: "image_url",
-                image_url: { url: influencerFaceImage }
-              },
-              {
-                type: "text",
-                text: "IMAGE 2 - REFERENCE LOOK (use dress, ornaments, pose, background, lighting from this - replace only the face):"
-              },
-              {
-                type: "image_url",
-                image_url: { url: referenceLookImage }
-              },
-              {
-                type: "text",
-                text: "Now generate the final image: Place the influencer's face from Image 1 onto the person in Image 2, keeping all outfit, jewelry, pose, and background from Image 2. Blend seamlessly."
-              }
-            ]
-          }
+            ],
+          },
         ],
-        modalities: ["image", "text"]
+        modalities: ["image", "text"],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI Gateway error:", response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      
+
       if (response.status === 402) {
         return new Response(
           JSON.stringify({ error: "API credits depleted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      
+
       return new Response(
         JSON.stringify({ error: "Failed to process full look transfer" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -167,11 +116,20 @@ The output must look like a professional photograph where the influencer from Im
 
     const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
+    // Some models can (rarely) echo back the base input image; treat that as failure.
+    if (generatedImageUrl && generatedImageUrl === referenceLookImage) {
+      console.error("Model returned reference image unchanged");
+      return new Response(
+        JSON.stringify({ error: "The model returned the reference image unchanged. Please try a clearer face photo or a different reference look." }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!generatedImageUrl) {
       console.error("No image in response:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ error: "No image was generated. The AI may have blocked the request due to content filters." }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
