@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Montserrat', 'system-ui', 'sans-serif'],
-        serif: ['Lora', 'Georgia', 'serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,16 +61,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Luxury Gold Palette
+        // Fashion Luxury Gold Palette
         gold: {
           DEFAULT: "hsl(var(--gold))",
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
+          muted: "hsl(var(--gold-muted))",
         },
+        champagne: "hsl(var(--champagne))",
+        // Rose / Blush Accents
         "rose-gold": {
           DEFAULT: "hsl(var(--rose-gold))",
           light: "hsl(var(--rose-gold-light))",
         },
+        blush: "hsl(var(--blush))",
+        nude: "hsl(var(--nude))",
         // Cream Tones
         cream: {
           DEFAULT: "hsl(var(--cream))",
@@ -80,6 +85,7 @@ export default {
         // Charcoal Tones
         charcoal: {
           DEFAULT: "hsl(var(--charcoal))",
+          deep: "hsl(var(--charcoal-deep))",
           light: "hsl(var(--charcoal-light))",
           muted: "hsl(var(--charcoal-muted))",
         },
@@ -95,6 +101,7 @@ export default {
         'gold': 'var(--shadow-gold)',
         'glow': 'var(--shadow-glow)',
         'glass': 'var(--glass-shadow)',
+        'card': 'var(--shadow-card)',
       },
       keyframes: {
         "accordion-down": {
@@ -109,11 +116,21 @@ export default {
           "0%": { backgroundPosition: "-200% center" },
           "100%": { backgroundPosition: "200% center" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 20px hsla(43, 74%, 49%, 0.2)" },
+          "50%": { boxShadow: "0 0 40px hsla(43, 74%, 49%, 0.4)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         shimmer: "shimmer 2s infinite",
+        float: "float 4s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

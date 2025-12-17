@@ -16,25 +16,31 @@ export const ToolSection = ({
   children 
 }: ToolSectionProps) => {
   return (
-    <section id={id} className="py-16 lg:py-24 scroll-mt-20 relative">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-cream/20 to-background" />
+    <section id={id} className="py-20 lg:py-28 scroll-mt-20 relative overflow-hidden">
+      {/* Dark gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-charcoal to-background" />
+      
+      {/* Subtle accent */}
+      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-gradient-to-br from-gold/3 to-transparent rounded-full blur-3xl" />
+      
+      {/* Noise texture */}
+      <div className="absolute inset-0 noise-texture" />
       
       <div className="relative max-w-5xl mx-auto px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-10 lg:mb-12">
-          <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-charcoal tracking-tight mb-3">
-            {title} <span className="text-charcoal-muted">{subtitle}</span>
+        <div className="text-center mb-12 lg:mb-14">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-cream tracking-tight mb-4">
+            {title} <span className="text-cream/50">{subtitle}</span>
           </h2>
           {description && (
-            <p className="text-sm text-charcoal-muted max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm text-cream/40 max-w-xl mx-auto leading-relaxed font-light">
               {description}
             </p>
           )}
         </div>
 
-        {/* Content card with luxury styling */}
-        <div className="glass-card p-6 sm:p-8 lg:p-10 border border-gold/10 hover:border-gold/20 transition-all duration-500">
+        {/* Content card with luxury dark styling */}
+        <div className="glass-card p-6 sm:p-8 lg:p-10 border border-gold/15 hover:border-gold/25 transition-all duration-500 hover:shadow-glow">
           {children}
         </div>
       </div>

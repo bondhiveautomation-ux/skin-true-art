@@ -53,7 +53,8 @@ const features = [
     icon: Repeat,
     name: "Dress Change Studio",
     description: "Try on outfits from our curated library while keeping your face and pose 100% unchanged.",
-    sectionId: "dress-change-studio"
+    sectionId: "dress-change-studio",
+    featured: true
   }
 ];
 
@@ -75,56 +76,72 @@ export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) =>
   };
 
   return (
-    <section id={id} className="py-24 lg:py-32 relative">
-      {/* Subtle background texture */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-cream/30 to-background" />
+    <section id={id} className="py-28 lg:py-36 relative overflow-hidden">
+      {/* Dark background with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-charcoal to-background" />
+      
+      {/* Accent gradients */}
+      <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-gradient-to-br from-gold/5 to-transparent blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-rose-gold/3 to-transparent blur-3xl" />
+      
+      {/* Noise texture */}
+      <div className="absolute inset-0 noise-texture" />
       
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-16 lg:mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/5 border border-gold/20 mb-6 section-animate">
-            <span className="text-xs font-semibold text-gold uppercase tracking-widest">Our Suite</span>
+        <div className="text-center mb-20 lg:mb-24">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gold/10 border border-gold/25 mb-8 section-animate backdrop-blur-sm">
+            <span className="text-xs font-semibold text-gold uppercase tracking-widest">The Collection</span>
           </div>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-charcoal tracking-tight section-animate delay-1">
-            Professional Tools for
+          <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight section-animate delay-1">
+            AI-Powered
             <br />
-            <span className="gradient-text">Exceptional Results</span>
+            <span className="gradient-text">Creative Tools</span>
           </h2>
-          <p className="mt-6 text-lg text-charcoal-muted max-w-2xl mx-auto section-animate delay-2 leading-relaxed">
-            A curated collection of AI-powered tools designed for beauty professionals and content creators.
+          <p className="mt-8 text-lg text-cream/50 max-w-2xl mx-auto section-animate delay-2 leading-relaxed font-light">
+            A curated suite of professional tools designed for beauty artists, influencers, and fashion brands.
           </p>
         </div>
 
         {/* Feature grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
             <button 
               key={feature.name}
               onClick={() => handleCardClick(feature.sectionId)}
-              className={`group feature-card section-animate delay-${Math.min(index + 1, 8)} text-left cursor-pointer`}
+              className={`group feature-card glow-outline section-animate delay-${Math.min(index + 1, 9)} text-left cursor-pointer ${
+                feature.featured ? 'lg:col-span-1 border-gold/20' : ''
+              }`}
             >
               {/* Icon container with gold accent */}
-              <div className="w-12 h-12 rounded-xl gold-icon flex items-center justify-center mb-5 group-hover:shadow-gold transition-all duration-300">
-                <feature.icon className="w-5 h-5 text-gold" />
+              <div className="w-14 h-14 rounded-xl gold-icon flex items-center justify-center mb-6 group-hover:shadow-gold transition-all duration-500">
+                <feature.icon className="w-6 h-6 text-gold" />
               </div>
               
               {/* Feature name */}
-              <h3 className="font-serif text-lg font-semibold text-charcoal mb-3 group-hover:text-gold transition-colors duration-300">
+              <h3 className="font-serif text-xl font-semibold text-cream mb-4 group-hover:text-gold transition-colors duration-300">
                 {feature.name}
               </h3>
               
               {/* Description */}
-              <p className="text-sm text-charcoal-muted leading-relaxed">
+              <p className="text-sm text-cream/50 leading-relaxed font-light">
                 {feature.description}
               </p>
 
               {/* Hover indicator */}
-              <div className="mt-5 flex items-center gap-2 text-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="mt-6 flex items-center gap-2 text-gold opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2">
                 <span className="text-xs font-semibold uppercase tracking-wider">Explore</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </div>
+
+              {/* Featured badge */}
+              {feature.featured && (
+                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-gold/20 border border-gold/30">
+                  <span className="text-xs font-semibold text-gold uppercase tracking-wider">Featured</span>
+                </div>
+              )}
             </button>
           ))}
         </div>
