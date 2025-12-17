@@ -16,7 +16,6 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
@@ -26,7 +25,6 @@ const Auth = () => {
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         navigate("/");
@@ -94,46 +92,46 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-ivory via-cream to-background flex items-center justify-center px-4">
-      {/* Luxury background effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-gold/5 rounded-full blur-3xl" />
-        <div className="absolute inset-0 silk-texture" />
+    <div className="min-h-screen bg-charcoal-deep flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Dark luxury background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gold/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-rose-gold/3 rounded-full blur-3xl" />
+        <div className="absolute inset-0 noise-texture" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-xl gold-icon flex items-center justify-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-11 h-11 rounded-xl gold-icon flex items-center justify-center animate-pulse-glow">
               <Sparkles className="w-5 h-5 text-gold" />
             </div>
           </div>
-          <h1 className="font-serif text-3xl font-semibold text-charcoal tracking-tight">
+          <h1 className="font-serif text-3xl font-semibold text-cream tracking-tight">
             Influencer Tool
           </h1>
-          <p className="text-charcoal-muted text-sm mt-2 tracking-wide">
-            Premium AI Creator Studio
+          <p className="text-cream/40 text-sm mt-2 tracking-widest uppercase font-light">
+            AI Fashion & Beauty Studio
           </p>
         </div>
 
         {/* Login card */}
         <div className="glass-card p-8 lg:p-10 border border-gold/15">
-          <div className="flex items-center justify-center w-14 h-14 rounded-2xl gold-icon mx-auto mb-6">
-            <Lock className="w-6 h-6 text-gold" />
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl gold-icon mx-auto mb-6">
+            <Lock className="w-7 h-7 text-gold" />
           </div>
           
-          <h2 className="font-serif text-xl font-semibold text-charcoal text-center mb-2">
-            Sign in to your account
+          <h2 className="font-serif text-2xl font-semibold text-cream text-center mb-2">
+            Welcome Back
           </h2>
-          <p className="text-sm text-charcoal-muted text-center mb-8">
-            Enter your credentials to access the tools
+          <p className="text-sm text-cream/40 text-center mb-8 font-light">
+            Enter your credentials to access the studio
           </p>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm text-charcoal font-medium">
+              <Label htmlFor="email" className="text-sm text-cream/70 font-medium">
                 Email
               </Label>
               <Input
@@ -142,13 +140,13 @@ const Auth = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-ivory/50 border-gold/20 focus:border-gold/50 focus:ring-gold/20 h-11"
+                className="bg-charcoal border-gold/20 focus:border-gold/50 focus:ring-gold/20 h-12 text-cream placeholder:text-cream/30"
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm text-charcoal font-medium">
+              <Label htmlFor="password" className="text-sm text-cream/70 font-medium">
                 Password
               </Label>
               <Input
@@ -157,16 +155,16 @@ const Auth = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-ivory/50 border-gold/20 focus:border-gold/50 focus:ring-gold/20 h-11"
+                className="bg-charcoal border-gold/20 focus:border-gold/50 focus:ring-gold/20 h-12 text-cream placeholder:text-cream/30"
                 disabled={loading}
               />
             </div>
 
             <Button
               type="submit"
-              variant="luxury"
+              variant="gold"
               size="lg"
-              className="w-full mt-2"
+              className="w-full mt-2 btn-glow"
               disabled={loading}
             >
               {loading ? (
@@ -175,14 +173,14 @@ const Auth = () => {
                   Signing in...
                 </>
               ) : (
-                "Sign in"
+                "Sign In"
               )}
             </Button>
           </form>
 
-          <div className="luxury-divider my-6" />
+          <div className="luxury-divider my-8" />
 
-          <p className="text-xs text-charcoal-muted/60 text-center">
+          <p className="text-xs text-cream/30 text-center font-light tracking-wide">
             Access is by invitation only. Contact the administrator for an account.
           </p>
         </div>

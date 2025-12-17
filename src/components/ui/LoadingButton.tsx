@@ -14,12 +14,14 @@ export const LoadingButton = ({
   children,
   disabled,
   className = "",
+  variant = "gold",
   ...props
 }: LoadingButtonProps) => {
   return (
     <Button
       disabled={isLoading || disabled}
       className={`${className}`}
+      variant={variant}
       {...props}
     >
       {isLoading ? (
