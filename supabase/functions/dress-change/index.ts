@@ -81,33 +81,25 @@ serve(async (req) => {
 
     console.log("Processing dress change for category:", category);
 
-    // Build the prompt with strict face/pose preservation
-    const prompt = `TASK: Virtual clothing swap. Replace the clothing on the person in Image 1 with the outfit shown in Image 2.
+    // Build the prompt with strict orientation and face/pose preservation
+    const prompt = `VIRTUAL CLOTHING SWAP TASK
 
-CRITICAL INSTRUCTIONS:
-1. OUTPUT IMAGE MUST have the EXACT SAME orientation, rotation, and framing as Image 1 (the person photo). DO NOT rotate the image.
-2. The person's face must remain COMPLETELY UNCHANGED - same features, expression, angle, and position.
-3. The person's pose must remain COMPLETELY UNCHANGED - same body position, arm positions, hand positions.
-4. The background must remain COMPLETELY UNCHANGED - same as Image 1.
-5. ONLY replace the clothing/outfit with the design from Image 2.
+I am providing two images:
+- IMAGE 1 (PERSON): A photo of a person - this is the BASE image
+- IMAGE 2 (DRESS): A dress/outfit reference
 
-STEP BY STEP:
-- Start with Image 1 (person photo) as the base
-- Keep everything from Image 1 except the clothing
-- Replace only the visible clothing with the outfit design from Image 2
-- Blend the new clothing naturally onto the person's body
-- Maintain the same lighting and shadows
+YOUR TASK: Create a new image showing the person from IMAGE 1 wearing the outfit from IMAGE 2.
 
-DO NOT:
-- Rotate or flip the image
-- Change facial features or expression
-- Change body pose or hand positions
-- Change the background
-- Add or remove accessories not in the original
+CRITICAL REQUIREMENTS:
+1. ORIENTATION: The output MUST have EXACTLY the same orientation as IMAGE 1. If the person is upright in IMAGE 1, they must be upright in output. DO NOT ROTATE THE IMAGE IN ANY DIRECTION.
+2. FACE: Keep 100% identical - same features, expression, angle
+3. POSE: Keep 100% identical - same body position, arms, hands
+4. BACKGROUND: Keep 100% identical to IMAGE 1
+5. CLOTHING: Replace only the visible clothing with the outfit design from IMAGE 2
 
-Generate a high-quality image showing the person from Image 1 wearing the outfit from Image 2, with identical orientation and framing as Image 1.`;
+The output image orientation and rotation must EXACTLY match IMAGE 1. This is the most important requirement.`;
 
-    console.log("Calling AI Gateway for dress change...");
+    console.log("Calling AI Gateway for dress change with gemini-3-pro-image-preview...");
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -118,7 +110,7 @@ Generate a high-quality image showing the person from Image 1 wearing the outfit
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image-preview",
+          model: "google/gemini-3-pro-image-preview",
           messages: [
             {
               role: "user",
