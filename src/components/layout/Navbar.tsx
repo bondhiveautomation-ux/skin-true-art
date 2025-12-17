@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Coins, Shield, Sparkles } from "lucide-react";
+import { useContent } from "@/hooks/useSiteContent";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
@@ -14,6 +15,14 @@ interface NavbarProps {
 export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: NavbarProps) => {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { content } = useContent("header");
+
+  // Default values
+  const brandName = content.brand_name || "Influencer Tool";
+  const navFeatures = content.nav_features || "Features";
+  const navProcess = content.nav_process || "Process";
+  const navStudio = content.nav_studio || "Studio";
+  const ctaGetStarted = content.cta_get_started || "Get Started";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,7 +49,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               <Sparkles className="w-4 h-4 text-gold" />
             </div>
             <span className="font-serif text-xl lg:text-2xl font-semibold text-cream tracking-tight group-hover:text-gold transition-colors duration-300">
-              Influencer Tool
+              {brandName}
             </span>
           </button>
 
@@ -50,19 +59,19 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               onClick={() => onNavigate("features")}
               className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
             >
-              Features
+              {navFeatures}
             </button>
             <button 
               onClick={() => onNavigate("how-it-works")}
               className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
             >
-              Process
+              {navProcess}
             </button>
             <button 
               onClick={() => onNavigate("tools")}
               className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
             >
-              Studio
+              {navStudio}
             </button>
           </nav>
 
@@ -105,7 +114,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                 size="default"
                 className="btn-glow"
               >
-                Get Started
+                {ctaGetStarted}
               </Button>
             )}
           </div>

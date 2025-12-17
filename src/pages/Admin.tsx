@@ -21,7 +21,8 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Shirt
+  Shirt,
+  Settings2
 } from "lucide-react";
 import {
   Table,
@@ -56,6 +57,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
+import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -241,7 +243,7 @@ const Admin = () => {
       {/* Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap">
             <TabsTrigger value="users" className="gap-2">
               <Users className="w-4 h-4" />
               Users ({users.length})
@@ -253,6 +255,10 @@ const Admin = () => {
             <TabsTrigger value="dress-library" className="gap-2">
               <Shirt className="w-4 h-4" />
               Dress Library
+            </TabsTrigger>
+            <TabsTrigger value="website-cms" className="gap-2">
+              <Settings2 className="w-4 h-4" />
+              Website CMS
             </TabsTrigger>
           </TabsList>
 
@@ -533,6 +539,10 @@ const Admin = () => {
 
           <TabsContent value="dress-library">
             <DressLibraryManager />
+          </TabsContent>
+
+          <TabsContent value="website-cms">
+            <WebsiteControlCenter />
           </TabsContent>
         </Tabs>
       </main>

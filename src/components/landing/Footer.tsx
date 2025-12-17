@@ -1,6 +1,18 @@
 import { Sparkles } from "lucide-react";
+import { useContent } from "@/hooks/useSiteContent";
 
 export const Footer = () => {
+  const { content } = useContent("footer");
+
+  // Defaults
+  const brandName = content.brand_name || "Influencer Tool";
+  const tagline = content.tagline || "AI-powered tools for the modern creator";
+  const copyright = (content.copyright || "© {year} Influencer Tool. Crafted with elegance. All rights reserved.")
+    .replace("{year}", new Date().getFullYear().toString());
+  const linkPrivacy = content.link_privacy || "Privacy";
+  const linkTerms = content.link_terms || "Terms";
+  const linkContact = content.link_contact || "Contact";
+
   return (
     <footer className="py-20 border-t border-gold/10 bg-charcoal-deep relative overflow-hidden">
       {/* Subtle gradient */}
@@ -15,24 +27,24 @@ export const Footer = () => {
                 <Sparkles className="w-4 h-4 text-gold" />
               </div>
               <span className="font-serif text-2xl font-semibold text-cream">
-                Influencer Tool
+                {brandName}
               </span>
             </div>
             <p className="text-sm text-cream/40 font-light tracking-wide">
-              AI-powered tools for the modern creator
+              {tagline}
             </p>
           </div>
 
           {/* Links */}
           <div className="flex items-center gap-10 text-sm">
             <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 tracking-wide uppercase text-xs font-medium">
-              Privacy
+              {linkPrivacy}
             </a>
             <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 tracking-wide uppercase text-xs font-medium">
-              Terms
+              {linkTerms}
             </a>
             <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 tracking-wide uppercase text-xs font-medium">
-              Contact
+              {linkContact}
             </a>
           </div>
         </div>
@@ -43,7 +55,7 @@ export const Footer = () => {
         {/* Copyright */}
         <div className="text-center">
           <p className="text-xs text-cream/25 tracking-widest uppercase font-light">
-            © {new Date().getFullYear()} Influencer Tool. Crafted with elegance. All rights reserved.
+            {copyright}
           </p>
         </div>
       </div>

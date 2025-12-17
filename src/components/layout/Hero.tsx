@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useContent } from "@/hooks/useSiteContent";
 
 interface HeroProps {
   onExplore: () => void;
@@ -81,6 +82,17 @@ const SparkleParticles = () => {
 };
 
 export const Hero = ({ onExplore }: HeroProps) => {
+  const { content } = useContent("hero");
+  
+  // Default values in case content hasn't loaded yet
+  const badgeText = content.badge_text || "AI Fashion & Beauty Studio";
+  const headline1 = content.headline_1 || "Where Fashion";
+  const headline2 = content.headline_2 || "Meets AI";
+  const subheadline = content.subheadline || "The ultimate creative studio for makeup artists, influencers, and fashion brands. Transform your vision with precision AI technology.";
+  const ctaPrimary = content.cta_primary || "Enter Studio";
+  const ctaSecondary = content.cta_secondary || "Explore Features";
+  const trustText = content.trust_text || "Trusted by creators & brands worldwide";
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Dark cinematic background */}
@@ -104,20 +116,19 @@ export const Hero = ({ onExplore }: HeroProps) => {
         {/* Fashion badge */}
         <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gold/10 border border-gold/25 mb-10 section-animate backdrop-blur-sm">
           <Sparkles className="w-4 h-4 text-gold animate-pulse-glow" />
-          <span className="text-sm font-medium text-cream tracking-widest uppercase">AI Fashion & Beauty Studio</span>
+          <span className="text-sm font-medium text-cream tracking-widest uppercase">{badgeText}</span>
         </div>
 
         {/* Main headline - Editorial Serif */}
         <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-semibold text-cream leading-[1.05] tracking-tight mb-8 section-animate delay-1">
-          Where Fashion
+          {headline1}
           <br />
-          <span className="gradient-text">Meets AI</span>
+          <span className="gradient-text">{headline2}</span>
         </h1>
 
         {/* Sub-headline */}
         <p className="text-lg sm:text-xl text-cream/60 max-w-2xl mx-auto mb-14 leading-relaxed section-animate delay-2 font-light">
-          The ultimate creative studio for makeup artists, influencers, and fashion brands. 
-          Transform your vision with precision AI technology.
+          {subheadline}
         </p>
 
         {/* CTA Buttons */}
@@ -128,7 +139,7 @@ export const Hero = ({ onExplore }: HeroProps) => {
             size="xl"
             className="min-w-[220px] btn-glow"
           >
-            Enter Studio
+            {ctaPrimary}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           <Button 
@@ -137,7 +148,7 @@ export const Hero = ({ onExplore }: HeroProps) => {
             size="xl"
             className="min-w-[220px]"
           >
-            Explore Features
+            {ctaSecondary}
           </Button>
         </div>
 
@@ -145,7 +156,7 @@ export const Hero = ({ onExplore }: HeroProps) => {
         <div className="mt-24 section-animate delay-4">
           <div className="luxury-divider max-w-xs mx-auto mb-6" />
           <p className="text-sm text-cream/40 tracking-widest uppercase font-light">
-            Trusted by creators & brands worldwide
+            {trustText}
           </p>
         </div>
       </div>

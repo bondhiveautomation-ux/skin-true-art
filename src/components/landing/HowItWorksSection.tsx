@@ -1,31 +1,44 @@
 import { Upload, MousePointer, Download } from "lucide-react";
-
-const steps = [
-  {
-    icon: Upload,
-    step: "01",
-    title: "Upload Your Image",
-    description: "Select your source image in any common format. Our system handles the rest with precision."
-  },
-  {
-    icon: MousePointer,
-    step: "02",
-    title: "Choose Your Tool",
-    description: "Select from our suite of AI tools tailored to your creative vision and brand aesthetic."
-  },
-  {
-    icon: Download,
-    step: "03",
-    title: "Generate & Download",
-    description: "Receive your results instantly in stunning high quality, ready for your content."
-  }
-];
+import { useContent } from "@/hooks/useSiteContent";
 
 interface HowItWorksSectionProps {
   id: string;
 }
 
 export const HowItWorksSection = ({ id }: HowItWorksSectionProps) => {
+  const { content } = useContent("how_it_works");
+
+  // Check if section is visible
+  const isVisible = content.section_visible !== "false";
+  if (!isVisible) return null;
+
+  // Defaults
+  const badgeText = content.badge_text || "The Process";
+  const headline1 = content.headline_1 || "Effortless";
+  const headline2 = content.headline_2 || "Elegance";
+  const subheadline = content.subheadline || "Three simple steps to transform your creative vision into reality.";
+
+  const steps = [
+    {
+      icon: Upload,
+      step: "01",
+      title: content.step_1_title || "Upload Your Image",
+      description: content.step_1_description || "Select your source image in any common format. Our system handles the rest with precision."
+    },
+    {
+      icon: MousePointer,
+      step: "02",
+      title: content.step_2_title || "Choose Your Tool",
+      description: content.step_2_description || "Select from our suite of AI tools tailored to your creative vision and brand aesthetic."
+    },
+    {
+      icon: Download,
+      step: "03",
+      title: content.step_3_title || "Generate & Download",
+      description: content.step_3_description || "Receive your results instantly in stunning high quality, ready for your content."
+    }
+  ];
+
   return (
     <section id={id} className="py-28 lg:py-36 relative overflow-hidden">
       {/* Deep dark cinematic background */}
@@ -44,13 +57,13 @@ export const HowItWorksSection = ({ id }: HowItWorksSectionProps) => {
         {/* Section header */}
         <div className="text-center mb-20 lg:mb-28">
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gold/10 border border-gold/25 mb-8 section-animate backdrop-blur-sm">
-            <span className="text-xs font-semibold text-gold uppercase tracking-widest">The Process</span>
+            <span className="text-xs font-semibold text-gold uppercase tracking-widest">{badgeText}</span>
           </div>
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight section-animate delay-1">
-            Effortless <span className="gradient-text">Elegance</span>
+            {headline1} <span className="gradient-text">{headline2}</span>
           </h2>
           <p className="mt-6 text-lg text-cream/50 max-w-xl mx-auto section-animate delay-2 font-light">
-            Three simple steps to transform your creative vision into reality.
+            {subheadline}
           </p>
         </div>
 
