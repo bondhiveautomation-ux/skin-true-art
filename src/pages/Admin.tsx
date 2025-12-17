@@ -20,7 +20,8 @@ import {
   Image,
   ChevronDown,
   ChevronUp,
-  ExternalLink
+  ExternalLink,
+  Shirt
 } from "lucide-react";
 import {
   Table,
@@ -54,6 +55,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -247,6 +249,10 @@ const Admin = () => {
             <TabsTrigger value="history" className="gap-2">
               <History className="w-4 h-4" />
               Generation History
+            </TabsTrigger>
+            <TabsTrigger value="dress-library" className="gap-2">
+              <Shirt className="w-4 h-4" />
+              Dress Library
             </TabsTrigger>
           </TabsList>
 
@@ -523,6 +529,10 @@ const Admin = () => {
                 </TableBody>
               </Table>
             </div>
+          </TabsContent>
+
+          <TabsContent value="dress-library">
+            <DressLibraryManager />
           </TabsContent>
         </Tabs>
       </main>

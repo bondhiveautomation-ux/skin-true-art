@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      dress_library: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          name: string
+          tags: string[] | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          name: string
+          tags?: string[] | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          name?: string
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
       generation_history: {
         Row: {
           created_at: string

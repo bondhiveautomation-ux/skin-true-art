@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.full-look-transfer]
 verify_jwt = false
+
+[functions.dress-change]
+verify_jwt = false
