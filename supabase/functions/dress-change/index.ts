@@ -82,41 +82,30 @@ serve(async (req) => {
     console.log("Processing dress change for category:", category);
 
     // Build the prompt with strict face/pose preservation
-    const prompt = `You are an AI fashion stylist performing a VIRTUAL DRESS CHANGE.
+    const prompt = `TASK: Virtual clothing swap. Replace the clothing on the person in Image 1 with the outfit shown in Image 2.
 
-INPUT:
-1. PERSON IMAGE: The user's uploaded photo - this person's IDENTITY must be 100% preserved
-2. DRESS REFERENCE: A dress/outfit image to apply to the person
+CRITICAL INSTRUCTIONS:
+1. OUTPUT IMAGE MUST have the EXACT SAME orientation, rotation, and framing as Image 1 (the person photo). DO NOT rotate the image.
+2. The person's face must remain COMPLETELY UNCHANGED - same features, expression, angle, and position.
+3. The person's pose must remain COMPLETELY UNCHANGED - same body position, arm positions, hand positions.
+4. The background must remain COMPLETELY UNCHANGED - same as Image 1.
+5. ONLY replace the clothing/outfit with the design from Image 2.
 
-ABSOLUTE REQUIREMENTS (NON-NEGOTIABLE):
-- Keep the person's face EXACTLY the same - no beautification, no modification of any facial features
-- Keep the person's exact pose, body position, and angle - no changes whatsoever
-- Keep the person's exact expression - no smile changes, no eye changes, no lip changes
-- Keep the person's exact head shape, jawline, nose, eyes, eyebrows, lips - zero modifications
-- Keep the person's exact hair style and hair - no changes
-- Keep the person's hands exactly as they appear - same position, same fingers
-- Keep the exact camera angle and framing from the original photo
-- Keep the background exactly as it appears in the original photo
+STEP BY STEP:
+- Start with Image 1 (person photo) as the base
+- Keep everything from Image 1 except the clothing
+- Replace only the visible clothing with the outfit design from Image 2
+- Blend the new clothing naturally onto the person's body
+- Maintain the same lighting and shadows
 
-WHAT YOU MUST DO:
-- Replace ONLY the clothing/outfit on the person with the dress from the reference image
-- Match the dress design, fabric, color, pattern, and style as closely as possible
-- Blend the clothing edges naturally with the person's skin and existing elements
-- Ensure the dress fits naturally on the person's body proportions
-- Maintain original lighting and shadows, adjusting only where the new clothing requires
+DO NOT:
+- Rotate or flip the image
+- Change facial features or expression
+- Change body pose or hand positions
+- Change the background
+- Add or remove accessories not in the original
 
-WHAT YOU MUST NOT DO:
-- DO NOT change any facial features - not even subtle beautification
-- DO NOT change the person's expression or gaze direction
-- DO NOT change the person's pose, posture, or body angle
-- DO NOT change the person's hands or their position
-- DO NOT add or remove any accessories not present in the original (unless part of the dress)
-- DO NOT change the background or lighting style
-- DO NOT modify skin texture or skin tone
-
-If you cannot perform this task while preserving 100% of the person's identity, face, and pose, return the original image unchanged and indicate that the transformation failed.
-
-Generate a high-resolution result where the ONLY visible change is the outfit/clothing.`;
+Generate a high-quality image showing the person from Image 1 wearing the outfit from Image 2, with identical orientation and framing as Image 1.`;
 
     console.log("Calling AI Gateway for dress change...");
 
