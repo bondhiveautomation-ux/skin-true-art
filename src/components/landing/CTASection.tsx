@@ -1,11 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Crown } from "lucide-react";
+import { useContent } from "@/hooks/useSiteContent";
 
 interface CTASectionProps {
   onGetStarted: () => void;
 }
 
 export const CTASection = ({ onGetStarted }: CTASectionProps) => {
+  const { content } = useContent("cta");
+
+  // Check if section is visible
+  const isVisible = content.section_visible !== "false";
+  if (!isVisible) return null;
+
+  // Defaults
+  const headline1 = content.headline_1 || "Ready to";
+  const headline2 = content.headline_2 || "Transform";
+  const subheadline = content.subheadline || "Join the creators shaping the future of fashion and beauty with AI.";
+  const buttonText = content.button_text || "Begin Your Journey";
+  const trustText = content.trust_text || "No commitment required • Professional results guaranteed";
+
   return (
     <section className="py-28 lg:py-36 relative overflow-hidden">
       {/* Deep dark background */}
@@ -26,11 +40,11 @@ export const CTASection = ({ onGetStarted }: CTASectionProps) => {
         </div>
 
         <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-8 section-animate delay-1">
-          Ready to <span className="gradient-text">Transform</span>?
+          {headline1} <span className="gradient-text">{headline2}</span>?
         </h2>
         
         <p className="text-lg sm:text-xl text-cream/50 mb-14 max-w-2xl mx-auto leading-relaxed section-animate delay-2 font-light">
-          Join the creators shaping the future of fashion and beauty with AI.
+          {subheadline}
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-5 section-animate delay-3">
@@ -40,7 +54,7 @@ export const CTASection = ({ onGetStarted }: CTASectionProps) => {
             size="xl"
             className="min-w-[260px] btn-glow text-lg"
           >
-            Begin Your Journey
+            {buttonText}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
@@ -49,7 +63,7 @@ export const CTASection = ({ onGetStarted }: CTASectionProps) => {
         <div className="mt-20 section-animate delay-4">
           <div className="luxury-divider max-w-sm mx-auto mb-8" />
           <p className="text-sm text-cream/30 tracking-widest uppercase font-light">
-            No commitment required • Professional results guaranteed
+            {trustText}
           </p>
         </div>
       </div>

@@ -1,62 +1,29 @@
 import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Repeat } from "lucide-react";
+import { useContent, useFeatureContent } from "@/hooks/useSiteContent";
 
-const features = [
-  {
-    icon: Sparkles,
-    name: "Skin Texture Enhancement",
-    description: "Enhance facial skin texture naturally while preserving realism. Smooth, refine, and balance details without over-editing.",
-    sectionId: "skin-enhancement"
-  },
-  {
-    icon: Image,
-    name: "Character-Consistent Image Generator",
-    description: "Generate new images while keeping the exact same face and identity consistent across all outputs.",
-    sectionId: "character-generator"
-  },
-  {
-    icon: FileText,
-    name: "Image Prompt Extractor",
-    description: "Extract detailed AI prompts from any image to recreate, remix, or study styles with precision.",
-    sectionId: "prompt-extractor"
-  },
-  {
-    icon: Shirt,
-    name: "Dress-to-Dummy Extractor",
-    description: "Isolate outfits cleanly from reference images for seamless reuse on different characters or poses.",
-    sectionId: "dress-extractor"
-  },
-  {
-    icon: Users,
-    name: "Remove People, Keep Background",
-    description: "Remove unwanted people while perfectly preserving the original background with AI accuracy.",
-    sectionId: "background-saver"
-  },
-  {
-    icon: Move,
-    name: "Pose Transfer Studio",
-    description: "Apply the pose from one image to another character while maintaining natural proportions and realism.",
-    sectionId: "pose-transfer"
-  },
-  {
-    icon: Palette,
-    name: "Make Me Up – AI Makeup Studio",
-    description: "Apply professional-grade makeup styles digitally—ideal for beauty creators and makeup artists.",
-    sectionId: "makeup-studio"
-  },
-  {
-    icon: Layers,
-    name: "Full Look Transfer (Face Keep)",
-    description: "Transfer the complete look—outfit, lighting, and style—while keeping the original face unchanged.",
-    sectionId: "full-look-transfer"
-  },
-  {
-    icon: Repeat,
-    name: "Dress Change Studio",
-    description: "Try on outfits from our curated library while keeping your face and pose 100% unchanged.",
-    sectionId: "dress-change-studio",
-    featured: true
-  }
-];
+const featureIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  feature_1: Sparkles,
+  feature_2: Image,
+  feature_3: FileText,
+  feature_4: Shirt,
+  feature_5: Users,
+  feature_6: Move,
+  feature_7: Palette,
+  feature_8: Layers,
+  feature_9: Repeat,
+};
+
+const featureSectionIds: Record<string, string> = {
+  feature_1: "skin-enhancement",
+  feature_2: "character-generator",
+  feature_3: "prompt-extractor",
+  feature_4: "dress-extractor",
+  feature_5: "background-saver",
+  feature_6: "pose-transfer",
+  feature_7: "makeup-studio",
+  feature_8: "full-look-transfer",
+  feature_9: "dress-change-studio",
+};
 
 interface FeaturesSectionProps {
   id: string;
@@ -64,6 +31,19 @@ interface FeaturesSectionProps {
 }
 
 export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) => {
+  const { content: sectionContent } = useContent("features");
+  const { features } = useFeatureContent();
+  
+  // Check if section is visible
+  const isVisible = sectionContent.section_visible !== "false";
+  if (!isVisible) return null;
+
+  // Section header defaults
+  const badgeText = sectionContent.badge_text || "The Collection";
+  const headline1 = sectionContent.headline_1 || "AI-Powered";
+  const headline2 = sectionContent.headline_2 || "Creative Tools";
+  const subheadline = sectionContent.subheadline || "A curated suite of professional tools designed for beauty artists, influencers, and fashion brands.";
+
   const handleCardClick = (sectionId: string) => {
     if (onFeatureClick) {
       onFeatureClick(sectionId);
@@ -74,6 +54,24 @@ export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) =>
       }
     }
   };
+
+  // Build feature list from database content
+  const featureList = Object.entries(featureSectionIds).map(([key, sectionId]) => {
+    const featureData = features[key] || {};
+    const Icon = featureIcons[key];
+    const isFeatureVisible = featureData.visible !== "false";
+    const isFeatured = featureData.featured === "true";
+    
+    return {
+      key,
+      icon: Icon,
+      name: featureData.name || key.replace("_", " "),
+      description: featureData.description || "",
+      sectionId,
+      visible: isFeatureVisible,
+      featured: isFeatured,
+    };
+  }).filter(f => f.visible);
 
   return (
     <section id={id} className="py-28 lg:py-36 relative overflow-hidden">
@@ -91,23 +89,23 @@ export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) =>
         {/* Section header */}
         <div className="text-center mb-20 lg:mb-24">
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gold/10 border border-gold/25 mb-8 section-animate backdrop-blur-sm">
-            <span className="text-xs font-semibold text-gold uppercase tracking-widest">The Collection</span>
+            <span className="text-xs font-semibold text-gold uppercase tracking-widest">{badgeText}</span>
           </div>
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight section-animate delay-1">
-            AI-Powered
+            {headline1}
             <br />
-            <span className="gradient-text">Creative Tools</span>
+            <span className="gradient-text">{headline2}</span>
           </h2>
           <p className="mt-8 text-lg text-cream/50 max-w-2xl mx-auto section-animate delay-2 leading-relaxed font-light">
-            A curated suite of professional tools designed for beauty artists, influencers, and fashion brands.
+            {subheadline}
           </p>
         </div>
 
         {/* Feature grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {features.map((feature, index) => (
+          {featureList.map((feature, index) => (
             <button 
-              key={feature.name}
+              key={feature.key}
               onClick={() => handleCardClick(feature.sectionId)}
               className={`group feature-card glow-outline section-animate delay-${Math.min(index + 1, 9)} text-left cursor-pointer ${
                 feature.featured ? 'lg:col-span-1 border-gold/20' : ''
