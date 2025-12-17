@@ -1,4 +1,4 @@
-import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers } from "lucide-react";
+import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Repeat } from "lucide-react";
 
 const features = [
   {
@@ -48,6 +48,12 @@ const features = [
     name: "Full Look Transfer (Face Keep)",
     description: "Transfer the complete look—outfit, lighting, and style—while keeping the original face unchanged.",
     sectionId: "full-look-transfer"
+  },
+  {
+    icon: Repeat,
+    name: "Dress Change Studio",
+    description: "Try on outfits from our curated library while keeping your face and pose 100% unchanged.",
+    sectionId: "dress-change-studio"
   }
 ];
 
