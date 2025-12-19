@@ -65,8 +65,8 @@ Output: generate the final edited image.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // "Nano banana" image model tends to behave better for image edits.
-        model: "google/gemini-2.5-flash-image",
+        // Use the more powerful image generation model for complex face swaps
+        model: "google/gemini-3-pro-image-preview",
         messages: [
           {
             role: "user",
