@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Upload, Loader2, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Copy, Search } from "lucide-react";
+import { Upload, Loader2, Download, Copy, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,20 +50,6 @@ const Index = () => {
     }
   }, [loading, isAuthenticated, navigate]);
 
-  // Skin Enhancement states
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [enhancementMode, setEnhancementMode] = useState<"preserve" | "remove">("preserve");
-  const [showComparison, setShowComparison] = useState(false);
-  const [sliderPosition, setSliderPosition] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const comparisonRef = useRef<HTMLDivElement>(null);
-  
   // Character Generator states
   const [generationPrompt, setGenerationPrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -172,86 +158,6 @@ const Index = () => {
       reader.readAsDataURL(file);
     };
   };
-
-  // ==================== SKIN ENHANCEMENT ====================
-  const handleImageUpload = createImageUploadHandler(setSelectedImage, [
-    () => setEnhancedImage(null),
-    () => setShowComparison(false),
-    () => setZoomLevel(1),
-    () => setPanPosition({ x: 0, y: 0 }),
-  ]);
-
-  const handleEnhance = async () => {
-    if (!selectedImage) return;
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
-      return;
-    }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
-      return;
-    }
-    setIsProcessing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('enhance-skin', {
-        body: { imageUrl: selectedImage, mode: enhancementMode, userId: user?.id }
-      });
-      if (error) throw error;
-      if (data?.enhancedImageUrl) {
-        setEnhancedImage(data.enhancedImageUrl);
-        setShowComparison(true);
-        // Generation is now logged by the edge function with images
-        toast({ title: "Enhancement complete", description: "Your portrait has been enhanced" });
-      }
-    } catch (error: any) {
-      toast({ title: "Enhancement failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleDownload = () => {
-    if (!enhancedImage) return;
-    const link = document.createElement('a');
-    link.href = enhancedImage;
-    link.download = 'enhanced-portrait.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleReset = () => {
-    setSelectedImage(null);
-    setEnhancedImage(null);
-    setShowComparison(false);
-    setSliderPosition(50);
-    setZoomLevel(1);
-    setPanPosition({ x: 0, y: 0 });
-  };
-
-  // Zoom/Pan handlers
-  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.5, 4));
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.5, 1));
-    if (zoomLevel <= 1.5) setPanPosition({ x: 0, y: 0 });
-  };
-  const handleResetZoom = () => {
-    setZoomLevel(1);
-    setPanPosition({ x: 0, y: 0 });
-  };
-  const handlePanStart = (e: React.MouseEvent) => {
-    if (zoomLevel > 1) {
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
-    }
-  };
-  const handlePanMove = (e: React.MouseEvent) => {
-    if (isPanning && zoomLevel > 1) {
-      setPanPosition({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
-    }
-  };
-  const handlePanEnd = () => setIsPanning(false);
 
   // ==================== CHARACTER GENERATOR ====================
   const handleCharacterImageUpload = createImageUploadHandler(setCharacterImage, [
@@ -831,168 +737,6 @@ const Index = () => {
           </h2>
         </div>
       </div>
-
-      {/* Skin Enhancement Section */}
-      <ToolSection
-        id="skin-enhancement"
-        title="Skin Texture"
-        subtitle="Enhancement"
-        description="Enhance facial skin texture naturally while preserving realism"
-      >
-        {!selectedImage ? (
-          <div className="flex justify-center">
-            <ImageUploader
-              id="skin-upload"
-              image={selectedImage}
-              onUpload={handleImageUpload}
-              onRemove={handleReset}
-              label=""
-              className="w-full max-w-md"
-            />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Mode selector */}
-            {!showComparison && (
-              <div className="flex items-center justify-center gap-4 pb-6 border-b border-border/50">
-                <span className="text-sm font-medium text-muted-foreground">Mode:</span>
-                <div className="flex gap-2">
-                  <Button
-                    variant={enhancementMode === "preserve" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setEnhancementMode("preserve")}
-                    className={enhancementMode === "preserve" ? "bg-foreground text-background" : ""}
-                  >
-                    Preserve Makeup
-                  </Button>
-                  <Button
-                    variant={enhancementMode === "remove" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setEnhancementMode("remove")}
-                    className={enhancementMode === "remove" ? "bg-foreground text-background" : ""}
-                  >
-                    Remove Makeup
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Comparison view */}
-            {showComparison && enhancedImage ? (
-              <div className="space-y-4">
-                <div className="flex justify-center gap-2">
-                  <Button onClick={handleZoomOut} disabled={zoomLevel <= 1} variant="outline" size="sm">
-                    <ZoomOut className="h-4 w-4 mr-1" /> Zoom Out
-                  </Button>
-                  <Button onClick={handleResetZoom} disabled={zoomLevel === 1} variant="outline" size="sm">
-                    <Maximize2 className="h-4 w-4 mr-1" /> {Math.round(zoomLevel * 100)}%
-                  </Button>
-                  <Button onClick={handleZoomIn} disabled={zoomLevel >= 4} variant="outline" size="sm">
-                    <ZoomIn className="h-4 w-4 mr-1" /> Zoom In
-                  </Button>
-                </div>
-
-                <div className="relative overflow-hidden rounded-xl bg-secondary/30">
-                  <div
-                    ref={comparisonRef}
-                    className="relative w-full max-w-xl mx-auto select-none"
-                    style={{ cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
-                    onMouseMove={(e) => {
-                      if (isDragging && !isPanning && comparisonRef.current) {
-                        const rect = comparisonRef.current.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        setSliderPosition(Math.max(0, Math.min(100, (x / rect.width) * 100)));
-                      }
-                      handlePanMove(e);
-                    }}
-                    onMouseDown={(e) => {
-                      if (zoomLevel > 1 && !(e.target as HTMLElement).closest('.slider-handle')) {
-                        handlePanStart(e);
-                      }
-                    }}
-                    onMouseUp={() => { setIsDragging(false); handlePanEnd(); }}
-                    onMouseLeave={() => { setIsDragging(false); handlePanEnd(); }}
-                  >
-                    <div
-                      className="relative w-full"
-                      style={{
-                        transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
-                        transformOrigin: 'center center',
-                        transition: isPanning ? 'none' : 'transform 0.2s ease-out',
-                      }}
-                    >
-                      <img src={enhancedImage} alt="Enhanced" className="w-full h-auto object-contain pointer-events-none" draggable={false} />
-                    </div>
-                    <div
-                      className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
-                      style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-                    >
-                      <div
-                        className="relative w-full h-full"
-                        style={{
-                          transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
-                          transformOrigin: 'center center',
-                          transition: isPanning ? 'none' : 'transform 0.2s ease-out',
-                        }}
-                      >
-                        <img src={selectedImage} alt="Original" className="w-full h-auto object-contain" draggable={false} />
-                      </div>
-                    </div>
-                    <div
-                      className="slider-handle absolute inset-y-0 w-0.5 bg-foreground/50 cursor-ew-resize z-10"
-                      style={{ left: `${sliderPosition}%` }}
-                      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
-                    >
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded-full bg-foreground p-1.5 shadow-lg">
-                        <ChevronLeft className="h-3 w-3 text-background" />
-                        <ChevronRight className="h-3 w-3 text-background" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-3 left-3 rounded-md bg-background/80 px-2 py-1 backdrop-blur-sm">
-                      <span className="text-xs font-medium text-foreground">Original</span>
-                    </div>
-                    <div className="absolute bottom-3 right-3 rounded-md bg-background/80 px-2 py-1 backdrop-blur-sm">
-                      <span className="text-xs font-medium text-foreground">Enhanced</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="relative flex justify-center">
-                <img src={selectedImage} alt="Selected" className="max-h-[400px] rounded-xl object-contain" />
-                <Button onClick={handleReset} variant="outline" size="sm" className="absolute top-2 right-2">
-                  Remove
-                </Button>
-              </div>
-            )}
-
-            {/* Action buttons */}
-            <div className="flex flex-wrap justify-center gap-3">
-              {!showComparison ? (
-                <>
-                  <LoadingButton
-                    onClick={handleEnhance}
-                    isLoading={isProcessing}
-                    loadingText="Enhancing..."
-                    size="lg"
-                    className="btn-glow bg-foreground text-background hover:bg-foreground/90"
-                  >
-                    Enhance Skin Texture
-                  </LoadingButton>
-                  <Button onClick={handleReset} variant="outline" size="lg">Cancel</Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleDownload} size="lg" className="btn-glow bg-foreground text-background hover:bg-foreground/90">
-                    <Download className="mr-2 h-4 w-4" /> Download Enhanced
-                  </Button>
-                  <Button onClick={handleReset} variant="outline" size="lg">Upload New Photo</Button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </ToolSection>
 
       {/* Character Generator Section */}
       <ToolSection
