@@ -2,7 +2,6 @@ import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Repeat 
 import { useContent, useFeatureContent } from "@/hooks/useSiteContent";
 
 const featureIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  feature_1: Sparkles,
   feature_2: Image,
   feature_3: FileText,
   feature_4: Shirt,
@@ -14,7 +13,6 @@ const featureIcons: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 const featureSectionIds: Record<string, string> = {
-  feature_1: "skin-enhancement",
   feature_2: "character-generator",
   feature_3: "prompt-extractor",
   feature_4: "dress-extractor",
