@@ -64,6 +64,13 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
+  const ALLOWED_EMAIL_DOMAINS = ['gmail.com', 'yahoo.com', 'outlook.com'];
+
+  const isEmailDomainAllowed = (email: string): boolean => {
+    const domain = email.toLowerCase().split('@')[1];
+    return ALLOWED_EMAIL_DOMAINS.includes(domain);
+  };
+
   const validateSignup = () => {
     const newErrors: Record<string, string> = {};
     
@@ -71,6 +78,8 @@ const Auth = () => {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Please enter a valid email";
+    } else if (!isEmailDomainAllowed(email.trim())) {
+      newErrors.email = "Only Gmail, Yahoo, and Outlook emails are allowed";
     }
     
     if (!password) {
