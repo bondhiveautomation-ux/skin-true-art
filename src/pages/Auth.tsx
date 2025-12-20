@@ -48,15 +48,6 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          // Show welcome toast for new signups
-          if (event === "SIGNED_IN") {
-            setTimeout(() => {
-              toast({
-                title: "Welcome! 🎉",
-                description: "You have 10 free credits to get started.",
-              });
-            }, 500);
-          }
           navigate("/");
         }
         setCheckingAuth(false);
