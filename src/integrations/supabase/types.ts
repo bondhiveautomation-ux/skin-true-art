@@ -49,6 +49,45 @@ export type Database = {
           },
         ]
       }
+      class_leads: {
+        Row: {
+          admin_notes: string | null
+          business_category: string | null
+          business_page_name: string
+          created_at: string
+          id: string
+          monthly_ad_spend: string | null
+          program: string
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          whatsapp_number: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_category?: string | null
+          business_page_name: string
+          created_at?: string
+          id?: string
+          monthly_ad_spend?: string | null
+          program: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          whatsapp_number: string
+        }
+        Update: {
+          admin_notes?: string | null
+          business_category?: string | null
+          business_page_name?: string
+          created_at?: string
+          id?: string
+          monthly_ad_spend?: string | null
+          program?: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
       dress_library: {
         Row: {
           category: string
@@ -302,6 +341,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      lead_status: "new" | "contacted" | "enrolled"
       payment_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -431,6 +471,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      lead_status: ["new", "contacted", "enrolled"],
       payment_status: ["pending", "approved", "rejected"],
     },
   },
