@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_from_admin: boolean
+          is_read: boolean
+          message: string
+          sender_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_from_admin?: boolean
+          is_read?: boolean
+          message: string
+          sender_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_from_admin?: boolean
+          is_read?: boolean
+          message?: string
+          sender_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -263,6 +293,48 @@ export type Database = {
           created_at?: string
           credits?: number
           id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_presence: {
+        Row: {
+          created_at: string
+          current_page_name: string | null
+          current_path: string | null
+          device_type: string | null
+          entered_at: string | null
+          id: string
+          is_online: boolean
+          last_active_at: string
+          last_seen: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_page_name?: string | null
+          current_path?: string | null
+          device_type?: string | null
+          entered_at?: string | null
+          id?: string
+          is_online?: boolean
+          last_active_at?: string
+          last_seen?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_page_name?: string | null
+          current_path?: string | null
+          device_type?: string | null
+          entered_at?: string | null
+          id?: string
+          is_online?: boolean
+          last_active_at?: string
+          last_seen?: string
           updated_at?: string
           user_id?: string
         }

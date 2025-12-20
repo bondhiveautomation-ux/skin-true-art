@@ -25,7 +25,8 @@ import {
   Settings2,
   MessageCircle,
   GraduationCap,
-  Download
+  Download,
+  Radio
 } from "lucide-react";
 import {
   Table,
@@ -63,6 +64,7 @@ import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
 import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 import { PaymentInbox } from "@/components/admin/PaymentInbox";
 import { LeadsInbox } from "@/components/admin/LeadsInbox";
+import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -285,8 +287,12 @@ const Admin = () => {
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs defaultValue="users" className="w-full">
+        <Tabs defaultValue="live-users" className="w-full">
           <TabsList className="mb-6 flex-wrap">
+            <TabsTrigger value="live-users" className="gap-2">
+              <Radio className="w-4 h-4" />
+              Live Users
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="w-4 h-4" />
               Users ({users.length})
@@ -312,6 +318,10 @@ const Admin = () => {
               Class Leads
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="live-users">
+            <LiveUsersMonitor />
+          </TabsContent>
 
           <TabsContent value="users">
             {/* Create New User Form */}
