@@ -191,13 +191,20 @@ const LiveUsersMonitor = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {user.current_page_name ? (
-                        <Badge variant="secondary" className="font-normal">
-                          {user.current_page_name}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
+                      <div className="flex flex-col gap-1">
+                        {user.current_page_name ? (
+                          <Badge variant="secondary" className="font-normal w-fit">
+                            {user.current_page_name}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                        {user.current_tool && (
+                          <Badge variant="outline" className="font-normal text-xs w-fit text-gold border-gold/30">
+                            {user.current_tool}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {user.device_type === "mobile" ? (

@@ -1,7 +1,17 @@
 import { createContext, useContext, ReactNode } from "react";
 import { usePresence } from "@/hooks/usePresence";
 
-const PresenceContext = createContext<ReturnType<typeof usePresence> | null>(null);
+interface PresenceContextType {
+  updatePresence: (isOnline: boolean, path?: string, tool?: string | null) => Promise<void>;
+  markOffline: () => Promise<void>;
+  setCurrentTool: (tool: string | null) => Promise<void>;
+}
+
+const PresenceContext = createContext<PresenceContextType>({
+  updatePresence: async () => {},
+  markOffline: async () => {},
+  setCurrentTool: async () => {},
+});
 
 export const PresenceProvider = ({ children }: { children: ReactNode }) => {
   const presence = usePresence();
@@ -14,9 +24,5 @@ export const PresenceProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const usePresenceContext = () => {
-  const context = useContext(PresenceContext);
-  if (!context) {
-    throw new Error("usePresenceContext must be used within PresenceProvider");
-  }
-  return context;
+  return useContext(PresenceContext);
 };

@@ -9,6 +9,7 @@ interface LiveUser {
   is_online: boolean;
   current_page_name: string | null;
   current_path: string | null;
+  current_tool: string | null;
   last_seen: string;
   last_active_at: string;
   device_type: string | null;
@@ -56,6 +57,7 @@ export const useLiveUsers = () => {
           is_online: isActuallyOnline,
           current_page_name: presence.current_page_name,
           current_path: presence.current_path,
+          current_tool: presence.current_tool,
           last_seen: presence.last_seen,
           last_active_at: presence.last_active_at,
           device_type: presence.device_type,

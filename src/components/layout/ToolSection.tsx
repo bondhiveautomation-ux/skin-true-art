@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
+import { usePresenceContext } from "@/components/PresenceProvider";
 
 interface ToolSectionProps {
   id: string;
@@ -15,8 +16,41 @@ export const ToolSection = ({
   description,
   children 
 }: ToolSectionProps) => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { setCurrentTool } = usePresenceContext();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            // User is viewing this tool section
+            const toolName = `${title} ${subtitle}`.trim();
+            setCurrentTool(toolName);
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+        rootMargin: "-10% 0px -10% 0px",
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [title, subtitle, setCurrentTool]);
+
   return (
-    <section id={id} className="py-12 sm:py-20 lg:py-28 scroll-mt-16 sm:scroll-mt-20 relative overflow-hidden">
+    <section 
+      ref={sectionRef}
+      id={id} 
+      className="py-12 sm:py-20 lg:py-28 scroll-mt-16 sm:scroll-mt-20 relative overflow-hidden"
+    >
       {/* Dark gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-charcoal to-background" />
       
