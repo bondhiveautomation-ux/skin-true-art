@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
 import { supabase } from "@/integrations/supabase/client";
+import { fileToNormalizedDataUrl } from "@/lib/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -111,24 +112,37 @@ const BrandingStudio = () => {
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
 
-  const handlePostUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePostUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    try {
       setPostFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setPostImage(e.target?.result as string);
-      reader.readAsDataURL(file);
+      const normalized = await fileToNormalizedDataUrl(file);
+      setPostImage(normalized);
       setResult(null);
+    } catch (err) {
+      console.error("Failed to read image:", err);
+      toast.error("Failed to load image. Please try a different file.");
+    } finally {
+      // allow re-selecting same file
+      e.target.value = "";
     }
   }, []);
 
-  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    try {
       setLogoFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setLogoImage(e.target?.result as string);
-      reader.readAsDataURL(file);
+      const normalized = await fileToNormalizedDataUrl(file);
+      setLogoImage(normalized);
+    } catch (err) {
+      console.error("Failed to read logo:", err);
+      toast.error("Failed to load logo. Please try a different file.");
+    } finally {
+      e.target.value = "";
     }
   }, []);
 
@@ -156,13 +170,9 @@ const BrandingStudio = () => {
     setBatchImages(prev => prev.filter(img => img.id !== id));
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const fileToBase64 = async (file: File): Promise<string> => {
+    // Normalize orientation (apply EXIF to pixels, then strip metadata)
+    return await fileToNormalizedDataUrl(file);
   };
 
   const handleSingleProcess = async () => {
