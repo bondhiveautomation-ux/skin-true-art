@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLiveUsers } from "@/hooks/useLiveUsers";
 import { useAdminMessaging } from "@/hooks/useAdminMessages";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,15 @@ const LiveUsersMonitor = () => {
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [broadcastText, setBroadcastText] = useState("");
   const [broadcastToOnline, setBroadcastToOnline] = useState(true);
+  const [, setTick] = useState(0);
+
+  // Force re-render every 10 seconds to update relative times
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const displayUsers = showOnlineOnly ? onlineUsers : liveUsers;
   const selectedUser = liveUsers.find(u => u.user_id === selectedUserId);
