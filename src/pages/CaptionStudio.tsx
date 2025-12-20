@@ -45,10 +45,13 @@ const CaptionStudio = () => {
   // Helper function to log generation
   const logGeneration = async (featureName: string) => {
     if (!user?.id) return;
+
     try {
-      await supabase.rpc('log_generation', {
+      await supabase.rpc("log_generation", {
         p_user_id: user.id,
-        p_feature_name: featureName
+        p_feature_name: featureName,
+        p_input_images: [],
+        p_output_images: [],
       });
     } catch (error) {
       console.error("Failed to log generation:", error);

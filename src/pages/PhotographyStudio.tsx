@@ -42,12 +42,21 @@ const PhotographyStudio = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
 
   // Helper function to log generation
-  const logGeneration = async (featureName: string) => {
+  const logGeneration = async (
+    featureName: string,
+    inputImages: string[] = [],
+    outputImages: string[] = []
+  ) => {
     if (!user?.id) return;
+
+    const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+
     try {
-      await supabase.rpc('log_generation', {
+      await supabase.rpc("log_generation", {
         p_user_id: user.id,
-        p_feature_name: featureName
+        p_feature_name: featureName,
+        p_input_images: onlyUrls(inputImages),
+        p_output_images: onlyUrls(outputImages),
       });
     } catch (error) {
       console.error("Failed to log generation:", error);
@@ -161,7 +170,7 @@ const PhotographyStudio = () => {
 
       if (data?.enhancedImage) {
         setEnhancedImage(data.enhancedImage);
-        await logGeneration("Photography Studio");
+        await logGeneration("Photography Studio", [], [data.enhancedImage]);
         toast({
           title: "Photo enhanced!",
           description: "Your professional-quality image is ready",

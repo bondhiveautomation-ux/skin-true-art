@@ -32,12 +32,21 @@ const Index = () => {
   const { toast } = useToast();
 
   // Helper function to log generation
-  const logGeneration = async (featureName: string) => {
+  const logGeneration = async (
+    featureName: string,
+    inputImages: string[] = [],
+    outputImages: string[] = []
+  ) => {
     if (!user?.id) return;
+
+    const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+
     try {
-      await supabase.rpc('log_generation', {
+      await supabase.rpc("log_generation", {
         p_user_id: user.id,
-        p_feature_name: featureName
+        p_feature_name: featureName,
+        p_input_images: onlyUrls(inputImages),
+        p_output_images: onlyUrls(outputImages),
       });
     } catch (error) {
       console.error("Failed to log generation:", error);
@@ -220,7 +229,7 @@ const Index = () => {
       if (data?.generatedImageUrl) {
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
-        await logGeneration("Character Generator");
+        await logGeneration("Character Generator", [], [data.generatedImageUrl]);
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
       }
     } catch (error: any) {
@@ -322,7 +331,7 @@ const Index = () => {
       }
       if (data?.extractedImage) {
         setExtractedDressImage(data.extractedImage);
-        await logGeneration("Dress Extractor");
+        await logGeneration("Dress Extractor", [], [data.extractedImage]);
         toast({ title: "Success!", description: "Dress extracted and placed on mannequin" });
       }
     } catch (error: any) {
@@ -369,7 +378,7 @@ const Index = () => {
       }
       if (data?.cleanBackground) {
         setCleanBackground(data.cleanBackground);
-        await logGeneration("Background Saver");
+        await logGeneration("Background Saver", [], [data.cleanBackground]);
         toast({ title: "Success!", description: "People removed successfully" });
       }
     } catch (error: any) {
@@ -429,7 +438,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setPoseTransferResult(data.generatedImageUrl);
-        await logGeneration("Pose Transfer");
+        await logGeneration("Pose Transfer", [], [data.generatedImageUrl]);
         toast({ title: "Pose Transfer Complete!", description: "Your influencer has been recreated in the new pose" });
       }
     } catch (error: any) {
@@ -500,7 +509,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setMakeupResult(data.generatedImageUrl);
-        await logGeneration("Makeup Studio");
+        await logGeneration("Makeup Studio", [], [data.generatedImageUrl]);
         toast({ title: "Makeup Applied!", description: "Your look has been created successfully" });
       }
     } catch (error: any) {
@@ -561,7 +570,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setFullLookResult(data.generatedImageUrl);
-        await logGeneration("Full Look Transfer");
+        await logGeneration("Full Look Transfer", [], [data.generatedImageUrl]);
         toast({ title: "Full Look Transfer Complete!", description: "Your influencer look has been created successfully" });
       }
     } catch (error: any) {
@@ -639,7 +648,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setDressChangeResult(data.generatedImageUrl);
-        await logGeneration("Dress Change Studio");
+        await logGeneration("Dress Change Studio", [], [data.generatedImageUrl]);
         toast({ title: "Dress Change Complete!", description: "Your new look has been generated successfully" });
       }
     } catch (error: any) {
