@@ -51,7 +51,7 @@ export const DressLibraryManager = () => {
 
   const [isAddingDress, setIsAddingDress] = useState(false);
   const [newDressName, setNewDressName] = useState("");
-  const [newDressCategory, setNewDressCategory] = useState<"male" | "female">("female");
+  const [newDressCategory, setNewDressCategory] = useState<"male" | "female" | "kids">("female");
   const [newDressTags, setNewDressTags] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -172,7 +172,7 @@ export const DressLibraryManager = () => {
               <Label>Category *</Label>
               <Select
                 value={newDressCategory}
-                onValueChange={(v) => setNewDressCategory(v as "male" | "female")}
+                onValueChange={(v) => setNewDressCategory(v as "male" | "female" | "kids")}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -180,6 +180,7 @@ export const DressLibraryManager = () => {
                 <SelectContent>
                   <SelectItem value="female">Female</SelectItem>
                   <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="kids">Kids</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -269,7 +270,9 @@ export const DressLibraryManager = () => {
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         dress.category === "female"
                           ? "bg-pink-100 text-pink-700"
-                          : "bg-blue-100 text-blue-700"
+                          : dress.category === "male"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-purple-100 text-purple-700"
                       }`}
                     >
                       {dress.category}
