@@ -102,7 +102,7 @@ const Index = () => {
 
   // Dress Change Studio states
   const { activeDresses, loading: dressesLoading } = useDressLibrary();
-  const [dressChangeCategory, setDressChangeCategory] = useState<"male" | "female">("female");
+  const [dressChangeCategory, setDressChangeCategory] = useState<"male" | "female" | "kids">("female");
   const [dressChangeUserImage, setDressChangeUserImage] = useState<string | null>(null);
   const [selectedDress, setSelectedDress] = useState<Dress | null>(null);
   const [dressChangeResult, setDressChangeResult] = useState<string | null>(null);
@@ -1217,101 +1217,117 @@ const Index = () => {
               >
                 Male
               </Button>
+              <Button
+                variant={dressChangeCategory === "kids" ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setDressChangeCategory("kids");
+                  setSelectedDress(null);
+                }}
+                className={dressChangeCategory === "kids" ? "bg-foreground text-background" : ""}
+              >
+                Kids
+              </Button>
             </div>
           </div>
 
-          {/* Step 2: Upload User Photo */}
-          <div className="max-w-sm mx-auto">
-            <ImageUploader
-              id="dress-change-user"
-              image={dressChangeUserImage}
-              onUpload={handleDressChangeUserImageUpload}
-              onRemove={() => {
-                setDressChangeUserImage(null);
-                setDressChangeResult(null);
-              }}
-              label="Upload Your Photo"
-              description="Clear, full-body photo works best"
-              aspectRatio="portrait"
-            />
+          {/* Step 2: Dress Picker Grid - Now shown first */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-sm font-medium text-foreground">Step 1: Select a Dress</label>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name or tag..."
+                  value={dressSearchQuery}
+                  onChange={(e) => setDressSearchQuery(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+            </div>
+
+            {dressesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredDresses.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No dresses available for {dressChangeCategory} category.</p>
+                <p className="text-sm mt-1">Admin needs to add dresses to the library.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {filteredDresses.map((dress) => (
+                  <button
+                    key={dress.id}
+                    onClick={() => setSelectedDress(dress)}
+                    disabled={isChangingDress}
+                    className={`group relative rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+                      selectedDress?.id === dress.id
+                        ? "border-gold ring-2 ring-gold/30"
+                        : "border-border hover:border-gold/50"
+                    } ${isChangingDress ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                  >
+                    <div className="aspect-[3/4] relative">
+                      <img
+                        src={dress.image_url}
+                        alt={dress.name}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      {selectedDress?.id === dress.id && (
+                        <div className="absolute inset-0 bg-gold/10 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center">
+                            <svg
+                              className="w-4 h-4 text-background"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2 bg-card/80 backdrop-blur-sm">
+                      <p className="text-xs font-medium text-foreground truncate">{dress.name}</p>
+                      {dress.tags.length > 0 && (
+                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">
+                          {dress.tags.slice(0, 2).join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Step 3: Dress Picker Grid */}
-          {dressChangeUserImage && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-sm font-medium text-foreground">Select a Dress</label>
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name or tag..."
-                    value={dressSearchQuery}
-                    onChange={(e) => setDressSearchQuery(e.target.value)}
-                    className="pl-9 h-9"
-                  />
-                </div>
+          {/* Step 3: Upload User Photo - Now shown after dress selection */}
+          {selectedDress && (
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <label className="block text-sm font-medium text-foreground text-center">
+                Step 2: Upload Your Photo
+              </label>
+              <div className="max-w-sm mx-auto">
+                <ImageUploader
+                  id="dress-change-user"
+                  image={dressChangeUserImage}
+                  onUpload={handleDressChangeUserImageUpload}
+                  onRemove={() => {
+                    setDressChangeUserImage(null);
+                    setDressChangeResult(null);
+                  }}
+                  label="Your Photo"
+                  description="Clear, full-body photo works best"
+                  aspectRatio="portrait"
+                />
               </div>
-
-              {dressesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : filteredDresses.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No dresses available for {dressChangeCategory} category.</p>
-                  <p className="text-sm mt-1">Admin needs to add dresses to the library.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {filteredDresses.map((dress) => (
-                    <button
-                      key={dress.id}
-                      onClick={() => setSelectedDress(dress)}
-                      disabled={isChangingDress}
-                      className={`group relative rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                        selectedDress?.id === dress.id
-                          ? "border-gold ring-2 ring-gold/30"
-                          : "border-border hover:border-gold/50"
-                      } ${isChangingDress ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                    >
-                      <div className="aspect-[3/4] relative">
-                        <img
-                          src={dress.image_url}
-                          alt={dress.name}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        />
-                        {selectedDress?.id === dress.id && (
-                          <div className="absolute inset-0 bg-gold/10 flex items-center justify-center">
-                            <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center">
-                              <svg
-                                className="w-4 h-4 text-background"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-2 bg-card/80 backdrop-blur-sm">
-                        <p className="text-xs font-medium text-foreground truncate">{dress.name}</p>
-                        {dress.tags.length > 0 && (
-                          <p className="text-[10px] text-muted-foreground truncate mt-0.5">
-                            {dress.tags.slice(0, 2).join(", ")}
-                          </p>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 

@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface Dress {
   id: string;
-  category: "male" | "female";
+  category: "male" | "female" | "kids";
   name: string;
   image_url: string;
   tags: string[];
@@ -81,7 +81,7 @@ export const useDressLibrary = () => {
   };
 
   const addDress = async (
-    category: "male" | "female",
+    category: "male" | "female" | "kids",
     name: string,
     imageUrl: string,
     tags: string[]
