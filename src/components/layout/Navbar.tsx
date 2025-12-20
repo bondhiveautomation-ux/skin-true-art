@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Coins, Shield, Sparkles, Menu } from "lucide-react";
 import { useContent } from "@/hooks/useSiteContent";
 import { MobileNavDrawer } from "./MobileNavDrawer";
+import UserInbox from "@/components/user/UserInbox";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
@@ -109,9 +110,12 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                 </div>
               )}
               {userEmail && (
-                <span className="hidden lg:block text-sm text-cream/50 truncate max-w-[150px]">
-                  {userEmail}
-                </span>
+                <>
+                  <UserInbox />
+                  <span className="hidden lg:block text-sm text-cream/50 truncate max-w-[150px]">
+                    {userEmail}
+                  </span>
+                </>
               )}
               {onSignOut ? (
                 <Button 
@@ -134,8 +138,9 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               )}
             </div>
 
-            {/* Mobile: Credits + Hamburger */}
-            <div className="flex md:hidden items-center gap-3">
+            {/* Mobile: Inbox + Credits + Hamburger */}
+            <div className="flex md:hidden items-center gap-2">
+              {userEmail && <UserInbox />}
               {credits !== null && credits !== undefined && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30">
                   <Coins className="w-3.5 h-3.5 text-gold" />
