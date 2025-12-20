@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -203,16 +203,36 @@ const Admin = () => {
 
   const handleDownloadImage = async (url: string, filename: string) => {
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-      toast({ title: "Image downloaded" });
+      // Handle base64 data URLs directly
+      if (url.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast({ title: "Image downloaded" });
+        return;
+      }
+
+      // For external URLs, try fetch first, then fallback to opening in new tab
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) throw new Error('Fetch failed');
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        toast({ title: "Image downloaded" });
+      } catch {
+        // CORS blocked - open in new tab so user can save manually
+        window.open(url, '_blank');
+        toast({ title: "Image opened in new tab", description: "Right-click to save the image" });
+      }
     } catch (error) {
       console.error("Download failed:", error);
       toast({ title: "Failed to download image", variant: "destructive" });
@@ -280,42 +300,58 @@ const Admin = () => {
     }
   };
 
-  const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button className="relative group overflow-hidden rounded-lg border border-border hover:border-gold/50 transition-all">
-          <img 
-            src={src} 
-            alt={alt}
-            className="w-16 h-16 object-cover transition-transform group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-charcoal/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <ExternalLink className="w-4 h-4 text-cream" />
-          </div>
-        </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{alt}</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col items-center justify-center gap-4">
-          <img 
-            src={src} 
-            alt={alt}
-            className="max-h-[60vh] object-contain rounded-lg"
-          />
-          <Button 
-            onClick={() => handleDownloadImage(src, `${alt.replace(/\s+/g, '_')}.png`)}
-            variant="outline"
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Download Image
-          </Button>
+  const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => {
+    // Check if it's a valid displayable image source
+    const isValidSrc = src && (src.startsWith('http') || src.startsWith('data:image'));
+    
+    if (!isValidSrc) {
+      return (
+        <div className="w-16 h-16 rounded-lg border border-border bg-muted flex items-center justify-center">
+          <Image className="w-6 h-6 text-muted-foreground" />
         </div>
-      </DialogContent>
-    </Dialog>
-  );
+      );
+    }
+    
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <button className="relative group overflow-hidden rounded-lg border border-border hover:border-gold/50 transition-all">
+            <img 
+              src={src} 
+              alt={alt}
+              className="w-16 h-16 object-cover transition-transform group-hover:scale-110"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+            <div className="absolute inset-0 bg-charcoal/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <ExternalLink className="w-4 h-4 text-cream" />
+            </div>
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{alt}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center gap-4">
+            <img 
+              src={src} 
+              alt={alt}
+              className="max-h-[60vh] object-contain rounded-lg"
+            />
+            <Button 
+              onClick={() => handleDownloadImage(src, `${alt.replace(/\s+/g, '_')}.png`)}
+              variant="outline"
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download Image
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -616,8 +652,8 @@ const Admin = () => {
                       const isExpanded = expandedRows.has(h.id);
                       
                       return (
-                        <>
-                          <TableRow key={h.id} className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""}>
+                        <React.Fragment key={h.id}>
+                          <TableRow className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""}>
                             <TableCell onClick={(e) => e.stopPropagation()}>
                               <Checkbox 
                                 checked={selectedHistoryIds.has(h.id)}
@@ -729,7 +765,7 @@ const Admin = () => {
                               </TableCell>
                             </TableRow>
                           )}
-                        </>
+                        </React.Fragment>
                       );
                     })
                   )}
