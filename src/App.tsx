@@ -11,6 +11,7 @@ import CaptionStudio from "./pages/CaptionStudio";
 import PhotographyStudio from "./pages/PhotographyStudio";
 import BrandingStudio from "./pages/BrandingStudio";
 import Pricing from "./pages/Pricing";
+import Classes from "./pages/Classes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudio /></ProtectedRoute>} />
           <Route path="/branding-studio" element={<ProtectedRoute><BrandingStudio /></ProtectedRoute>} />
           <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+          <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
           
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />

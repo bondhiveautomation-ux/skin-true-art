@@ -23,7 +23,8 @@ import {
   ExternalLink,
   Shirt,
   Settings2,
-  MessageCircle
+  MessageCircle,
+  GraduationCap
 } from "lucide-react";
 import {
   Table,
@@ -60,6 +61,7 @@ import {
 import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
 import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 import { PaymentInbox } from "@/components/admin/PaymentInbox";
+import { LeadsInbox } from "@/components/admin/LeadsInbox";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -265,6 +267,10 @@ const Admin = () => {
             <TabsTrigger value="website-cms" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Website CMS
+            </TabsTrigger>
+            <TabsTrigger value="class-leads" className="gap-2">
+              <GraduationCap className="w-4 h-4" />
+              Class Leads
             </TabsTrigger>
           </TabsList>
 
@@ -553,6 +559,10 @@ const Admin = () => {
 
           <TabsContent value="website-cms">
             <WebsiteControlCenter />
+          </TabsContent>
+
+          <TabsContent value="class-leads">
+            <LeadsInbox />
           </TabsContent>
         </Tabs>
       </main>
