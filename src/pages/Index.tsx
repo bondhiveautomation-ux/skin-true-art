@@ -639,6 +639,7 @@ const Index = () => {
       }
       if (data?.generatedImageUrl) {
         setDressChangeResult(data.generatedImageUrl);
+        await logGeneration("Dress Change Studio");
         toast({ title: "Dress Change Complete!", description: "Your new look has been generated successfully" });
       }
     } catch (error: any) {
