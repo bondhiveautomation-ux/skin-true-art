@@ -154,6 +154,7 @@ const PhotographyStudio = () => {
           aiPhotographerMode,
           skinFinishEnabled: photoType !== "product" && skinFinishEnabled,
           skinFinishIntensity: photoType !== "product" && skinFinishEnabled ? skinFinishIntensity : undefined,
+          userId: user?.id,
         }
       });
 
