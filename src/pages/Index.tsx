@@ -223,13 +223,13 @@ const Index = () => {
           cameraAngle: selectedCameraAngle || undefined,
           backgroundImage: backgroundImage || undefined,
           pose: selectedPose || undefined,
+          userId: user?.id,
         }
       });
       if (error) throw error;
       if (data?.generatedImageUrl) {
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
-        await logGeneration("Character Generator", [], [data.generatedImageUrl]);
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
       }
     } catch (error: any) {
@@ -323,7 +323,7 @@ const Index = () => {
     }
     setIsExtractingDress(true);
     try {
-      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { body: { image: dressImage } });
+      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { body: { image: dressImage, userId: user?.id } });
       if (error) throw error;
       if (data?.error) {
         toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
@@ -331,7 +331,6 @@ const Index = () => {
       }
       if (data?.extractedImage) {
         setExtractedDressImage(data.extractedImage);
-        await logGeneration("Dress Extractor", [], [data.extractedImage]);
         toast({ title: "Success!", description: "Dress extracted and placed on mannequin" });
       }
     } catch (error: any) {
@@ -370,7 +369,7 @@ const Index = () => {
     }
     setIsRemovingPeople(true);
     try {
-      const { data, error } = await supabase.functions.invoke('remove-people-from-image', { body: { image: peopleImage } });
+      const { data, error } = await supabase.functions.invoke('remove-people-from-image', { body: { image: peopleImage, userId: user?.id } });
       if (error) throw error;
       if (data?.error) {
         toast({ title: "Processing failed", description: data.error, variant: "destructive" });
@@ -378,7 +377,6 @@ const Index = () => {
       }
       if (data?.cleanBackground) {
         setCleanBackground(data.cleanBackground);
-        await logGeneration("Background Saver", [], [data.cleanBackground]);
         toast({ title: "Success!", description: "People removed successfully" });
       }
     } catch (error: any) {

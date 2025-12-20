@@ -1,10 +1,51 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Helper to upload base64 image to Supabase storage
+async function uploadImageToStorage(
+  supabase: any,
+  base64Data: string,
+  userId: string,
+  prefix: string
+): Promise<string | null> {
+  try {
+    const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) return null;
+    
+    const extension = matches[1];
+    const base64Content = matches[2];
+    const buffer = Uint8Array.from(atob(base64Content), c => c.charCodeAt(0));
+    
+    const fileName = `${userId}/${prefix}_${Date.now()}.${extension}`;
+    
+    const { error } = await supabase.storage
+      .from('generation-images')
+      .upload(fileName, buffer, {
+        contentType: `image/${extension}`,
+        upsert: false
+      });
+    
+    if (error) {
+      console.error("Storage upload error:", error);
+      return null;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('generation-images')
+      .getPublicUrl(fileName);
+    
+    return urlData?.publicUrl || null;
+  } catch (error) {
+    console.error("Error uploading to storage:", error);
+    return null;
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,7 +53,7 @@ serve(async (req) => {
   }
 
   try {
-    const { characterImage, characterLeftProfile, characterRightProfile, prompt, productImage, preset, cameraAngle, backgroundImage, pose } = await req.json();
+    const { characterImage, characterLeftProfile, characterRightProfile, prompt, productImage, preset, cameraAngle, backgroundImage, pose, userId } = await req.json();
     
     if (!characterImage) {
       throw new Error("No character reference image provided");
@@ -37,8 +78,14 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Initialize Supabase client for storage and logging
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     console.log("Generating image with character consistency");
     console.log("Has side profiles:", hasMultipleReferenceImages ? "yes" : "no");
+    console.log("User ID for logging:", userId || "not provided");
 
     // Helper to build character reference images array
     const buildCharacterReferenceImages = () => {
@@ -217,7 +264,7 @@ Generate an image showing the same person in this new situation.`;
     }
 
     const data = await response.json();
-    console.log("AI response data:", JSON.stringify(data, null, 2));
+    console.log("AI response received");
     
     // Check for safety filter blocks
     const finishReason = data.choices?.[0]?.native_finish_reason || data.choices?.[0]?.finish_reason;
@@ -237,7 +284,7 @@ Generate an image showing the same person in this new situation.`;
     const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!generatedImageUrl) {
-      console.error("No image in AI response. Full response:", JSON.stringify(data, null, 2));
+      console.error("No image in AI response");
       
       const errorMessage = data.error?.message || data.choices?.[0]?.message?.content || "No image generated";
       
@@ -253,6 +300,37 @@ Generate an image showing the same person in this new situation.`;
     }
 
     console.log("Character-consistent image generated successfully");
+
+    // Upload to storage and log generation if userId is provided
+    if (userId) {
+      try {
+        let outputStorageUrl: string | null = null;
+
+        // Upload output image to storage
+        if (generatedImageUrl.startsWith('data:image')) {
+          outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_character');
+          console.log("Output image uploaded to storage:", outputStorageUrl ? "success" : "failed");
+        }
+
+        const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+
+        // Log the generation
+        const { error: logError } = await supabase.rpc('log_generation', {
+          p_user_id: userId,
+          p_feature_name: 'Character Generator',
+          p_input_images: [],
+          p_output_images: outputImages
+        });
+
+        if (logError) {
+          console.error("Error logging generation:", logError);
+        } else {
+          console.log("Generation logged with images:", { outputCount: outputImages.length });
+        }
+      } catch (logErr) {
+        console.error("Error in logging/upload:", logErr);
+      }
+    }
 
     return new Response(
       JSON.stringify({ generatedImageUrl }),

@@ -1,9 +1,50 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Helper to upload base64 image to Supabase storage
+async function uploadImageToStorage(
+  supabase: any,
+  base64Data: string,
+  userId: string,
+  prefix: string
+): Promise<string | null> {
+  try {
+    const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) return null;
+    
+    const extension = matches[1];
+    const base64Content = matches[2];
+    const buffer = Uint8Array.from(atob(base64Content), c => c.charCodeAt(0));
+    
+    const fileName = `${userId}/${prefix}_${Date.now()}.${extension}`;
+    
+    const { error } = await supabase.storage
+      .from('generation-images')
+      .upload(fileName, buffer, {
+        contentType: `image/${extension}`,
+        upsert: false
+      });
+    
+    if (error) {
+      console.error("Storage upload error:", error);
+      return null;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('generation-images')
+      .getPublicUrl(fileName);
+    
+    return urlData?.publicUrl || null;
+  } catch (error) {
+    console.error("Error uploading to storage:", error);
+    return null;
+  }
+}
 
 interface EnhanceRequest {
   image: string;
@@ -14,6 +55,7 @@ interface EnhanceRequest {
   aiPhotographerMode: boolean;
   skinFinishEnabled?: boolean;
   skinFinishIntensity?: "light" | "medium" | "pro";
+  userId?: string;
 }
 
 const styleDescriptions: Record<string, string> = {
@@ -66,9 +108,9 @@ serve(async (req) => {
 
   try {
     const body: EnhanceRequest = await req.json();
-    const { image, photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity } = body;
+    const { image, photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity, userId } = body;
 
-    console.log("Photo enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity });
+    console.log("Photo enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity, userId: userId || "not provided" });
 
     if (!image) {
       return new Response(
@@ -81,6 +123,11 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const styleDesc = styleDescriptions[stylePreset] || styleDescriptions.clean_studio;
     const bgDesc = backgroundDescriptions[backgroundOption] || backgroundDescriptions.keep_original;
@@ -207,6 +254,35 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
     }
 
     console.log("Photo enhanced successfully");
+
+    // Upload to storage and log generation if userId is provided
+    if (userId) {
+      try {
+        let outputStorageUrl: string | null = null;
+
+        if (enhancedImageUrl.startsWith('data:image')) {
+          outputStorageUrl = await uploadImageToStorage(supabase, enhancedImageUrl, userId, 'output_enhance');
+          console.log("Output image uploaded:", outputStorageUrl ? "success" : "failed");
+        }
+
+        const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+
+        const { error: logError } = await supabase.rpc('log_generation', {
+          p_user_id: userId,
+          p_feature_name: 'Photography Studio',
+          p_input_images: [],
+          p_output_images: outputImages
+        });
+
+        if (logError) {
+          console.error("Error logging generation:", logError);
+        } else {
+          console.log("Generation logged with images:", { outputCount: outputImages.length });
+        }
+      } catch (logErr) {
+        console.error("Error in logging/upload:", logErr);
+      }
+    }
 
     return new Response(
       JSON.stringify({ enhancedImage: enhancedImageUrl }),
