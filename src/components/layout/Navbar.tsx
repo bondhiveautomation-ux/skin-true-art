@@ -58,41 +58,41 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8 lg:gap-12">
+            <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
               <button 
                 onClick={() => onNavigate("features")}
-                className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
               >
                 {navFeatures}
               </button>
               <button 
                 onClick={() => onNavigate("how-it-works")}
-                className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
               >
                 {navProcess}
               </button>
               <button 
                 onClick={() => onNavigate("tools")}
-                className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
               >
                 {navStudio}
               </button>
               <button 
                 onClick={() => navigate("/pricing")}
-                className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
               >
                 Pricing
               </button>
               <button 
                 onClick={() => navigate("/classes")}
-                className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
               >
                 Classes
               </button>
             </nav>
 
             {/* Desktop User section */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2">
               {isAdmin && (
                 <Button
                   onClick={() => navigate("/admin")}
@@ -138,8 +138,8 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               )}
             </div>
 
-            {/* Mobile: Inbox + Credits + Hamburger */}
-            <div className="flex md:hidden items-center gap-2">
+            {/* Mobile/Tablet: Inbox + Credits + Hamburger */}
+            <div className="flex lg:hidden items-center gap-2">
               {userEmail && <UserInbox />}
               {credits !== null && credits !== undefined && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30">
