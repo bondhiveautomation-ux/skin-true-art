@@ -1,0 +1,181 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface EnhanceRequest {
+  image: string;
+  photoType: "product" | "portrait" | "lifestyle";
+  stylePreset: string;
+  backgroundOption: string;
+  outputQuality: "hd" | "ultra_hd";
+  aiPhotographerMode: boolean;
+}
+
+const styleDescriptions: Record<string, string> = {
+  clean_studio: "Clean, professional studio lighting with soft shadows and neutral background tones",
+  luxury_brand: "High-end luxury brand aesthetic with dramatic lighting, rich colors, and sophisticated mood",
+  soft_natural: "Soft, natural daylight with gentle diffused lighting and warm organic tones",
+  dark_premium: "Dark, moody premium aesthetic with selective lighting and deep shadows for drama",
+  ecommerce_white: "Pure white e-commerce background with even, shadowless product lighting",
+  instagram_editorial: "Instagram-worthy editorial style with trendy color grading and lifestyle appeal",
+};
+
+const backgroundDescriptions: Record<string, string> = {
+  keep_original: "Keep and enhance the original background with improved lighting and clarity",
+  clean_studio: "Replace with a clean, professional studio background",
+  premium_lifestyle: "Replace with a premium lifestyle context that complements the subject",
+};
+
+const photoTypeInstructions: Record<string, string> = {
+  product: "This is a PRODUCT photo. Focus on: showcasing the product clearly, accurate colors, appealing presentation, remove any distracting elements, ensure the product is the hero of the image.",
+  portrait: "This is a PORTRAIT/INFLUENCER photo. Focus on: flattering lighting on the face, natural skin texture (no plastic look), natural pose correction, eye enhancement, professional headshot quality while maintaining the person's authentic identity.",
+  lifestyle: "This is a LIFESTYLE/BRAND photo. Focus on: storytelling composition, aspirational mood, brand-appropriate atmosphere, lifestyle context enhancement, making the scene feel premium and desirable.",
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const body: EnhanceRequest = await req.json();
+    const { image, photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode } = body;
+
+    console.log("Photo enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode });
+
+    if (!image) {
+      return new Response(
+        JSON.stringify({ error: "Please provide an image to enhance" }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    const styleDesc = styleDescriptions[stylePreset] || styleDescriptions.clean_studio;
+    const bgDesc = backgroundDescriptions[backgroundOption] || backgroundDescriptions.keep_original;
+    const photoTypeInstruction = photoTypeInstructions[photoType] || photoTypeInstructions.portrait;
+    const qualityInstruction = outputQuality === "ultra_hd" 
+      ? "Output in ULTRA HIGH DEFINITION with maximum sharpness, clarity, and detail. DSLR-quality output with professional depth of field."
+      : "Output in HIGH DEFINITION with good sharpness and clarity.";
+
+    const aiModeInstruction = aiPhotographerMode 
+      ? `
+AI PHOTOGRAPHER MODE (AUTO-OPTIMIZE):
+Analyze the image and automatically determine:
+- Best camera angle correction (fix any perspective distortion)
+- Best crop and composition (apply rule of thirds, golden ratio)
+- Best lighting direction and intensity
+- Best color grading for the style
+- Natural pose corrections if needed
+Make all these decisions automatically without user input.`
+      : "";
+
+    const prompt = `You are a world-class professional photographer and photo retoucher. Transform this image into a stunning, professional-quality photograph.
+
+${photoTypeInstruction}
+
+STYLE: ${styleDesc}
+
+BACKGROUND: ${bgDesc}
+
+${qualityInstruction}
+
+${aiModeInstruction}
+
+CRITICAL RULES YOU MUST FOLLOW:
+1. NEVER distort faces, bodies, or product shapes - preserve all proportions exactly
+2. NEVER change the person's identity or make them unrecognizable
+3. NEVER add fake beauty filters or plastic-looking skin - maintain natural texture
+4. NEVER over-process or make the image look artificially filtered
+5. PRESERVE REALISM at all costs - this should look like a professional photo, not AI art
+
+PROFESSIONAL PHOTOGRAPHER CORRECTIONS:
+- Fix camera angle and straighten any crooked framing
+- Correct perspective distortion
+- Apply professional lighting correction
+- Enhance sharpness naturally without halos or artifacts
+- Improve color accuracy and white balance
+- Apply subtle professional color grading matching the style
+- Enhance dynamic range
+- Remove noise and grain professionally
+- If pose looks awkward, make SUBTLE natural corrections only
+
+The result should look like it was taken by a professional photographer with high-end equipment and then professionally retouched by an expert.
+
+EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced version of this exact image.`;
+
+    console.log("Calling Lovable AI for photo enhancement...");
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: image } }
+            ]
+          }
+        ],
+        modalities: ["image", "text"]
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI API error:", response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "API credits exhausted. Please try again later." }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw new Error(`AI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("AI response received");
+
+    // Extract the enhanced image from the response
+    const enhancedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+    if (!enhancedImageUrl) {
+      console.error("No image in response:", JSON.stringify(data).substring(0, 500));
+      throw new Error("No enhanced image generated from AI");
+    }
+
+    console.log("Photo enhanced successfully");
+
+    return new Response(
+      JSON.stringify({ enhancedImage: enhancedImageUrl }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error("Photo enhancement error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Failed to enhance photo" }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
