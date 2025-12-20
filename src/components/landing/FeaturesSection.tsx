@@ -1,4 +1,5 @@
-import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Repeat } from "lucide-react";
+import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Repeat, Type } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useContent, useFeatureContent } from "@/hooks/useSiteContent";
 
 const featureIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -10,6 +11,7 @@ const featureIcons: Record<string, React.ComponentType<{ className?: string }>> 
   feature_7: Palette,
   feature_8: Layers,
   feature_9: Repeat,
+  feature_10: Type,
 };
 
 const featureSectionIds: Record<string, string> = {
@@ -21,6 +23,7 @@ const featureSectionIds: Record<string, string> = {
   feature_7: "makeup-studio",
   feature_8: "full-look-transfer",
   feature_9: "dress-change-studio",
+  feature_10: "/caption-studio",
 };
 
 interface FeaturesSectionProps {
@@ -29,6 +32,7 @@ interface FeaturesSectionProps {
 }
 
 export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) => {
+  const navigate = useNavigate();
   const { content: sectionContent } = useContent("features");
   const { features } = useFeatureContent();
   
@@ -43,6 +47,12 @@ export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) =>
   const subheadline = sectionContent.subheadline || "A curated suite of professional tools designed for beauty artists, influencers, and fashion brands.";
 
   const handleCardClick = (sectionId: string) => {
+    // If it's a route (starts with /), navigate to it
+    if (sectionId.startsWith('/')) {
+      navigate(sectionId);
+      return;
+    }
+    
     if (onFeatureClick) {
       onFeatureClick(sectionId);
     } else {
