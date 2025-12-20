@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Sparkles, Flame, Rocket, Briefcase, Timer, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 
 type PaymentStatus = 'pending' | 'approved' | 'rejected';
@@ -32,6 +32,13 @@ interface ChatMessage {
 }
 
 const BKASH_NUMBER = "01328845972";
+
+const NEW_YEAR_OFFER = {
+  name: "New Year Special",
+  price: 999,
+  credits: 2000,
+  description: "Our biggest credit pack ever — only for New Year."
+};
 
 const PRICING_TIERS = [
   {
@@ -141,15 +148,26 @@ const Pricing = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleInboxClick = (tier: typeof PRICING_TIERS[0]) => {
+  const handleInboxClick = (tier: typeof PRICING_TIERS[0] | typeof NEW_YEAR_OFFER) => {
     if (!user) {
       toast.error("Please sign in to purchase credits");
       navigate("/auth");
       return;
     }
-    setSelectedPackage(tier);
+    setSelectedPackage(tier as typeof PRICING_TIERS[0]);
     setShowChat(true);
     setMessage(`Hi, I want to buy: ${tier.name} (${tier.credits} credits for ${tier.price} Tk).\nI have sent payment via bKash.\nMy TxID: \nMy account email: ${user.email}`);
+  };
+
+  const handleNewYearOfferClick = () => {
+    if (!user) {
+      toast.error("Please sign in to claim this offer");
+      navigate("/auth");
+      return;
+    }
+    setSelectedPackage(NEW_YEAR_OFFER as typeof PRICING_TIERS[0]);
+    setShowChat(true);
+    setMessage(`Hi, I want to claim the New Year 999 Tk offer (2000 credits).\nI have sent payment via bKash.\nMy TxID: ______\nMy email: ${user.email}`);
   };
 
   const handleSendMessage = async () => {
@@ -280,6 +298,130 @@ const Pricing = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* New Year Special Offer Card */}
+        <div className="mb-12 sm:mb-16">
+          <Card className="relative overflow-hidden border-2 border-gold bg-gradient-to-br from-gold/10 via-background to-gold/5 shadow-2xl shadow-gold/20 rounded-2xl sm:rounded-3xl">
+            {/* Animated glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/10 to-gold/0 animate-pulse pointer-events-none" />
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+            
+            {/* Badge */}
+            <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
+              <Badge className="bg-gradient-to-r from-gold to-amber-500 text-background font-bold px-3 sm:px-4 py-1.5 text-xs sm:text-sm animate-pulse shadow-lg shadow-gold/30">
+                <PartyPopper className="w-3.5 h-3.5 mr-1.5" />
+                NEW YEAR SPECIAL — LIMITED TIME
+              </Badge>
+            </div>
+            
+            <CardContent className="relative z-10 p-6 sm:p-8 pt-14 sm:pt-16">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                {/* Left: Offer Details */}
+                <div className="text-center md:text-left">
+                  <div className="mb-4">
+                    <span className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gold">{NEW_YEAR_OFFER.price}</span>
+                    <span className="text-cream/60 text-xl sm:text-2xl ml-2">Tk</span>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-serif text-cream mb-2">
+                    {NEW_YEAR_OFFER.credits.toLocaleString()} Credits
+                  </p>
+                  <p className="text-cream/70 text-sm sm:text-base mb-6">
+                    {NEW_YEAR_OFFER.description}
+                  </p>
+                  
+                  {/* Value Highlights */}
+                  <div className="space-y-2.5 mb-6">
+                    <div className="flex items-center gap-3 text-cream/80">
+                      <Flame className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                      <span className="text-sm sm:text-base">2000 Credits — save massive money</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-cream/80">
+                      <Rocket className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                      <span className="text-sm sm:text-base">Perfect for bulk posting & batch branding</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-cream/80">
+                      <Briefcase className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                      <span className="text-sm sm:text-base">Ideal for sellers, creators & agencies</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-cream/80">
+                      <Timer className="w-5 h-5 text-gold flex-shrink-0" />
+                      <span className="text-sm sm:text-base">Limited-time New Year deal only</span>
+                    </div>
+                  </div>
+                  
+                  <p className="text-cream/50 text-xs sm:text-sm italic">
+                    "Regular users would need multiple packs — this gives you everything at once."
+                  </p>
+                </div>
+                
+                {/* Right: Payment & CTA */}
+                <div className="space-y-5">
+                  {/* bKash Section */}
+                  <div className="bg-background/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 border border-gold/20">
+                    <p className="text-sm font-medium text-cream/80 flex items-center gap-2 mb-3">
+                      Pay via <span className="text-pink-500 font-semibold">bKash</span> (Manual)
+                    </p>
+                    
+                    <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 sm:p-4 border border-gold/10 mb-4">
+                      <span className="font-mono text-lg sm:text-xl text-gold font-bold">{BKASH_NUMBER}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={copyToClipboard}
+                        className="h-10 w-10 text-cream/60 hover:text-gold active:scale-95"
+                      >
+                        {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+                      </Button>
+                    </div>
+                    
+                    <ol className="text-xs sm:text-sm text-cream/60 space-y-1.5 pl-1">
+                      <li>1. Send <span className="text-gold font-semibold">999 Tk</span> to the number above</li>
+                      <li>2. Copy your Transaction ID (TxID)</li>
+                      <li>3. Click Inbox and send us your TxID</li>
+                      <li>4. Credits will be added after verification</li>
+                    </ol>
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <Button 
+                    onClick={handleNewYearOfferClick}
+                    className="w-full h-14 sm:h-12 text-base sm:text-lg font-bold bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-background shadow-lg shadow-gold/30 transition-all duration-300 hover:shadow-xl hover:shadow-gold/40 hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    }}
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Get New Year Deal
+                  </Button>
+                  
+                  {/* Inbox Button */}
+                  <Button 
+                    onClick={handleNewYearOfferClick}
+                    variant="outline"
+                    className="w-full h-12 sm:h-11 border-gold/30 text-gold hover:bg-gold/10 hover:border-gold"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Inbox to Claim This Offer
+                  </Button>
+                  
+                  {/* Urgency Text */}
+                  <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs text-cream/50">
+                    <span className="flex items-center gap-1">
+                      <Timer className="w-3.5 h-3.5" /> Limited time only
+                    </span>
+                    <span className="flex items-center gap-1">
+                      🎯 Offer will be removed soon
+                    </span>
+                    <span className="flex items-center gap-1">
+                      🎆 New Year exclusive
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Hero */}
         <div className="text-center mb-10 sm:mb-16">
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-cream mb-3 sm:mb-4">
