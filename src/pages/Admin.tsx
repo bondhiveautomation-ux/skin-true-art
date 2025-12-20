@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   ArrowLeft, 
   Loader2, 
@@ -75,6 +76,8 @@ const Admin = () => {
   const [processingUser, setProcessingUser] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+  const [selectedHistoryIds, setSelectedHistoryIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   
   // New user form state
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -221,10 +224,60 @@ const Admin = () => {
     const success = await deleteHistoryEntry(historyId);
     if (success) {
       toast({ title: "History entry deleted" });
+      setSelectedHistoryIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(historyId);
+        return newSet;
+      });
     } else {
       toast({ title: "Failed to delete history entry", variant: "destructive" });
     }
     setDeletingHistoryId(null);
+  };
+
+  const handleBulkDeleteHistory = async () => {
+    if (selectedHistoryIds.size === 0) return;
+    
+    setBulkDeleting(true);
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const id of selectedHistoryIds) {
+      const success = await deleteHistoryEntry(id);
+      if (success) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    }
+    
+    if (successCount > 0) {
+      toast({ title: `Deleted ${successCount} entries${failCount > 0 ? `, ${failCount} failed` : ''}` });
+      setSelectedHistoryIds(new Set());
+    } else {
+      toast({ title: "Failed to delete entries", variant: "destructive" });
+    }
+    setBulkDeleting(false);
+  };
+
+  const toggleHistorySelection = (id: string) => {
+    setSelectedHistoryIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAllHistory = () => {
+    if (selectedHistoryIds.size === history.length) {
+      setSelectedHistoryIds(new Set());
+    } else {
+      setSelectedHistoryIds(new Set(history.map(h => h.id)));
+    }
   };
 
   const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => (
@@ -493,10 +546,55 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="history">
+            {/* Bulk Delete Bar */}
+            {selectedHistoryIds.size > 0 && (
+              <div className="mb-4 p-3 rounded-lg border border-gold/10 bg-card flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  {selectedHistoryIds.size} item{selectedHistoryIds.size > 1 ? 's' : ''} selected
+                </span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" disabled={bulkDeleting}>
+                      {bulkDeleting ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      ) : (
+                        <Trash2 className="w-4 h-4 mr-2" />
+                      )}
+                      Delete Selected
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete {selectedHistoryIds.size} Entries</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete {selectedHistoryIds.size} generation history {selectedHistoryIds.size === 1 ? 'entry' : 'entries'}? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleBulkDeleteHistory}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete All
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+            
             <div className="rounded-lg border border-gold/10 overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-card/50">
+                    <TableHead className="w-10">
+                      <Checkbox 
+                        checked={history.length > 0 && selectedHistoryIds.size === history.length}
+                        onCheckedChange={toggleSelectAllHistory}
+                        aria-label="Select all"
+                      />
+                    </TableHead>
                     <TableHead className="w-10"></TableHead>
                     <TableHead>User</TableHead>
                     <TableHead>Feature</TableHead>
@@ -508,7 +606,7 @@ const Admin = () => {
                 <TableBody>
                   {history.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                         No generation history yet
                       </TableCell>
                     </TableRow>
@@ -520,6 +618,13 @@ const Admin = () => {
                       return (
                         <>
                           <TableRow key={h.id} className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""}>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              <Checkbox 
+                                checked={selectedHistoryIds.has(h.id)}
+                                onCheckedChange={() => toggleHistorySelection(h.id)}
+                                aria-label={`Select ${h.feature_name}`}
+                              />
+                            </TableCell>
                             <TableCell onClick={() => hasImages && toggleRow(h.id)}>
                               {hasImages && (
                                 <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
@@ -585,7 +690,7 @@ const Admin = () => {
                           {/* Expanded row for images */}
                           {isExpanded && hasImages && (
                             <TableRow key={`${h.id}-images`}>
-                              <TableCell colSpan={6} className="bg-accent/20 p-4">
+                              <TableCell colSpan={7} className="bg-accent/20 p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                   {/* Input Images */}
                                   <div>
