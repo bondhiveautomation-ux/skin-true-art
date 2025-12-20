@@ -262,7 +262,7 @@ const Auth = () => {
             <div className="w-12 h-12 rounded-xl gold-icon flex items-center justify-center animate-pulse-glow">
               <Sparkles className="w-6 h-6 text-gold" />
             </div>
-            <span className="font-serif text-2xl font-semibold text-cream">Influencer Tool</span>
+            <span className="font-serif text-2xl font-semibold text-cream">Brandify</span>
           </div>
 
           {/* Headline */}
@@ -273,7 +273,7 @@ const Auth = () => {
 
           {/* Subtext */}
           <p className="text-lg text-cream/60 leading-relaxed mb-10">
-            Photo upgrade, captions, branding, and creator tools — built for Bangladeshi sellers, influencers, and makeup artists.
+            Create, enhance, and brand your content with Brandify — built for Bangladeshi sellers, influencers, and makeup artists.
           </p>
 
           {/* Feature Bullets */}
