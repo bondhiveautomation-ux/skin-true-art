@@ -126,53 +126,53 @@ const LiveUsersMonitor = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-            <span className="font-medium">{onlineUsers.length} Online</span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 animate-pulse" />
+            <span className="font-medium text-sm sm:text-base">{onlineUsers.length} Online</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="w-3 h-3 rounded-full bg-gray-400" />
-            <span>{liveUsers.length - onlineUsers.length} Offline</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-gray-400" />
+            <span className="text-sm sm:text-base">{liveUsers.length - onlineUsers.length} Offline</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Switch
               id="online-only"
               checked={showOnlineOnly}
               onCheckedChange={setShowOnlineOnly}
             />
-            <Label htmlFor="online-only">Online only</Label>
+            <Label htmlFor="online-only" className="text-xs sm:text-sm whitespace-nowrap">Online only</Label>
           </div>
 
-          <Button variant="outline" size="sm" onClick={() => setShowBroadcast(true)}>
-            <Radio className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => setShowBroadcast(true)} className="shrink-0 text-xs sm:text-sm h-8 px-2 sm:px-3">
+            <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Broadcast
           </Button>
 
-          <Button variant="outline" size="sm" onClick={refetch}>
-            <RefreshCw className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={refetch} className="shrink-0 text-xs sm:text-sm h-8 px-2 sm:px-3">
+            <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Refresh
           </Button>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="rounded-lg border border-gold/10 overflow-hidden">
-        <Table>
+      <div className="rounded-lg border border-gold/10 overflow-x-auto">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow className="bg-card/50">
-              <TableHead className="w-12">Status</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>Current Page</TableHead>
-              <TableHead>Device</TableHead>
-              <TableHead>Last Active</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="w-12 text-xs sm:text-sm">Status</TableHead>
+              <TableHead className="text-xs sm:text-sm">User</TableHead>
+              <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Current Page</TableHead>
+              <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Device</TableHead>
+              <TableHead className="text-xs sm:text-sm">Last Active</TableHead>
+              <TableHead className="text-right text-xs sm:text-sm">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,18 +191,18 @@ const LiveUsersMonitor = () => {
                 return (
                   <TableRow key={user.user_id}>
                     <TableCell>
-                      <div className={`w-3 h-3 rounded-full ${user.is_online ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
+                      <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${user.is_online ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{user.full_name || "—"}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="font-medium text-xs sm:text-sm">{user.full_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-none">{user.email}</p>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       <div className="flex flex-col gap-1">
                         {user.current_page_name ? (
-                          <Badge variant="secondary" className="font-normal w-fit">
+                          <Badge variant="secondary" className="font-normal w-fit text-xs">
                             {user.current_page_name}
                           </Badge>
                         ) : (
@@ -215,7 +215,7 @@ const LiveUsersMonitor = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {user.device_type === "mobile" ? (
                         <Smartphone className="w-4 h-4 text-muted-foreground" />
                       ) : user.device_type === "desktop" ? (
@@ -224,7 +224,7 @@ const LiveUsersMonitor = () => {
                         <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
                       {formatTime(user.last_active_at)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -232,10 +232,10 @@ const LiveUsersMonitor = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => openChat(user.user_id)}
-                        className="relative"
+                        className="relative h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm"
                       >
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        Message
+                        <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Message</span>
                         {hasUnread && (
                           <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
                         )}

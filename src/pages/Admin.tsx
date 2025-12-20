@@ -375,38 +375,40 @@ const Admin = () => {
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <Tabs defaultValue="live-users" className="w-full">
-          <TabsList className="mb-6 flex-wrap">
-            <TabsTrigger value="live-users" className="gap-2">
-              <Radio className="w-4 h-4" />
-              Live Users
-            </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
-              <Users className="w-4 h-4" />
-              Users ({users.length})
-            </TabsTrigger>
-            <TabsTrigger value="payments" className="gap-2">
-              <MessageCircle className="w-4 h-4" />
-              Payment Inbox
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="w-4 h-4" />
-              Generation History
-            </TabsTrigger>
-            <TabsTrigger value="dress-library" className="gap-2">
-              <Shirt className="w-4 h-4" />
-              Dress Library
-            </TabsTrigger>
-            <TabsTrigger value="website-cms" className="gap-2">
-              <Settings2 className="w-4 h-4" />
-              Website CMS
-            </TabsTrigger>
-            <TabsTrigger value="class-leads" className="gap-2">
-              <GraduationCap className="w-4 h-4" />
-              Class Leads
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-6 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex h-auto min-w-max gap-1 p-1 sm:flex-wrap sm:h-auto">
+              <TabsTrigger value="live-users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <Radio className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Live</span> Users
+              </TabsTrigger>
+              <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                Users ({users.length})
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                Payments
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <History className="w-3 h-3 sm:w-4 sm:h-4" />
+                History
+              </TabsTrigger>
+              <TabsTrigger value="dress-library" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <Shirt className="w-3 h-3 sm:w-4 sm:h-4" />
+                Dresses
+              </TabsTrigger>
+              <TabsTrigger value="website-cms" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <Settings2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                CMS
+              </TabsTrigger>
+              <TabsTrigger value="class-leads" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4" />
+                Leads
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="live-users">
             <LiveUsersMonitor />
