@@ -24,7 +24,8 @@ import {
   Shirt,
   Settings2,
   MessageCircle,
-  GraduationCap
+  GraduationCap,
+  Download
 } from "lucide-react";
 import {
   Table,
@@ -66,11 +67,12 @@ import { LeadsInbox } from "@/components/admin/LeadsInbox";
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, createUser, refetchUsers, refetchHistory } = useAdmin();
+  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, refetchUsers, refetchHistory } = useAdmin();
   const { toast } = useToast();
   const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
   const [processingUser, setProcessingUser] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
   
   // New user form state
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -194,6 +196,35 @@ const Admin = () => {
     });
   };
 
+  const handleDownloadImage = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      toast({ title: "Image downloaded" });
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast({ title: "Failed to download image", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteHistory = async (historyId: string) => {
+    setDeletingHistoryId(historyId);
+    const success = await deleteHistoryEntry(historyId);
+    if (success) {
+      toast({ title: "History entry deleted" });
+    } else {
+      toast({ title: "Failed to delete history entry", variant: "destructive" });
+    }
+    setDeletingHistoryId(null);
+  };
+
   const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => (
     <Dialog>
       <DialogTrigger asChild>
@@ -212,12 +243,20 @@ const Admin = () => {
         <DialogHeader>
           <DialogTitle>{alt}</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
           <img 
             src={src} 
             alt={alt}
-            className="max-h-[70vh] object-contain rounded-lg"
+            className="max-h-[60vh] object-contain rounded-lg"
           />
+          <Button 
+            onClick={() => handleDownloadImage(src, `${alt.replace(/\s+/g, '_')}.png`)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Download Image
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -453,12 +492,13 @@ const Admin = () => {
                     <TableHead>Feature</TableHead>
                     <TableHead>Images</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {history.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                         No generation history yet
                       </TableCell>
                     </TableRow>
@@ -469,21 +509,21 @@ const Admin = () => {
                       
                       return (
                         <>
-                          <TableRow key={h.id} className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""} onClick={() => hasImages && toggleRow(h.id)}>
-                            <TableCell>
+                          <TableRow key={h.id} className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""}>
+                            <TableCell onClick={() => hasImages && toggleRow(h.id)}>
                               {hasImages && (
                                 <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
                                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                 </Button>
                               )}
                             </TableCell>
-                            <TableCell className="font-medium">{h.user_email}</TableCell>
-                            <TableCell>
+                            <TableCell onClick={() => hasImages && toggleRow(h.id)} className="font-medium">{h.user_email}</TableCell>
+                            <TableCell onClick={() => hasImages && toggleRow(h.id)}>
                               <span className="px-2 py-1 rounded-full bg-gold/10 text-gold text-sm font-medium">
                                 {h.feature_name}
                               </span>
                             </TableCell>
-                            <TableCell>
+                            <TableCell onClick={() => hasImages && toggleRow(h.id)}>
                               {hasImages ? (
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                   <Image className="w-4 h-4" />
@@ -493,15 +533,49 @@ const Admin = () => {
                                 <span className="text-sm text-muted-foreground/50">No images</span>
                               )}
                             </TableCell>
-                            <TableCell className="text-muted-foreground text-sm">
+                            <TableCell onClick={() => hasImages && toggleRow(h.id)} className="text-muted-foreground text-sm">
                               {formatDate(h.created_at)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    disabled={deletingHistoryId === h.id}
+                                  >
+                                    {deletingHistoryId === h.id ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="w-3 h-3" />
+                                    )}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete History Entry</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this generation history entry for {h.user_email}? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleDeleteHistory(h.id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </TableCell>
                           </TableRow>
                           
                           {/* Expanded row for images */}
                           {isExpanded && hasImages && (
                             <TableRow key={`${h.id}-images`}>
-                              <TableCell colSpan={5} className="bg-accent/20 p-4">
+                              <TableCell colSpan={6} className="bg-accent/20 p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                   {/* Input Images */}
                                   <div>
