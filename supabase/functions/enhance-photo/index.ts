@@ -12,6 +12,8 @@ interface EnhanceRequest {
   backgroundOption: string;
   outputQuality: "hd" | "ultra_hd";
   aiPhotographerMode: boolean;
+  skinFinishEnabled?: boolean;
+  skinFinishIntensity?: "light" | "medium" | "pro";
 }
 
 const styleDescriptions: Record<string, string> = {
@@ -35,6 +37,28 @@ const photoTypeInstructions: Record<string, string> = {
   lifestyle: "This is a LIFESTYLE/BRAND photo. Focus on: storytelling composition, aspirational mood, brand-appropriate atmosphere, lifestyle context enhancement, making the scene feel premium and desirable.",
 };
 
+const skinFinishInstructions: Record<string, string> = {
+  light: `STUDIO SKIN FINISH (Light):
+- Remove only small blemishes, tiny spots, and minor imperfections
+- Keep FULL skin texture and all pores visible
+- Do NOT smooth or blur any skin areas
+- Maintain complete natural appearance
+- Only touch up the most obvious temporary marks`,
+  medium: `STUDIO SKIN FINISH (Medium - Recommended):
+- Smooth skin evenly while maintaining natural texture
+- Remove acne, dark spots, scars, and uneven skin tone
+- Keep natural pores visible but refined
+- Balance between retouching and realism
+- Apply to primary subject face only if multiple people exist`,
+  pro: `STUDIO SKIN FINISH (Pro Retouch):
+- High-end professional beauty retouch
+- Smooth and even skin tone throughout
+- Remove all blemishes, spots, scars, and imperfections
+- Maintain realistic pore texture (subtle but visible)
+- Professional magazine-quality finish
+- Apply only to primary subject if multiple faces exist`,
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -42,9 +66,9 @@ serve(async (req) => {
 
   try {
     const body: EnhanceRequest = await req.json();
-    const { image, photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode } = body;
+    const { image, photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity } = body;
 
-    console.log("Photo enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode });
+    console.log("Photo enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity });
 
     if (!image) {
       return new Response(
@@ -77,6 +101,22 @@ Analyze the image and automatically determine:
 Make all these decisions automatically without user input.`
       : "";
 
+    // Skin finish instructions - only for non-product photos
+    const skinFinishInstruction = skinFinishEnabled && photoType !== "product" && skinFinishIntensity
+      ? `
+${skinFinishInstructions[skinFinishIntensity]}
+
+CRITICAL SKIN FINISH RULES:
+- Do NOT change face shape or facial features
+- Do NOT enlarge eyes or lips
+- Do NOT apply makeup or beauty filters
+- Do NOT create plastic, doll-like, or unnaturally smooth skin
+- Do NOT blur skin to the point of losing texture
+- PRESERVE the person's age and natural appearance
+- PRESERVE their identity completely
+- This should look like expert Photoshop retouching, NOT AI beautification`
+      : "";
+
     const prompt = `You are a world-class professional photographer and photo retoucher. Transform this image into a stunning, professional-quality photograph.
 
 ${photoTypeInstruction}
@@ -88,6 +128,8 @@ BACKGROUND: ${bgDesc}
 ${qualityInstruction}
 
 ${aiModeInstruction}
+
+${skinFinishInstruction}
 
 CRITICAL RULES YOU MUST FOLLOW:
 1. NEVER distort faces, bodies, or product shapes - preserve all proportions exactly
