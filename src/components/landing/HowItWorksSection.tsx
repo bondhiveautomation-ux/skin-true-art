@@ -40,59 +40,59 @@ export const HowItWorksSection = ({ id }: HowItWorksSectionProps) => {
   ];
 
   return (
-    <section id={id} className="py-28 lg:py-36 relative overflow-hidden">
+    <section id={id} className="py-16 sm:py-28 lg:py-36 relative overflow-hidden">
       {/* Deep dark cinematic background */}
       <div className="absolute inset-0 bg-charcoal-deep" />
       
-      {/* Dramatic gradient overlays */}
+      {/* Dramatic gradient overlays - reduced on mobile */}
       <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-background to-transparent" />
       <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent" />
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gold/5 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-gradient-to-tr from-rose-gold/3 to-transparent" />
+      <div className="hidden sm:block absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gold/5 to-transparent" />
+      <div className="hidden sm:block absolute bottom-0 left-0 w-1/3 h-1/2 bg-gradient-to-tr from-rose-gold/3 to-transparent" />
       
       {/* Noise texture */}
       <div className="absolute inset-0 noise-texture" />
       
-      <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-20 lg:mb-28">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gold/10 border border-gold/25 mb-8 section-animate backdrop-blur-sm">
+        <div className="text-center mb-12 sm:mb-20 lg:mb-28">
+          <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gold/10 border border-gold/25 mb-6 sm:mb-8 section-animate backdrop-blur-sm">
             <span className="text-xs font-semibold text-gold uppercase tracking-widest">{badgeText}</span>
           </div>
-          <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight section-animate delay-1">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-cream tracking-tight section-animate delay-1">
             {headline1} <span className="gradient-text">{headline2}</span>
           </h2>
-          <p className="mt-6 text-lg text-cream/50 max-w-xl mx-auto section-animate delay-2 font-light">
+          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-cream/50 max-w-xl mx-auto section-animate delay-2 font-light px-2">
             {subheadline}
           </p>
         </div>
 
-        {/* Steps - Cinematic layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+        {/* Steps - Responsive layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
           {steps.map((step, index) => (
             <div 
               key={step.title}
               className={`relative text-center section-animate delay-${index + 3} group`}
             >
               {/* Large step number */}
-              <div className="step-number mb-6 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
+              <div className="step-number text-5xl sm:text-6xl lg:text-7xl mb-4 sm:mb-6 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
                 {step.step}
               </div>
               
               {/* Icon container */}
-              <div className="relative inline-flex items-center justify-center mb-8">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 flex items-center justify-center backdrop-blur-sm group-hover:shadow-gold transition-all duration-500">
-                  <step.icon className="w-8 h-8 text-gold" />
+              <div className="relative inline-flex items-center justify-center mb-5 sm:mb-8">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 flex items-center justify-center backdrop-blur-sm group-hover:shadow-gold transition-all duration-500">
+                  <step.icon className="w-6 h-6 sm:w-8 sm:h-8 text-gold" />
                 </div>
               </div>
               
               {/* Title */}
-              <h3 className="font-serif text-2xl font-semibold text-cream mb-4 group-hover:text-gold transition-colors duration-300">
+              <h3 className="font-serif text-xl sm:text-2xl font-semibold text-cream mb-3 sm:mb-4 group-hover:text-gold transition-colors duration-300">
                 {step.title}
               </h3>
               
               {/* Description */}
-              <p className="text-sm text-cream/40 leading-relaxed font-light max-w-xs mx-auto">
+              <p className="text-xs sm:text-sm text-cream/40 leading-relaxed font-light max-w-xs mx-auto px-4 sm:px-0">
                 {step.description}
               </p>
 

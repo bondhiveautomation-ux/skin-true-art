@@ -261,43 +261,44 @@ const Pricing = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-gold/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="text-cream/60 hover:text-gold"
+            className="text-cream/60 hover:text-gold px-2 sm:px-4"
+            size="sm"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            <ArrowLeft className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Back to Home</span>
           </Button>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-gold" />
-            <span className="font-serif text-xl text-cream">Credits & Pricing</span>
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
+            <span className="font-serif text-base sm:text-xl text-cream">Credits & Pricing</span>
           </div>
-          <div className="w-24" />
+          <div className="w-10 sm:w-24" />
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Hero */}
-        <div className="text-center mb-16">
-          <h1 className="font-serif text-4xl lg:text-5xl font-bold text-cream mb-4">
+        <div className="text-center mb-10 sm:mb-16">
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-cream mb-3 sm:mb-4">
             Choose Your <span className="text-gold">Credit Package</span>
           </h1>
-          <p className="text-cream/60 text-lg max-w-2xl mx-auto">
+          <p className="text-cream/60 text-base sm:text-lg max-w-2xl mx-auto px-2">
             Power your content creation with AI credits. Pay via bKash and get credits added after quick verification.
           </p>
-          <p className="text-cream/40 text-sm mt-4">
+          <p className="text-cream/40 text-xs sm:text-sm mt-3 sm:mt-4">
             Manual bKash verification usually takes 5–30 minutes.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
           {PRICING_TIERS.map((tier) => (
             <Card 
               key={tier.name}
-              className={`relative overflow-hidden transition-all duration-300 hover:scale-105 ${
+              className={`relative overflow-hidden transition-all duration-300 active:scale-[0.98] sm:hover:scale-105 rounded-2xl sm:rounded-3xl ${
                 tier.highlighted 
                   ? "border-gold shadow-lg shadow-gold/20 ring-2 ring-gold/30" 
                   : "hover:border-gold/30"
@@ -305,41 +306,41 @@ const Pricing = () => {
             >
               {tier.badge && (
                 <div className="absolute top-0 right-0">
-                  <Badge className="rounded-none rounded-bl-lg bg-gold text-background font-bold px-4 py-1">
+                  <Badge className="rounded-none rounded-bl-xl bg-gold text-background font-bold px-3 sm:px-4 py-1 text-xs sm:text-sm">
                     {tier.badge}
                   </Badge>
                 </div>
               )}
-              <CardHeader className="text-center pb-2">
-                <CardTitle className="font-serif text-2xl text-cream">{tier.name}</CardTitle>
-                <CardDescription className="text-cream/50">{tier.description}</CardDescription>
+              <CardHeader className="text-center pb-2 pt-6 sm:pt-8">
+                <CardTitle className="font-serif text-xl sm:text-2xl text-cream">{tier.name}</CardTitle>
+                <CardDescription className="text-cream/50 text-sm">{tier.description}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-5 sm:space-y-6 p-5 sm:p-6">
                 <div className="text-center">
-                  <span className="text-5xl font-bold text-gold">{tier.price}</span>
+                  <span className="text-4xl sm:text-5xl font-bold text-gold">{tier.price}</span>
                   <span className="text-cream/60 ml-2">Tk</span>
-                  <p className="text-cream/70 mt-2">{tier.credits} Credits</p>
+                  <p className="text-cream/70 mt-2 text-sm sm:text-base">{tier.credits} Credits</p>
                 </div>
 
                 {/* bKash Instructions */}
-                <div className="bg-background/50 rounded-xl p-4 space-y-3">
+                <div className="bg-background/50 rounded-xl sm:rounded-2xl p-4 space-y-3">
                   <p className="text-sm font-medium text-cream/80 flex items-center gap-2">
                     <span className="text-pink-500">bKash</span> Manual Payment
                   </p>
                   
-                  <div className="flex items-center justify-between bg-card/50 rounded-lg p-3 border border-gold/10">
-                    <span className="font-mono text-lg text-gold">{BKASH_NUMBER}</span>
+                  <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 sm:p-4 border border-gold/10">
+                    <span className="font-mono text-base sm:text-lg text-gold">{BKASH_NUMBER}</span>
                     <Button
                       size="icon"
                       variant="ghost"
                       onClick={copyToClipboard}
-                      className="h-8 w-8 text-cream/60 hover:text-gold"
+                      className="h-10 w-10 sm:h-8 sm:w-8 text-cream/60 hover:text-gold active:scale-95"
                     >
-                      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      {copied ? <Check className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-400" /> : <Copy className="w-5 h-5 sm:w-4 sm:h-4" />}
                     </Button>
                   </div>
 
-                  <ol className="text-xs text-cream/50 space-y-1 pl-4">
+                  <ol className="text-xs text-cream/50 space-y-1.5 pl-4">
                     <li>1. Send <span className="text-gold">{tier.price} Tk</span> to this bKash number</li>
                     <li>2. Copy your Transaction ID (TxID)</li>
                     <li>3. Click Inbox and message us your TxID</li>
@@ -350,7 +351,7 @@ const Pricing = () => {
                 <Button 
                   onClick={() => handleInboxClick(tier)}
                   variant="gold"
-                  className="w-full btn-glow"
+                  className="w-full btn-glow h-12 sm:h-11 text-sm sm:text-base"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Inbox to Confirm Payment
@@ -362,13 +363,13 @@ const Pricing = () => {
 
         {/* User's Payment Requests */}
         {user && userRequests.length > 0 && (
-          <div className="mb-16">
-            <h2 className="font-serif text-2xl text-cream mb-6">Your Payment Requests</h2>
-            <div className="grid gap-4">
+          <div className="mb-12 sm:mb-16">
+            <h2 className="font-serif text-xl sm:text-2xl text-cream mb-4 sm:mb-6">Your Payment Requests</h2>
+            <div className="grid gap-3 sm:gap-4">
               {userRequests.map((request) => (
                 <Card 
                   key={request.id} 
-                  className={`cursor-pointer transition-all hover:border-gold/30 ${
+                  className={`cursor-pointer transition-all active:scale-[0.98] hover:border-gold/30 rounded-xl sm:rounded-2xl ${
                     activeRequest?.id === request.id ? "border-gold" : ""
                   }`}
                   onClick={() => {
@@ -377,18 +378,18 @@ const Pricing = () => {
                     setSelectedPackage(PRICING_TIERS.find(t => t.name === request.package_name) || null);
                   }}
                 >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <CardContent className="p-4 sm:p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <p className="font-medium text-cream">{request.package_name}</p>
-                        <p className="text-sm text-cream/50">TxID: {request.txid}</p>
+                        <p className="text-xs sm:text-sm text-cream/50">TxID: {request.txid}</p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {getStatusBadge(request.status)}
-                      <span className="text-sm text-cream/40">
-                        {new Date(request.created_at).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        {getStatusBadge(request.status)}
+                        <span className="text-xs sm:text-sm text-cream/40">
+                          {new Date(request.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -399,18 +400,18 @@ const Pricing = () => {
 
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-serif text-2xl text-cream text-center mb-8">Frequently Asked Questions</h2>
-          <Accordion type="single" collapsible className="space-y-4">
+          <h2 className="font-serif text-xl sm:text-2xl text-cream text-center mb-6 sm:mb-8">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
             {FAQ_ITEMS.map((item, index) => (
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="border border-gold/10 rounded-xl bg-card/30 px-6"
+                className="border border-gold/10 rounded-xl sm:rounded-2xl bg-card/30 px-4 sm:px-6"
               >
-                <AccordionTrigger className="text-cream hover:text-gold">
+                <AccordionTrigger className="text-cream hover:text-gold text-left text-sm sm:text-base py-4 sm:py-5">
                   {item.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-cream/60">
+                <AccordionContent className="text-cream/60 text-sm pb-4 sm:pb-5">
                   {item.answer}
                 </AccordionContent>
               </AccordionItem>

@@ -239,15 +239,15 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-charcoal-deep flex relative overflow-hidden">
-      {/* Animated background */}
+    <div className="min-h-screen bg-charcoal-deep flex flex-col lg:flex-row relative overflow-hidden">
+      {/* Animated background - reduced effects on mobile */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gold/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] bg-rose-gold/4 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-gold/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
-        {/* Sparkle particles */}
+        <div className="absolute top-1/4 left-1/4 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-gold/5 rounded-full blur-3xl animate-pulse" />
+        <div className="hidden sm:block absolute bottom-1/3 right-1/4 w-[500px] h-[500px] bg-rose-gold/4 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="hidden sm:block absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-gold/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
+        {/* Sparkle particles - fewer on mobile */}
         <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 bg-gold/30 rounded-full animate-pulse"
@@ -263,7 +263,7 @@ const Auth = () => {
         <div className="absolute inset-0 noise-texture" />
       </div>
 
-      {/* Left Side - Brand & Value */}
+      {/* Left Side - Brand & Value (Desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-20 relative z-10">
         <div className="max-w-lg">
           {/* Logo */}
@@ -306,25 +306,25 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Auth Card */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 relative z-10">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 relative z-10 min-h-screen lg:min-h-0">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-11 h-11 rounded-xl gold-icon flex items-center justify-center animate-pulse-glow">
+          {/* Mobile Logo & Headline */}
+          <div className="lg:hidden text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl gold-icon flex items-center justify-center animate-pulse-glow">
                 <Sparkles className="w-5 h-5 text-gold" />
               </div>
             </div>
-            <h1 className="font-serif text-2xl font-semibold text-cream">
+            <h1 className="font-serif text-xl sm:text-2xl font-semibold text-cream">
               Your All-in-One Content Studio
             </h1>
-            <p className="text-cream/50 text-sm mt-2">
+            <p className="text-cream/50 text-xs sm:text-sm mt-2">
               Built for creators and sellers
             </p>
           </div>
 
           {/* Auth Card */}
-          <div className="glass-card p-8 border border-gold/15 rounded-2xl backdrop-blur-md">
+          <div className="glass-card p-5 sm:p-8 border border-gold/15 rounded-2xl sm:rounded-3xl backdrop-blur-md">
             {forgotPassword ? (
               /* Forgot Password Form */
               <div className="space-y-6">
