@@ -53,7 +53,15 @@ serve(async (req) => {
       "badge": "with a subtle background/badge behind it for better contrast"
     };
 
-    let prompt = `Apply branding to this image following these EXACT specifications:
+    let prompt = `You are a professional graphic designer applying branding to an image. Follow these specifications EXACTLY:
+
+CRITICAL - IMAGE ORIENTATION:
+- DO NOT rotate the image under ANY circumstances
+- Keep the EXACT same orientation as the original
+- If the person is standing upright, they must remain standing upright
+- If the image is portrait, output must be portrait
+- If the image is landscape, output must be landscape
+- Maintain the EXACT same dimensions and aspect ratio
 
 LOGO PLACEMENT:
 - Place the logo in the ${positionMap[settings.position as keyof typeof positionMap]}
@@ -62,13 +70,14 @@ LOGO PLACEMENT:
 - Safe margin from edges: ${settings.safeMargin ? "Yes, keep 2-3% padding from edges" : "No, can touch edges"}
 - Logo style: ${styleMap[settings.logoStyle as keyof typeof styleMap]}
 
-CRITICAL RULES - YOU MUST FOLLOW:
-1. DO NOT modify, redraw, or change the logo in ANY way
-2. DO NOT change logo colors, fonts, shape, or proportions
-3. DO NOT alter the original image content (faces, products, background)
-4. Keep the logo sharp and clear
-5. Ensure logo is visible against any background
-6. If logo style is "badge", add only a subtle semi-transparent background behind the logo for contrast`;
+ABSOLUTE RULES - YOU MUST FOLLOW:
+1. NEVER rotate, flip, or change the orientation of the original image
+2. DO NOT modify, redraw, or change the logo in ANY way
+3. DO NOT change logo colors, fonts, shape, or proportions
+4. DO NOT alter the original image content (faces, products, background)
+5. Keep the logo sharp and clear
+6. Ensure logo is visible against any background
+7. Output image must have IDENTICAL orientation to input image`;
 
     if (settings.brandBorder) {
       prompt += `\n\nBRAND BORDER: Add a thin, elegant premium border (gold/cream color, 1-2px) around the entire image.`;
