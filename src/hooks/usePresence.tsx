@@ -124,23 +124,39 @@ export const usePresence = () => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         updatePresence(true, location.pathname);
+      } else {
+        // Mark offline when tab becomes hidden
+        markOffline();
       }
     };
 
     // Handle before unload (user closing tab)
     const handleBeforeUnload = () => {
-      // Use sendBeacon for reliable offline marking
+      // Use sendBeacon with proper Supabase REST API format
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_presence?user_id=eq.${user.id}`;
       const data = JSON.stringify({
-        user_id: user.id,
         is_online: false,
         last_seen: new Date().toISOString(),
         current_tool: null,
       });
       
-      navigator.sendBeacon(
-        `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_presence?user_id=eq.${user.id}`,
-        new Blob([data], { type: "application/json" })
-      );
+      // Create a proper request with headers
+      const headers = {
+        "Content-Type": "application/json",
+        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        "Prefer": "return=minimal",
+      };
+      
+      // Use fetch with keepalive as fallback since sendBeacon doesn't support custom headers
+      fetch(url, {
+        method: "PATCH",
+        headers,
+        body: data,
+        keepalive: true,
+      }).catch(() => {
+        // Silent fail - user is leaving anyway
+      });
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
