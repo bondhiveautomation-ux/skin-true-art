@@ -166,6 +166,25 @@ export const useAdmin = () => {
     }
   }, [user?.id, isAdmin, fetchUsers]);
 
+  // Delete generation history entry
+  const deleteHistoryEntry = useCallback(async (historyId: string): Promise<boolean> => {
+    if (!user?.id || !isAdmin) return false;
+
+    try {
+      const { error } = await supabase
+        .from('generation_history')
+        .delete()
+        .eq('id', historyId);
+
+      if (error) throw error;
+      await fetchHistory();
+      return true;
+    } catch (error) {
+      console.error("Error deleting history entry:", error);
+      return false;
+    }
+  }, [user?.id, isAdmin, fetchHistory]);
+
   // Create new user (admin only)
   const createUser = useCallback(async (email: string, password: string, fullName?: string): Promise<{ success: boolean; error?: string }> => {
     if (!user?.id || !isAdmin) return { success: false, error: "Unauthorized" };
@@ -218,6 +237,7 @@ export const useAdmin = () => {
     history,
     updateCredits,
     deleteUser,
+    deleteHistoryEntry,
     createUser,
     refetchUsers: fetchUsers,
     refetchHistory: fetchHistory,
