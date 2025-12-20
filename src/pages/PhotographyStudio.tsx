@@ -17,6 +17,7 @@ type PhotoType = "product" | "portrait" | "lifestyle";
 type StylePreset = "clean_studio" | "luxury_brand" | "soft_natural" | "dark_premium" | "ecommerce_white" | "instagram_editorial";
 type BackgroundOption = "keep_original" | "clean_studio" | "premium_lifestyle";
 type OutputQuality = "hd" | "ultra_hd";
+type SkinFinishIntensity = "light" | "medium" | "pro";
 
 const PhotographyStudio = () => {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ const PhotographyStudio = () => {
   const [backgroundOption, setBackgroundOption] = useState<BackgroundOption>("keep_original");
   const [outputQuality, setOutputQuality] = useState<OutputQuality>("ultra_hd");
   const [aiPhotographerMode, setAiPhotographerMode] = useState(true);
+  const [skinFinishEnabled, setSkinFinishEnabled] = useState(false);
+  const [skinFinishIntensity, setSkinFinishIntensity] = useState<SkinFinishIntensity>("medium");
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -140,6 +143,8 @@ const PhotographyStudio = () => {
           backgroundOption,
           outputQuality,
           aiPhotographerMode,
+          skinFinishEnabled: photoType !== "product" && skinFinishEnabled,
+          skinFinishIntensity: photoType !== "product" && skinFinishEnabled ? skinFinishIntensity : undefined,
         }
       });
 
@@ -314,7 +319,7 @@ const PhotographyStudio = () => {
                 )}
               </div>
 
-              {/* Controls Grid */}
+                {/* Controls Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Photo Type */}
                 <div className="space-y-3">
@@ -323,7 +328,13 @@ const PhotographyStudio = () => {
                     {photoTypes.map((type) => (
                       <button
                         key={type.value}
-                        onClick={() => setPhotoType(type.value as PhotoType)}
+                        onClick={() => {
+                          setPhotoType(type.value as PhotoType);
+                          // Auto-disable skin finish for product photos
+                          if (type.value === "product") {
+                            setSkinFinishEnabled(false);
+                          }
+                        }}
                         className={`py-3 px-3 rounded-xl border text-center transition-all duration-300 ${
                           photoType === type.value
                             ? "border-gold/50 bg-gold/10 shadow-gold"
@@ -337,6 +348,73 @@ const PhotographyStudio = () => {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Studio Skin Finish - Only for Portrait/Lifestyle */}
+                <div className={`space-y-3 ${photoType === "product" ? "opacity-40 pointer-events-none" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-cream">
+                      Studio Skin Finish <span className="text-cream/40 font-normal">(Optional)</span>
+                    </label>
+                    <Switch
+                      id="skin-finish"
+                      checked={skinFinishEnabled && photoType !== "product"}
+                      onCheckedChange={setSkinFinishEnabled}
+                      disabled={photoType === "product"}
+                      className="data-[state=checked]:bg-gold"
+                    />
+                  </div>
+                  <p className="text-xs text-cream/50">
+                    {photoType === "product" 
+                      ? "Not available for product photos" 
+                      : "Professionally smooth skin while preserving natural texture and realism."}
+                  </p>
+                  
+                  {/* Intensity Selector - Only visible when enabled */}
+                  {skinFinishEnabled && photoType !== "product" && (
+                    <div className="grid grid-cols-3 gap-2 pt-2 animate-fade-in">
+                      <button
+                        onClick={() => setSkinFinishIntensity("light")}
+                        className={`py-2.5 px-3 rounded-xl border text-center transition-all duration-300 ${
+                          skinFinishIntensity === "light"
+                            ? "border-gold/50 bg-gold/10 shadow-gold"
+                            : "border-gold/15 bg-charcoal-light hover:border-gold/30"
+                        }`}
+                      >
+                        <span className={`block text-xs font-medium ${skinFinishIntensity === "light" ? "text-gold" : "text-cream/70"}`}>
+                          Light
+                        </span>
+                        <span className="block text-[10px] text-cream/40 mt-0.5">Subtle</span>
+                      </button>
+                      <button
+                        onClick={() => setSkinFinishIntensity("medium")}
+                        className={`py-2.5 px-3 rounded-xl border text-center transition-all duration-300 relative ${
+                          skinFinishIntensity === "medium"
+                            ? "border-gold/50 bg-gold/10 shadow-gold"
+                            : "border-gold/15 bg-charcoal-light hover:border-gold/30"
+                        }`}
+                      >
+                        <span className="absolute -top-1.5 right-1 text-[8px] text-gold bg-charcoal px-1 rounded">REC</span>
+                        <span className={`block text-xs font-medium ${skinFinishIntensity === "medium" ? "text-gold" : "text-cream/70"}`}>
+                          Medium
+                        </span>
+                        <span className="block text-[10px] text-cream/40 mt-0.5">Balanced</span>
+                      </button>
+                      <button
+                        onClick={() => setSkinFinishIntensity("pro")}
+                        className={`py-2.5 px-3 rounded-xl border text-center transition-all duration-300 ${
+                          skinFinishIntensity === "pro"
+                            ? "border-gold/50 bg-gold/10 shadow-gold"
+                            : "border-gold/15 bg-charcoal-light hover:border-gold/30"
+                        }`}
+                      >
+                        <span className={`block text-xs font-medium ${skinFinishIntensity === "pro" ? "text-gold" : "text-cream/70"}`}>
+                          Pro Retouch
+                        </span>
+                        <span className="block text-[10px] text-cream/40 mt-0.5">High-end</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Output Quality */}
@@ -495,8 +573,15 @@ const PhotographyStudio = () => {
                     <div className="absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-charcoal/80 backdrop-blur-sm">
                       <span className="text-xs font-medium text-cream">Original</span>
                     </div>
-                    <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-gold/20 backdrop-blur-sm border border-gold/30">
-                      <span className="text-xs font-medium text-gold">Enhanced</span>
+                    <div className="absolute top-4 right-4 space-y-1.5">
+                      <div className="px-3 py-1.5 rounded-lg bg-gold/20 backdrop-blur-sm border border-gold/30">
+                        <span className="text-xs font-medium text-gold">Enhanced</span>
+                      </div>
+                      {skinFinishEnabled && photoType !== "product" && (
+                        <div className="px-2 py-1 rounded-lg bg-charcoal/80 backdrop-blur-sm border border-gold/20">
+                          <span className="text-[10px] font-medium text-cream/70">✨ Studio Skin Finish – Natural Retouch</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
