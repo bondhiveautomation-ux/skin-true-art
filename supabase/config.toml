@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.enhance-photo]
 verify_jwt = false
+
+[functions.apply-branding]
+verify_jwt = false
