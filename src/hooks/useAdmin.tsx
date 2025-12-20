@@ -8,6 +8,7 @@ interface UserWithCredits {
   full_name: string | null;
   credits: number;
   created_at: string;
+  is_blocked: boolean;
 }
 
 interface GenerationHistory {
@@ -62,7 +63,7 @@ export const useAdmin = () => {
     try {
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, email, full_name, created_at');
+        .select('user_id, email, full_name, created_at, is_blocked');
 
       if (profilesError) throw profilesError;
 
@@ -80,6 +81,7 @@ export const useAdmin = () => {
         full_name: p.full_name,
         credits: creditsMap.get(p.user_id) ?? 0,
         created_at: p.created_at,
+        is_blocked: p.is_blocked ?? false,
       }));
 
       setUsers(usersWithCredits);
@@ -185,6 +187,29 @@ export const useAdmin = () => {
     }
   }, [user?.id, isAdmin, fetchHistory]);
 
+  // Toggle block/unblock user
+  const toggleBlockUser = useCallback(async (targetUserId: string, blocked: boolean): Promise<boolean> => {
+    if (!user?.id || !isAdmin) return false;
+
+    try {
+      const { data, error } = await supabase.rpc('admin_toggle_block_user', {
+        p_admin_id: user.id,
+        p_target_user_id: targetUserId,
+        p_blocked: blocked,
+      });
+
+      if (error) throw error;
+      if (data) {
+        await fetchUsers();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error toggling block status:", error);
+      return false;
+    }
+  }, [user?.id, isAdmin, fetchUsers]);
+
   // Create new user (admin only)
   const createUser = useCallback(async (email: string, password: string, fullName?: string): Promise<{ success: boolean; error?: string }> => {
     if (!user?.id || !isAdmin) return { success: false, error: "Unauthorized" };
@@ -239,6 +264,7 @@ export const useAdmin = () => {
     deleteUser,
     deleteHistoryEntry,
     createUser,
+    toggleBlockUser,
     refetchUsers: fetchUsers,
     refetchHistory: fetchHistory,
   };

@@ -27,7 +27,9 @@ import {
   MessageCircle,
   GraduationCap,
   Download,
-  Radio
+  Radio,
+  Ban,
+  CheckCircle
 } from "lucide-react";
 import {
   Table,
@@ -70,7 +72,7 @@ import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, refetchUsers, refetchHistory } = useAdmin();
+  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, toggleBlockUser, refetchUsers, refetchHistory } = useAdmin();
   const { toast } = useToast();
   const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
   const [processingUser, setProcessingUser] = useState<string | null>(null);
@@ -470,10 +472,11 @@ const Admin = () => {
               </div>
             </div>
 
-            <div className="rounded-lg border border-gold/10 overflow-hidden">
-              <Table>
+            <div className="rounded-lg border border-gold/10 overflow-x-auto">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow className="bg-card/50">
+                    <TableHead>Status</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Credits</TableHead>
@@ -483,7 +486,20 @@ const Admin = () => {
                 </TableHeader>
                 <TableBody>
                   {users.map((u) => (
-                    <TableRow key={u.user_id}>
+                    <TableRow key={u.user_id} className={u.is_blocked ? "opacity-60" : ""}>
+                      <TableCell>
+                        {u.is_blocked ? (
+                          <span className="inline-flex items-center gap-1 text-xs text-destructive font-medium">
+                            <Ban className="w-3 h-3" />
+                            Blocked
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs text-green-500 font-medium">
+                            <CheckCircle className="w-3 h-3" />
+                            Active
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">
                         {u.email}
                         {u.user_id === user.id && (
@@ -542,6 +558,51 @@ const Admin = () => {
                               Set
                             </Button>
                           </div>
+
+                          {/* Block/Unblock user */}
+                          {u.user_id !== user.id && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant={u.is_blocked ? "outline" : "secondary"}
+                                  size="sm"
+                                  disabled={processingUser === u.user_id}
+                                  className={u.is_blocked ? "text-green-500 border-green-500/30" : "text-orange-500"}
+                                >
+                                  {u.is_blocked ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>{u.is_blocked ? "Unblock" : "Block"} User</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {u.is_blocked 
+                                      ? `Are you sure you want to unblock ${u.email}? They will be able to access the app again.`
+                                      : `Are you sure you want to block ${u.email}? They will no longer be able to access the app.`
+                                    }
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={async () => {
+                                      setProcessingUser(u.user_id);
+                                      const success = await toggleBlockUser(u.user_id, !u.is_blocked);
+                                      if (success) {
+                                        toast({ title: u.is_blocked ? "User unblocked" : "User blocked" });
+                                      } else {
+                                        toast({ title: "Failed to update user status", variant: "destructive" });
+                                      }
+                                      setProcessingUser(null);
+                                    }}
+                                    className={u.is_blocked ? "bg-green-600 hover:bg-green-700" : "bg-orange-600 hover:bg-orange-700"}
+                                  >
+                                    {u.is_blocked ? "Unblock" : "Block"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
 
                           {/* Delete user */}
                           {u.user_id !== user.id && (

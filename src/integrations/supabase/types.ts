@@ -220,6 +220,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          is_blocked: boolean
           updated_at: string
           user_id: string
         }
@@ -228,6 +229,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_blocked?: boolean
           updated_at?: string
           user_id: string
         }
@@ -236,6 +238,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_blocked?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -371,6 +374,14 @@ export type Database = {
     Functions: {
       admin_delete_user: {
         Args: { p_admin_id: string; p_target_user_id: string }
+        Returns: boolean
+      }
+      admin_toggle_block_user: {
+        Args: {
+          p_admin_id: string
+          p_blocked: boolean
+          p_target_user_id: string
+        }
         Returns: boolean
       }
       admin_update_credits: {
