@@ -25,7 +25,7 @@ import { SelectionGrid } from "@/components/ui/SelectionGrid";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user, loading, signOut, isAuthenticated } = useAuth();
+  const { user, signOut } = useAuth();
   const { credits, deductCredit, hasCredits, refetchCredits } = useCredits();
   const { isAdmin } = useAdmin();
   const { toast } = useToast();
@@ -42,13 +42,6 @@ const Index = () => {
       console.error("Failed to log generation:", error);
     }
   };
-  
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate("/auth");
-    }
-  }, [loading, isAuthenticated, navigate]);
 
   // Character Generator states
   const [generationPrompt, setGenerationPrompt] = useState("");
@@ -105,15 +98,6 @@ const Index = () => {
   const [dressChangeResult, setDressChangeResult] = useState<string | null>(null);
   const [isChangingDress, setIsChangingDress] = useState(false);
   const [dressSearchQuery, setDressSearchQuery] = useState("");
-
-  // Show loading state while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   // Scroll to section handler
   const scrollToSection = (sectionId: string) => {
