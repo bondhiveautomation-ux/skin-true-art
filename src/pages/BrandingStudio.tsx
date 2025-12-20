@@ -203,12 +203,16 @@ const BrandingStudio = () => {
       setResult(data.resultImage);
       toast.success("Branding applied successfully!");
       
-      // Log generation
+      // Log generation (store only URLs; never store base64)
+      const onlyUrl = (v?: string | null) => (typeof v === "string" && v.startsWith("http") ? v : null);
+      const inUrl = onlyUrl(postImage);
+      const outUrl = onlyUrl(data?.resultImage);
+
       await supabase.rpc("log_generation", {
         p_user_id: user.id,
         p_feature_name: "Branding Studio",
-        p_input_images: [postImage.substring(0, 100)],
-        p_output_images: [data.resultImage?.substring(0, 100) || ""]
+        p_input_images: inUrl ? [inUrl] : [],
+        p_output_images: outUrl ? [outUrl] : [],
       });
     } catch (error) {
       console.error("Branding error:", error);
