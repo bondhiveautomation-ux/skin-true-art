@@ -5,9 +5,9 @@ export const Footer = () => {
   const { content } = useContent("footer");
 
   // Defaults
-  const brandName = content.brand_name || "Influencer Tool";
-  const tagline = content.tagline || "AI-powered tools for the modern creator";
-  const copyright = (content.copyright || "© {year} Influencer Tool. Crafted with elegance. All rights reserved.")
+  const brandName = content.brand_name || "Brandify";
+  const tagline = content.tagline || "Your all-in-one content & branding studio";
+  const copyright = (content.copyright || "© {year} Brandify. Crafted with elegance. All rights reserved.")
     .replace("{year}", new Date().getFullYear().toString());
   const linkPrivacy = content.link_privacy || "Privacy";
   const linkTerms = content.link_terms || "Terms";

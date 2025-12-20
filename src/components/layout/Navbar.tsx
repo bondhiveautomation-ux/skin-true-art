@@ -20,7 +20,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
   const { content } = useContent("header");
 
   // Default values
-  const brandName = content.brand_name || "Influencer Tool";
+  const brandName = content.brand_name || "Brandify";
   const navFeatures = content.nav_features || "Features";
   const navProcess = content.nav_process || "Process";
   const navStudio = content.nav_studio || "Studio";

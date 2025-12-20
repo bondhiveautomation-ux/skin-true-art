@@ -312,7 +312,7 @@ const PhotographyStudio = () => {
                     setEnhancedImage(null);
                   }}
                   label="Upload Your Photo"
-                  description="Product photos, influencer shots, or lifestyle images"
+                  description="Product photos, creator shots, or lifestyle images"
                 />
                 {originalImage && !enhancedImage && (
                   <p className="text-center text-xs text-cream/40 mt-2">Original Preview</p>
