@@ -303,6 +303,7 @@ export type Database = {
           created_at: string
           current_page_name: string | null
           current_path: string | null
+          current_tool: string | null
           device_type: string | null
           entered_at: string | null
           id: string
@@ -316,6 +317,7 @@ export type Database = {
           created_at?: string
           current_page_name?: string | null
           current_path?: string | null
+          current_tool?: string | null
           device_type?: string | null
           entered_at?: string | null
           id?: string
@@ -329,6 +331,7 @@ export type Database = {
           created_at?: string
           current_page_name?: string | null
           current_path?: string | null
+          current_tool?: string | null
           device_type?: string | null
           entered_at?: string | null
           id?: string

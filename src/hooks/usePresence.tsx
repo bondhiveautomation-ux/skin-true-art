@@ -27,33 +27,33 @@ const getDeviceType = (): string => {
 };
 
 const HEARTBEAT_INTERVAL = 20000; // 20 seconds
-const OFFLINE_TIMEOUT = 60000; // 60 seconds
 
 export const usePresence = () => {
   const { user } = useAuth();
   const location = useLocation();
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const lastPathRef = useRef<string>("");
+  const currentToolRef = useRef<string | null>(null);
 
-  const updatePresence = useCallback(async (isOnline: boolean, path?: string) => {
+  const updatePresence = useCallback(async (isOnline: boolean, path?: string, tool?: string | null) => {
     if (!user?.id) return;
 
     const now = new Date().toISOString();
     const pageName = path ? getPageName(path) : undefined;
     
     try {
-      // Try to upsert presence
       const { error } = await supabase
         .from("user_presence")
         .upsert({
           user_id: user.id,
           is_online: isOnline,
-          current_page_name: pageName,
-          current_path: path,
+          current_page_name: pageName || null,
+          current_path: path || null,
           entered_at: path !== lastPathRef.current ? now : undefined,
           last_seen: now,
           last_active_at: now,
           device_type: getDeviceType(),
+          current_tool: tool !== undefined ? tool : currentToolRef.current,
         }, {
           onConflict: "user_id",
         });
@@ -62,9 +62,24 @@ export const usePresence = () => {
         console.error("Error updating presence:", error);
       } else {
         if (path) lastPathRef.current = path;
+        if (tool !== undefined) currentToolRef.current = tool;
       }
     } catch (err) {
       console.error("Failed to update presence:", err);
+    }
+  }, [user?.id]);
+
+  const setCurrentTool = useCallback(async (tool: string | null) => {
+    currentToolRef.current = tool;
+    if (user?.id) {
+      try {
+        await supabase
+          .from("user_presence")
+          .update({ current_tool: tool, last_active_at: new Date().toISOString() })
+          .eq("user_id", user.id);
+      } catch (err) {
+        console.error("Failed to update tool:", err);
+      }
     }
   }, [user?.id]);
 
@@ -77,6 +92,7 @@ export const usePresence = () => {
         .update({
           is_online: false,
           last_seen: new Date().toISOString(),
+          current_tool: null,
         })
         .eq("user_id", user.id);
     } catch (err) {
@@ -84,10 +100,11 @@ export const usePresence = () => {
     }
   }, [user?.id]);
 
-  // Update presence on route change
+  // Clear tool when changing routes
   useEffect(() => {
     if (user?.id) {
-      updatePresence(true, location.pathname);
+      currentToolRef.current = null;
+      updatePresence(true, location.pathname, null);
     }
   }, [location.pathname, user?.id, updatePresence]);
 
@@ -117,6 +134,7 @@ export const usePresence = () => {
         user_id: user.id,
         is_online: false,
         last_seen: new Date().toISOString(),
+        current_tool: null,
       });
       
       navigator.sendBeacon(
@@ -138,5 +156,5 @@ export const usePresence = () => {
     };
   }, [user?.id, location.pathname, updatePresence, markOffline]);
 
-  return { updatePresence, markOffline };
+  return { updatePresence, markOffline, setCurrentTool };
 };
