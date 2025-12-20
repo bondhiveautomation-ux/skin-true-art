@@ -17,6 +17,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ValueSection } from "@/components/landing/ValueSection";
 import { CTASection } from "@/components/landing/CTASection";
+import { ClassesPreview } from "@/components/landing/ClassesPreview";
 import { Footer } from "@/components/landing/Footer";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
@@ -1337,6 +1338,9 @@ const Index = () => {
           )}
         </div>
       </ToolSection>
+
+      {/* Classes Preview Section */}
+      <ClassesPreview />
 
       {/* Footer */}
       <Footer />
