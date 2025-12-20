@@ -22,7 +22,8 @@ import {
   ChevronUp,
   ExternalLink,
   Shirt,
-  Settings2
+  Settings2,
+  MessageCircle
 } from "lucide-react";
 import {
   Table,
@@ -58,6 +59,7 @@ import {
 } from "@/components/ui/dialog";
 import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
 import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
+import { PaymentInbox } from "@/components/admin/PaymentInbox";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -247,6 +249,10 @@ const Admin = () => {
             <TabsTrigger value="users" className="gap-2">
               <Users className="w-4 h-4" />
               Users ({users.length})
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Payment Inbox
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="w-4 h-4" />
@@ -535,6 +541,10 @@ const Admin = () => {
                 </TableBody>
               </Table>
             </div>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <PaymentInbox />
           </TabsContent>
 
           <TabsContent value="dress-library">

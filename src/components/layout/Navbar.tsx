@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Coins, Shield, Sparkles } from "lucide-react";
+import { LogOut, Coins, Shield, Sparkles, CreditCard } from "lucide-react";
 import { useContent } from "@/hooks/useSiteContent";
 
 interface NavbarProps {
@@ -72,6 +72,12 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
             >
               {navStudio}
+            </button>
+            <button 
+              onClick={() => navigate("/pricing")}
+              className="text-sm font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+            >
+              Pricing
             </button>
           </nav>
 

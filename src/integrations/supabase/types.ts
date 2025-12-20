@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean
+          message: string
+          payment_request_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message: string
+          payment_request_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message?: string
+          payment_request_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dress_library: {
         Row: {
           category: string
@@ -67,6 +102,45 @@ export type Database = {
           id?: string
           input_images?: string[] | null
           output_images?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_requests: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          credits: number
+          id: string
+          package_name: string
+          status: Database["public"]["Enums"]["payment_status"]
+          txid: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string
+          credits: number
+          id?: string
+          package_name: string
+          status?: Database["public"]["Enums"]["payment_status"]
+          txid: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          credits?: number
+          id?: string
+          package_name?: string
+          status?: Database["public"]["Enums"]["payment_status"]
+          txid?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -193,6 +267,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      approve_payment: {
+        Args: { p_admin_id: string; p_request_id: string }
+        Returns: boolean
+      }
+      check_duplicate_txid: { Args: { p_txid: string }; Returns: boolean }
       deduct_credit: { Args: { p_user_id: string }; Returns: number }
       get_user_credits: { Args: { p_user_id: string }; Returns: number }
       has_role: {
@@ -216,9 +295,14 @@ export type Database = {
             }
             Returns: string
           }
+      reject_payment: {
+        Args: { p_admin_id: string; p_notes?: string; p_request_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
+      payment_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -347,6 +431,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      payment_status: ["pending", "approved", "rejected"],
     },
   },
 } as const
