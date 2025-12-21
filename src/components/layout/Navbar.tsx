@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Coins, Shield, Sparkles, Menu } from "lucide-react";
+import { LogOut, Coins, Shield, Sparkles, Menu, Play, ExternalLink } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useContent } from "@/hooks/useSiteContent";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import UserInbox from "@/components/user/UserInbox";
@@ -71,6 +76,23 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               >
                 {navProcess}
               </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a 
+                    href="https://www.facebook.com/share/v/17WGy9jeFi/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
+                  >
+                    <Play className="w-3 h-3" />
+                    Tutorial
+                    <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Watch the full Brandify tutorial</p>
+                </TooltipContent>
+              </Tooltip>
               <button 
                 onClick={() => onNavigate("tools")}
                 className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
