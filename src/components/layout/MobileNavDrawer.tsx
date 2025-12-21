@@ -1,4 +1,4 @@
-import { X, Coins, Shield, LogOut, Sparkles, CreditCard, GraduationCap } from "lucide-react";
+import { X, Coins, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -88,6 +88,17 @@ export const MobileNavDrawer = ({
           >
             <span className="text-sm font-medium tracking-wide">Process</span>
           </button>
+          <a
+            href="https://www.facebook.com/share/v/17WGy9jeFi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left"
+          >
+            <Play className="w-4 h-4" />
+            <span className="text-sm font-medium tracking-wide">Tutorial</span>
+            <ExternalLink className="w-3 h-3 opacity-50 ml-auto" />
+          </a>
           <button
             onClick={() => handleNavigate("tools")}
             className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left"
