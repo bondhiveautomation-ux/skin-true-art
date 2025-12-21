@@ -304,7 +304,56 @@ Generate an image showing the same person in this new situation.`;
     // Upload to storage and log generation if userId is provided
     if (userId) {
       try {
+        const inputUrls: string[] = [];
         let outputStorageUrl: string | null = null;
+
+        // Upload character image to storage
+        if (characterImage.startsWith('data:image')) {
+          const url = await uploadImageToStorage(supabase, characterImage, userId, 'input_character');
+          if (url) inputUrls.push(url);
+          console.log("Character image uploaded:", url ? "success" : "failed");
+        } else {
+          inputUrls.push(characterImage);
+        }
+
+        // Upload additional reference images if provided
+        if (characterLeftProfile) {
+          if (characterLeftProfile.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, characterLeftProfile, userId, 'input_character_left');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(characterLeftProfile);
+          }
+        }
+
+        if (characterRightProfile) {
+          if (characterRightProfile.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, characterRightProfile, userId, 'input_character_right');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(characterRightProfile);
+          }
+        }
+
+        // Upload product image if provided
+        if (productImage) {
+          if (productImage.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, productImage, userId, 'input_product');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(productImage);
+          }
+        }
+
+        // Upload background image if provided
+        if (backgroundImage) {
+          if (backgroundImage.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, backgroundImage, userId, 'input_background');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(backgroundImage);
+          }
+        }
 
         // Upload output image to storage
         if (generatedImageUrl.startsWith('data:image')) {
@@ -318,14 +367,14 @@ Generate an image showing the same person in this new situation.`;
         const { error: logError } = await supabase.rpc('log_generation', {
           p_user_id: userId,
           p_feature_name: 'Character Generator',
-          p_input_images: [],
+          p_input_images: inputUrls,
           p_output_images: outputImages
         });
 
         if (logError) {
           console.error("Error logging generation:", logError);
         } else {
-          console.log("Generation logged with images:", { outputCount: outputImages.length });
+          console.log("Generation logged with images:", { inputCount: inputUrls.length, outputCount: outputImages.length });
         }
       } catch (logErr) {
         console.error("Error in logging/upload:", logErr);

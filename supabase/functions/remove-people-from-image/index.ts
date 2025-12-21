@@ -208,26 +208,36 @@ Generate a clean, people-free version of this image where the background remains
     // Upload to storage and log generation if userId is provided
     if (userId) {
       try {
+        let inputStorageUrl: string | null = null;
         let outputStorageUrl: string | null = null;
+
+        // Upload input image to storage
+        if (image.startsWith('data:image')) {
+          inputStorageUrl = await uploadImageToStorage(supabase, image, userId, 'input_bg_saver');
+          console.log("Input image uploaded:", inputStorageUrl ? "success" : "failed");
+        } else {
+          inputStorageUrl = image;
+        }
 
         if (generatedImageUrl.startsWith('data:image')) {
           outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_bg_saver');
           console.log("Output image uploaded:", outputStorageUrl ? "success" : "failed");
         }
 
+        const inputImages = inputStorageUrl ? [inputStorageUrl] : [];
         const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
 
         const { error: logError } = await supabase.rpc('log_generation', {
           p_user_id: userId,
           p_feature_name: 'Background Saver',
-          p_input_images: [],
+          p_input_images: inputImages,
           p_output_images: outputImages
         });
 
         if (logError) {
           console.error("Error logging generation:", logError);
         } else {
-          console.log("Generation logged with images:", { outputCount: outputImages.length });
+          console.log("Generation logged with images:", { inputCount: inputImages.length, outputCount: outputImages.length });
         }
       } catch (logErr) {
         console.error("Error in logging/upload:", logErr);
