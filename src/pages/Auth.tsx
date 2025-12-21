@@ -193,8 +193,8 @@ const Auth = () => {
         setPendingEmail(email.trim());
         setShowOtpVerification(true);
         toast({
-          title: "Verification code sent! 📧",
-          description: "Please check your email and enter the 6-digit code.",
+          title: "Confirm your email to login",
+          description: "We've sent a 6-digit verification code to your email.",
         });
       }
     } catch (error) {
