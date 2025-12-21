@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Upload, Loader2, Download, Copy, Search } from "lucide-react";
+import { Upload, Loader2, Download, Copy, Search, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -66,6 +66,7 @@ const Index = () => {
   const [selectedPose, setSelectedPose] = useState<string>("");
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
+  const [isRefiningPrompt, setIsRefiningPrompt] = useState(false);
   
   // Prompt Extractor states
   const [extractorImage, setExtractorImage] = useState<string | null>(null);
@@ -264,6 +265,31 @@ const Index = () => {
     setSelectedCameraAngle("");
     setBackgroundImage(null);
     setSelectedPose("");
+  };
+
+  const handleRefinePrompt = async () => {
+    if (!generationPrompt.trim()) {
+      toast({ title: "Empty prompt", description: "Please write a prompt to refine.", variant: "destructive" });
+      return;
+    }
+
+    setIsRefiningPrompt(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('refine-prompt', {
+        body: { prompt: generationPrompt.trim() }
+      });
+      
+      if (error) throw error;
+      
+      if (data?.refinedPrompt) {
+        setGenerationPrompt(data.refinedPrompt);
+        toast({ title: "Prompt refined ✨", description: "Your prompt has been improved for better results" });
+      }
+    } catch (error: any) {
+      toast({ title: "Refinement failed", description: error.message || "Please try again", variant: "destructive" });
+    } finally {
+      setIsRefiningPrompt(false);
+    }
   };
 
   // ==================== PROMPT EXTRACTOR ====================
@@ -842,8 +868,31 @@ const Index = () => {
                 </div>
               )}
 
-              {/* Generate button */}
-              <div className="flex justify-center">
+              {/* Generate and Refine buttons */}
+              <div className="flex justify-center gap-3 flex-wrap">
+                {!productImage && generationPrompt.trim() && (
+                  <Button
+                    onClick={handleRefinePrompt}
+                    disabled={isRefiningPrompt || isGeneratingImage}
+                    variant="dark-outline"
+                    size="lg"
+                    className="group relative"
+                    title="Improve your prompt without using credits"
+                  >
+                    {isRefiningPrompt ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Refining...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2 group-hover:text-gold transition-colors" />
+                        Refine Prompt
+                        <span className="ml-2 text-xs text-muted-foreground">(Free)</span>
+                      </>
+                    )}
+                  </Button>
+                )}
                 <LoadingButton
                   onClick={handleGenerateImage}
                   isLoading={isGeneratingImage}
