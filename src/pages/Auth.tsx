@@ -16,8 +16,14 @@ import {
   Shield, 
   Palette,
   Mail,
-  ArrowRight
+  ArrowRight,
+  KeyRound
 } from "lucide-react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 const FEATURES = [
   { icon: Camera, title: "Photography Studio", description: "DSLR-quality upgrades" },
@@ -38,6 +44,12 @@ const Auth = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  
+  // OTP verification states
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -125,6 +137,8 @@ const Auth = () => {
         let errorMessage = error.message;
         if (error.message.includes("Invalid login credentials")) {
           errorMessage = "Invalid email or password. Please try again.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Please verify your email first. Check your inbox for the verification code.";
         }
         toast({
           title: "Login failed",
@@ -153,7 +167,7 @@ const Auth = () => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { error, data } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
@@ -174,10 +188,90 @@ const Auth = () => {
           description: errorMessage,
           variant: "destructive",
         });
+      } else if (data.user && !data.session) {
+        // User created but needs email verification
+        setPendingEmail(email.trim());
+        setShowOtpVerification(true);
+        toast({
+          title: "Verification code sent! 📧",
+          description: "Please check your email and enter the 6-digit code.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (otpCode.length !== 6) {
+      toast({
+        title: "Invalid code",
+        description: "Please enter the complete 6-digit code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: pendingEmail,
+        token: otpCode,
+        type: 'signup',
+      });
+
+      if (error) {
+        toast({
+          title: "Verification failed",
+          description: error.message || "Invalid or expired code. Please try again.",
+          variant: "destructive",
+        });
       } else {
         toast({
-          title: "Account created! 🎉",
-          description: "You're now signed in with 10 free credits.",
+          title: "Account verified! 🎉",
+          description: "You're now signed in with 5 free credits.",
+        });
+        // The auth state change listener will handle navigation
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: pendingEmail,
+      });
+
+      if (error) {
+        toast({
+          title: "Failed to resend",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Code resent! 📧",
+          description: "Please check your email for the new verification code.",
         });
       }
     } catch (error) {
@@ -325,7 +419,70 @@ const Auth = () => {
 
           {/* Auth Card */}
           <div className="glass-card p-5 sm:p-8 border border-gold/15 rounded-2xl sm:rounded-3xl backdrop-blur-md">
-            {forgotPassword ? (
+            {showOtpVerification ? (
+              /* OTP Verification Form */
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="w-14 h-14 rounded-xl gold-icon mx-auto mb-4 flex items-center justify-center">
+                    <KeyRound className="w-6 h-6 text-gold" />
+                  </div>
+                  <h2 className="font-serif text-2xl font-semibold text-cream">
+                    Verify Your Email
+                  </h2>
+                  <p className="text-sm text-cream/50 mt-2">
+                    We sent a 6-digit code to <span className="text-gold">{pendingEmail}</span>
+                  </p>
+                </div>
+
+                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(value) => setOtpCode(value)}
+                      disabled={loading}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} className="bg-charcoal border-gold/20 text-cream" />
+                        <InputOTPSlot index={1} className="bg-charcoal border-gold/20 text-cream" />
+                        <InputOTPSlot index={2} className="bg-charcoal border-gold/20 text-cream" />
+                        <InputOTPSlot index={3} className="bg-charcoal border-gold/20 text-cream" />
+                        <InputOTPSlot index={4} className="bg-charcoal border-gold/20 text-cream" />
+                        <InputOTPSlot index={5} className="bg-charcoal border-gold/20 text-cream" />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+
+                  <Button type="submit" variant="gold" size="lg" className="w-full btn-glow" disabled={loading || otpCode.length !== 6}>
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                    Verify & Continue
+                  </Button>
+                </form>
+
+                <div className="text-center space-y-3">
+                  <p className="text-sm text-cream/50">
+                    Didn't receive the code?{" "}
+                    <button 
+                      onClick={handleResendCode}
+                      disabled={loading}
+                      className="text-gold hover:text-gold/80 transition-colors disabled:opacity-50"
+                    >
+                      Resend
+                    </button>
+                  </p>
+                  <button 
+                    onClick={() => { 
+                      setShowOtpVerification(false); 
+                      setOtpCode(""); 
+                      setPendingEmail(""); 
+                    }}
+                    className="text-sm text-cream/40 hover:text-cream/60 transition-colors"
+                  >
+                    ← Back to Sign Up
+                  </button>
+                </div>
+              </div>
+            ) : forgotPassword ? (
               /* Forgot Password Form */
               <div className="space-y-6">
                 <div className="text-center">
