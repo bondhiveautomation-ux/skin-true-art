@@ -512,20 +512,21 @@ const PhotographyStudio = () => {
 
               {/* Before/After Comparison */}
               {enhancedImage && originalImage && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-serif font-semibold text-cream">Before / After</h3>
+                <div className="space-y-4 sm:space-y-6 animate-fade-in">
+                  {/* Header with zoom controls */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <h3 className="text-base sm:text-lg font-serif font-semibold text-cream">Before / After</h3>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setZoomLevel(Math.max(1, zoomLevel - 0.5))}
-                        className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary text-cream/60 hover:text-cream transition-colors"
+                        className="p-2.5 rounded-lg bg-secondary/50 hover:bg-secondary text-cream/60 hover:text-cream transition-colors active:scale-95"
                       >
                         <ZoomOut className="w-4 h-4" />
                       </button>
                       <span className="text-xs text-cream/50 w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
                       <button
                         onClick={() => setZoomLevel(Math.min(3, zoomLevel + 0.5))}
-                        className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary text-cream/60 hover:text-cream transition-colors"
+                        className="p-2.5 rounded-lg bg-secondary/50 hover:bg-secondary text-cream/60 hover:text-cream transition-colors active:scale-95"
                       >
                         <ZoomIn className="w-4 h-4" />
                       </button>
@@ -535,7 +536,7 @@ const PhotographyStudio = () => {
                   {/* Comparison Slider */}
                   <div
                     ref={comparisonRef}
-                    className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-gold/20 cursor-ew-resize select-none"
+                    className="relative w-full aspect-square sm:aspect-[4/3] rounded-xl overflow-hidden border border-gold/20 cursor-ew-resize select-none touch-none"
                     onMouseDown={() => setIsDragging(true)}
                     onMouseUp={() => setIsDragging(false)}
                     onMouseLeave={() => setIsDragging(false)}
@@ -571,59 +572,67 @@ const PhotographyStudio = () => {
 
                     {/* Slider Line */}
                     <div
-                      className="absolute top-0 bottom-0 w-1 bg-gold shadow-gold cursor-ew-resize"
+                      className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-gold shadow-gold cursor-ew-resize"
                       style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
                     >
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-gold flex items-center justify-center shadow-lg">
-                        <Maximize2 className="w-4 h-4 text-background rotate-45" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gold flex items-center justify-center shadow-lg">
+                        <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 text-background rotate-45" />
                       </div>
                     </div>
 
-                    {/* Labels */}
-                    <div className="absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-charcoal/80 backdrop-blur-sm">
-                      <span className="text-xs font-medium text-cream">Original</span>
+                    {/* Labels - Positioned to avoid overlap */}
+                    <div className="absolute top-3 sm:top-4 left-3 sm:left-4 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-charcoal/90 backdrop-blur-sm">
+                      <span className="text-[10px] sm:text-xs font-medium text-cream">Original</span>
                     </div>
-                    <div className="absolute top-4 right-4 space-y-1.5">
-                      <div className="px-3 py-1.5 rounded-lg bg-gold/20 backdrop-blur-sm border border-gold/30">
-                        <span className="text-xs font-medium text-gold">Enhanced</span>
+                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                      <div className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-gold/20 backdrop-blur-sm border border-gold/30">
+                        <span className="text-[10px] sm:text-xs font-medium text-gold">Enhanced</span>
                       </div>
-                      {skinFinishEnabled && photoType !== "product" && (
-                        <div className="px-2 py-1 rounded-lg bg-charcoal/80 backdrop-blur-sm border border-gold/20">
-                          <span className="text-[10px] font-medium text-cream/70">✨ Studio Skin Finish – Natural Retouch</span>
-                        </div>
-                      )}
                     </div>
+                    
+                    {/* Skin Finish Label - Bottom positioned on mobile to avoid overlap */}
+                    {skinFinishEnabled && photoType !== "product" && (
+                      <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-auto px-2 py-1 rounded-lg bg-charcoal/90 backdrop-blur-sm border border-gold/20">
+                        <span className="text-[9px] sm:text-[10px] font-medium text-cream/70 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-gold" />
+                          Studio Skin Finish – Natural Retouch
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-center gap-4 pt-4">
+                  {/* Action Buttons - Stacked on mobile */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
                     <Button
                       onClick={handleDownload}
                       variant="gold"
-                      className="px-6"
+                      size="lg"
+                      className="w-full sm:w-auto px-8 py-3 text-base font-semibold btn-glow"
                     >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download
+                      <Download className="w-5 h-5 mr-2" />
+                      Download Image
                     </Button>
-                    <Button
-                      onClick={handleEnhance}
-                      variant="outline"
-                      disabled={isEnhancing}
-                      className="border-gold/30 text-cream hover:bg-gold/10"
-                    >
-                      <RefreshCw className={`w-4 h-4 mr-2 ${isEnhancing ? "animate-spin" : ""}`} />
-                      Regenerate
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setEnhancedImage(null);
-                        setStylePreset("clean_studio");
-                      }}
-                      variant="ghost"
-                      className="text-cream/60 hover:text-cream hover:bg-secondary/50"
-                    >
-                      Try Different Style
-                    </Button>
+                    <div className="flex gap-2 sm:gap-3">
+                      <Button
+                        onClick={handleEnhance}
+                        variant="outline"
+                        disabled={isEnhancing}
+                        className="flex-1 sm:flex-none border-gold/30 text-cream hover:bg-gold/10 py-3"
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${isEnhancing ? "animate-spin" : ""}`} />
+                        Regenerate
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setEnhancedImage(null);
+                          setStylePreset("clean_studio");
+                        }}
+                        variant="ghost"
+                        className="flex-1 sm:flex-none text-cream/60 hover:text-cream hover:bg-secondary/50 py-3"
+                      >
+                        Try Different Style
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
