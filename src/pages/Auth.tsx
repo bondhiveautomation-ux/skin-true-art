@@ -17,13 +17,8 @@ import {
   Palette,
   Mail,
   ArrowRight,
-  KeyRound
+  CheckCircle
 } from "lucide-react";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
 
 const FEATURES = [
   { icon: Camera, title: "Photography Studio", description: "DSLR-quality upgrades" },
@@ -45,10 +40,10 @@ const Auth = () => {
   const [forgotPassword, setForgotPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   
-  // OTP verification states
-  const [showOtpVerification, setShowOtpVerification] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
+  // Email confirmation states
+  const [showEmailSent, setShowEmailSent] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
+  
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -191,10 +186,10 @@ const Auth = () => {
       } else if (data.user && !data.session) {
         // User created but needs email verification
         setPendingEmail(email.trim());
-        setShowOtpVerification(true);
+        setShowEmailSent(true);
         toast({
-          title: "Confirm your email to login",
-          description: "We've sent a 6-digit verification code to your email.",
+          title: "Check your email! 📧",
+          description: "Click the link in your email to complete signup.",
         });
       }
     } catch (error) {
@@ -208,58 +203,16 @@ const Auth = () => {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (otpCode.length !== 6) {
-      toast({
-        title: "Invalid code",
-        description: "Please enter the complete 6-digit code.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: pendingEmail,
-        token: otpCode,
-        type: 'signup',
-      });
-
-      if (error) {
-        toast({
-          title: "Verification failed",
-          description: error.message || "Invalid or expired code. Please try again.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Account verified! 🎉",
-          description: "You're now signed in with 5 free credits.",
-        });
-        // The auth state change listener will handle navigation
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendCode = async () => {
+  const handleResendEmail = async () => {
     setLoading(true);
     
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: pendingEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        }
       });
 
       if (error) {
@@ -270,8 +223,8 @@ const Auth = () => {
         });
       } else {
         toast({
-          title: "Code resent! 📧",
-          description: "Please check your email for the new verification code.",
+          title: "Email resent! 📧",
+          description: "Please check your inbox and click the confirmation link.",
         });
       }
     } catch (error) {
@@ -419,61 +372,42 @@ const Auth = () => {
 
           {/* Auth Card */}
           <div className="glass-card p-5 sm:p-8 border border-gold/15 rounded-2xl sm:rounded-3xl backdrop-blur-md">
-            {showOtpVerification ? (
-              /* OTP Verification Form */
+            {showEmailSent ? (
+              /* Email Sent Confirmation */
               <div className="space-y-6">
                 <div className="text-center">
-                  <div className="w-14 h-14 rounded-xl gold-icon mx-auto mb-4 flex items-center justify-center">
-                    <KeyRound className="w-6 h-6 text-gold" />
+                  <div className="w-16 h-16 rounded-full bg-green-500/20 mx-auto mb-4 flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8 text-green-400" />
                   </div>
                   <h2 className="font-serif text-2xl font-semibold text-cream">
-                    Verify Your Email
+                    Check Your Email
                   </h2>
-                  <p className="text-sm text-cream/50 mt-2">
-                    We sent a 6-digit code to <span className="text-gold">{pendingEmail}</span>
+                  <p className="text-sm text-cream/60 mt-3 leading-relaxed">
+                    We sent a confirmation link to<br />
+                    <span className="text-gold font-medium">{pendingEmail}</span>
                   </p>
                 </div>
 
-                <form onSubmit={handleVerifyOtp} className="space-y-6">
-                  <div className="flex justify-center">
-                    <InputOTP
-                      maxLength={6}
-                      value={otpCode}
-                      onChange={(value) => setOtpCode(value)}
-                      disabled={loading}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} className="bg-charcoal border-gold/20 text-cream" />
-                        <InputOTPSlot index={1} className="bg-charcoal border-gold/20 text-cream" />
-                        <InputOTPSlot index={2} className="bg-charcoal border-gold/20 text-cream" />
-                        <InputOTPSlot index={3} className="bg-charcoal border-gold/20 text-cream" />
-                        <InputOTPSlot index={4} className="bg-charcoal border-gold/20 text-cream" />
-                        <InputOTPSlot index={5} className="bg-charcoal border-gold/20 text-cream" />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
+                <div className="bg-gold/10 border border-gold/20 rounded-xl p-4 text-center">
+                  <p className="text-sm text-cream/70">
+                    📧 Click the link in your email to complete signup and start using Brandify!
+                  </p>
+                </div>
 
-                  <Button type="submit" variant="gold" size="lg" className="w-full btn-glow" disabled={loading || otpCode.length !== 6}>
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Verify & Continue
-                  </Button>
-                </form>
-
-                <div className="text-center space-y-3">
+                <div className="text-center space-y-4">
                   <p className="text-sm text-cream/50">
-                    Didn't receive the code?{" "}
+                    Didn't receive the email?{" "}
                     <button 
-                      onClick={handleResendCode}
+                      onClick={handleResendEmail}
                       disabled={loading}
-                      className="text-gold hover:text-gold/80 transition-colors disabled:opacity-50"
+                      className="text-gold hover:text-gold/80 transition-colors disabled:opacity-50 font-medium"
                     >
-                      Resend
+                      {loading ? "Sending..." : "Resend"}
                     </button>
                   </p>
                   <button 
                     onClick={() => { 
-                      setShowOtpVerification(false); 
-                      setOtpCode(""); 
+                      setShowEmailSent(false); 
                       setPendingEmail(""); 
                     }}
                     className="text-sm text-cream/40 hover:text-cream/60 transition-colors"
