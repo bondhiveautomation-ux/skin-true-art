@@ -89,13 +89,13 @@ const Classes = () => {
       </section>
 
       {/* Course Cards Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {/* 3 Days Program Card */}
-            <div className="group relative bg-card/50 backdrop-blur-sm border border-gold/20 rounded-3xl p-8 hover:border-gold/40 transition-all duration-500 hover:shadow-[0_0_60px_-15px_rgba(212,175,55,0.3)]">
+            <div className="group relative bg-card/50 backdrop-blur-sm border border-gold/20 rounded-2xl sm:rounded-3xl p-5 sm:p-8 hover:border-gold/40 transition-all duration-500 hover:shadow-[0_0_60px_-15px_rgba(212,175,55,0.3)]">
               {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <div className="relative z-10">
                 {/* Header */}
@@ -155,20 +155,20 @@ const Classes = () => {
                 </div>
 
                 {/* Program Format */}
-                <div className="flex items-center gap-4 mb-8 p-4 bg-secondary/30 rounded-xl border border-gold/10">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8 p-3 sm:p-4 bg-secondary/30 rounded-xl border border-gold/10">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gold" />
-                    <span className="text-sm text-cream/70">3 Days Online</span>
+                    <Clock className="w-4 h-4 text-gold flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-cream/70 whitespace-nowrap">3 Days Online</span>
                   </div>
-                  <div className="w-px h-4 bg-gold/20" />
+                  <div className="hidden sm:block w-px h-4 bg-gold/20" />
                   <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-gold" />
-                    <span className="text-sm text-cream/70">6 Hours</span>
+                    <Star className="w-4 h-4 text-gold flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-cream/70 whitespace-nowrap">6 Hours</span>
                   </div>
-                  <div className="w-px h-4 bg-gold/20" />
+                  <div className="hidden sm:block w-px h-4 bg-gold/20" />
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-gold" />
-                    <span className="text-sm text-cream/70">Long Term Support</span>
+                    <Users className="w-4 h-4 text-gold flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-cream/70 whitespace-nowrap">Long Term Support</span>
                   </div>
                 </div>
 
@@ -196,14 +196,14 @@ const Classes = () => {
             </div>
 
             {/* 5 Days Program Card */}
-            <div className="group relative bg-card/50 backdrop-blur-sm border border-rose-gold/30 rounded-3xl p-8 hover:border-rose-gold/50 transition-all duration-500 hover:shadow-[0_0_60px_-15px_rgba(183,110,121,0.3)]">
+            <div className="group relative bg-card/50 backdrop-blur-sm border border-rose-gold/30 rounded-2xl sm:rounded-3xl p-5 sm:p-8 hover:border-rose-gold/50 transition-all duration-500 hover:shadow-[0_0_60px_-15px_rgba(183,110,121,0.3)]">
               {/* Popular Badge */}
-              <div className="absolute -top-3 right-6 px-4 py-1.5 bg-gradient-to-r from-rose-gold to-gold rounded-full text-xs font-semibold text-background">
+              <div className="absolute -top-3 right-4 sm:right-6 px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-rose-gold to-gold rounded-full text-[10px] sm:text-xs font-semibold text-background">
                 Most Popular
               </div>
               
               {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/5 to-transparent rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <div className="relative z-10">
                 {/* Header */}
@@ -272,20 +272,20 @@ const Classes = () => {
                 </div>
 
                 {/* Program Format */}
-                <div className="flex items-center gap-4 mb-8 p-4 bg-secondary/30 rounded-xl border border-rose-gold/10">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8 p-3 sm:p-4 bg-secondary/30 rounded-xl border border-rose-gold/10">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-rose-gold" />
-                    <span className="text-sm text-cream/70">5 Days Online</span>
+                    <Clock className="w-4 h-4 text-rose-gold flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-cream/70 whitespace-nowrap">5 Days Online</span>
                   </div>
-                  <div className="w-px h-4 bg-rose-gold/20" />
+                  <div className="hidden sm:block w-px h-4 bg-rose-gold/20" />
                   <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-rose-gold" />
-                    <span className="text-sm text-cream/70">10 Hours</span>
+                    <Star className="w-4 h-4 text-rose-gold flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-cream/70 whitespace-nowrap">10 Hours</span>
                   </div>
-                  <div className="w-px h-4 bg-rose-gold/20" />
+                  <div className="hidden sm:block w-px h-4 bg-rose-gold/20" />
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-rose-gold" />
-                    <span className="text-sm text-cream/70">Long Term Support</span>
+                    <Users className="w-4 h-4 text-rose-gold flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-cream/70 whitespace-nowrap">Long Term Support</span>
                   </div>
                 </div>
 

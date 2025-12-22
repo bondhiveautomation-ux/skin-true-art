@@ -213,16 +213,16 @@ const Pricing = () => {
         </div>
 
         {/* Gem Cost Info */}
-        <div className="mb-12 p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-500/20">
-          <h3 className="text-lg font-serif text-cream mb-4 flex items-center gap-2"><Diamond className="w-5 h-5 text-purple-400" />Gem Costs by Feature</h3>
-          <div className="grid sm:grid-cols-3 gap-4">
+        <div className="mb-8 sm:mb-12 p-4 sm:p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl sm:rounded-2xl border border-purple-500/20">
+          <h3 className="text-base sm:text-lg font-serif text-cream mb-3 sm:mb-4 flex items-center gap-2"><Diamond className="w-4 sm:w-5 h-4 sm:h-5 text-purple-400" />Gem Costs by Feature</h3>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             {Object.entries(FEATURE_CATEGORIES).map(([key, cat]) => (
-              <div key={key} className="bg-background/50 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl font-bold text-purple-400">{cat.cost}</span>
-                  <span className="text-cream/60 text-sm">Gems</span>
+              <div key={key} className="bg-background/50 rounded-lg sm:rounded-xl p-2.5 sm:p-4">
+                <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                  <span className="text-lg sm:text-2xl font-bold text-purple-400">{cat.cost}</span>
+                  <span className="text-cream/60 text-[10px] sm:text-sm">Gems</span>
                 </div>
-                <p className="text-sm text-cream/70">{cat.label}</p>
+                <p className="text-[10px] sm:text-sm text-cream/70 line-clamp-2">{cat.label}</p>
               </div>
             ))}
           </div>
@@ -316,15 +316,18 @@ const Pricing = () => {
 
       {/* Chat Modal */}
       {showChat && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg max-h-[80vh] flex flex-col">
-            <CardHeader className="border-b border-purple-500/10 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div><CardTitle className="text-cream font-serif">{activeRequest ? "Payment Chat" : "Confirm Payment"}</CardTitle>{activeRequest && getStatusBadge(activeRequest.status)}</div>
-                <Button variant="ghost" size="icon" onClick={() => { setShowChat(false); setActiveRequest(null); setChatMessages([]); }} className="text-cream/60 hover:text-cream">×</Button>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <Card className="w-full sm:max-w-lg max-h-[90vh] sm:max-h-[80vh] flex flex-col rounded-t-2xl sm:rounded-2xl">
+            <CardHeader className="border-b border-purple-500/10 flex-shrink-0 p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-cream font-serif text-base sm:text-lg truncate">{activeRequest ? "Payment Chat" : "Confirm Payment"}</CardTitle>
+                  {activeRequest && <div className="mt-1">{getStatusBadge(activeRequest.status)}</div>}
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => { setShowChat(false); setActiveRequest(null); setChatMessages([]); }} className="text-cream/60 hover:text-cream h-10 w-10 flex-shrink-0">×</Button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+            <CardContent className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
               {activeRequest ? (
                 <>{chatMessages.map((msg) => (<div key={msg.id} className={`flex ${msg.is_admin ? "justify-start" : "justify-end"}`}><div className={`max-w-[80%] rounded-xl p-3 ${msg.is_admin ? "bg-muted text-cream" : "bg-purple-500/20 text-cream border border-purple-500/30"}`}><p className="text-sm whitespace-pre-wrap">{msg.message}</p><p className="text-xs text-cream/40 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p></div></div>))}<div ref={chatEndRef} /></>
               ) : (
@@ -340,11 +343,11 @@ const Pricing = () => {
                 </div>
               )}
             </CardContent>
-            <div className="border-t border-purple-500/10 p-4 flex-shrink-0">
+            <div className="border-t border-purple-500/10 p-3 sm:p-4 flex-shrink-0 safe-area-bottom">
               {activeRequest ? (
-                <div className="flex gap-2"><Input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendFollowUp()} /><Button onClick={handleSendFollowUp} disabled={sendingMessage || !message.trim()} className="bg-purple-500 hover:bg-purple-600"><Send className="w-4 h-4" /></Button></div>
+                <div className="flex gap-2"><Input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendFollowUp()} className="h-11" /><Button onClick={handleSendFollowUp} disabled={sendingMessage || !message.trim()} className="bg-purple-500 hover:bg-purple-600 h-11 w-11 sm:w-auto sm:px-4"><Send className="w-4 h-4" /></Button></div>
               ) : (
-                <Button onClick={handleSendMessage} disabled={sendingMessage || !txid.trim()} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">{sendingMessage ? "Submitting..." : "Submit Payment Request"}</Button>
+                <Button onClick={handleSendMessage} disabled={sendingMessage || !txid.trim()} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">{sendingMessage ? "Submitting..." : "Submit Payment Request"}</Button>
               )}
             </div>
           </Card>
