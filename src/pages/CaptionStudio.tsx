@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useCredits } from "@/hooks/useCredits";
+import { useGems } from "@/hooks/useGems";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { ImageUploader } from "@/components/ui/ImageUploader";
@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { ProcessingModal } from "@/components/gems/ProcessingModal";
+import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { getGemCost } from "@/lib/gemCosts";
 
 type Language = "bangla" | "english";
 type CaptionLength = "short" | "medium" | "long";
@@ -28,8 +31,9 @@ type ToneStyle = "bold_salesy" | "elegant_premium" | "friendly_casual" | "minima
 const CaptionStudio = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { credits, deductCredit, hasCredits, refetchCredits } = useCredits();
+  const { gems, deductGems, hasEnoughGems, refetchGems } = useGems();
   const { toast } = useToast();
+  const [showLowBalance, setShowLowBalance] = useState(false);
 
   // States
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -114,20 +118,16 @@ const CaptionStudio = () => {
       return;
     }
 
-    if (!hasCredits) {
-      toast({
-        title: "No credits",
-        description: "You have no credits remaining",
-        variant: "destructive",
-      });
+    if (!hasEnoughGems("generate-caption")) {
+      setShowLowBalance(true);
       return;
     }
 
-    const success = await deductCredit();
-    if (!success) {
+    const result = await deductGems("generate-caption");
+    if (!result.success) {
       toast({
-        title: "No credits",
-        description: "You have no credits remaining",
+        title: "Insufficient gems",
+        description: "Please top up your gems to continue",
         variant: "destructive",
       });
       return;
@@ -204,7 +204,7 @@ const CaptionStudio = () => {
     <div className="min-h-screen bg-background">
       <Navbar 
         onNavigate={(section) => navigate(`/#${section}`)} 
-        credits={credits}
+        credits={gems}
       />
 
       {/* Hero Section */}
