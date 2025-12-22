@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-interface UserWithCredits {
+interface UserWithGems {
   user_id: string;
   email: string | null;
   full_name: string | null;
-  credits: number;
+  gems: number;
   created_at: string;
   is_blocked: boolean;
 }
@@ -25,7 +25,7 @@ export const useAdmin = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<UserWithCredits[]>([]);
+  const [users, setUsers] = useState<UserWithGems[]>([]);
   const [history, setHistory] = useState<GenerationHistory[]>([]);
 
   // Check if current user is admin
@@ -56,7 +56,7 @@ export const useAdmin = () => {
     checkAdmin();
   }, [user?.id]);
 
-  // Fetch all users with credits
+  // Fetch all users with gems
   const fetchUsers = useCallback(async () => {
     if (!isAdmin) return;
 
@@ -69,22 +69,22 @@ export const useAdmin = () => {
 
       const { data: credits, error: creditsError } = await supabase
         .from('user_credits')
-        .select('user_id, credits');
+        .select('user_id, gems_balance');
 
       if (creditsError) throw creditsError;
 
-      const creditsMap = new Map(credits?.map(c => [c.user_id, c.credits]) || []);
+      const gemsMap = new Map(credits?.map(c => [c.user_id, c.gems_balance]) || []);
 
-      const usersWithCredits: UserWithCredits[] = (profiles || []).map(p => ({
+      const usersWithGems: UserWithGems[] = (profiles || []).map(p => ({
         user_id: p.user_id,
         email: p.email,
         full_name: p.full_name,
-        credits: creditsMap.get(p.user_id) ?? 0,
+        gems: gemsMap.get(p.user_id) ?? 0,
         created_at: p.created_at,
         is_blocked: p.is_blocked ?? false,
       }));
 
-      setUsers(usersWithCredits);
+      setUsers(usersWithGems);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -123,15 +123,15 @@ export const useAdmin = () => {
     }
   }, [isAdmin]);
 
-  // Update user credits
-  const updateCredits = useCallback(async (targetUserId: string, newCredits: number): Promise<boolean> => {
+  // Update user gems
+  const updateCredits = useCallback(async (targetUserId: string, newGems: number): Promise<boolean> => {
     if (!user?.id || !isAdmin) return false;
 
     try {
-      const { data, error } = await supabase.rpc('admin_update_credits', {
+      const { data, error } = await supabase.rpc('admin_update_gems', {
         p_admin_id: user.id,
         p_target_user_id: targetUserId,
-        p_credits: newCredits,
+        p_gems: newGems,
       });
 
       if (error) throw error;
@@ -141,7 +141,7 @@ export const useAdmin = () => {
       }
       return false;
     } catch (error) {
-      console.error("Error updating credits:", error);
+      console.error("Error updating gems:", error);
       return false;
     }
   }, [user?.id, isAdmin, fetchUsers]);

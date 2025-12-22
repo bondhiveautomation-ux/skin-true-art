@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Coins, Shield, Sparkles, Menu, Play, ExternalLink } from "lucide-react";
+import { LogOut, Shield, Sparkles, Menu, Play, ExternalLink, Diamond } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -126,9 +126,9 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                 </Button>
               )}
               {credits !== null && credits !== undefined && (
-                <div className="flex items-center gap-2 px-3 lg:px-4 py-2 rounded-full bg-gold/10 border border-gold/30 backdrop-blur-sm">
-                  <Coins className="w-4 h-4 text-gold" />
-                  <span className="text-sm font-semibold text-gold">{credits}</span>
+                <div className="flex items-center gap-2 px-3 lg:px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 backdrop-blur-sm">
+                  <Diamond className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{credits}</span>
                 </div>
               )}
               {userEmail && (
@@ -160,13 +160,13 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               )}
             </div>
 
-            {/* Mobile/Tablet: Inbox + Credits + Hamburger */}
+            {/* Mobile/Tablet: Inbox + Gems + Hamburger */}
             <div className="flex lg:hidden items-center gap-2">
               {userEmail && <UserInbox />}
               {credits !== null && credits !== undefined && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30">
-                  <Coins className="w-3.5 h-3.5 text-gold" />
-                  <span className="text-xs font-semibold text-gold">{credits}</span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30">
+                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="text-xs font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{credits}</span>
                 </div>
               )}
               <button 

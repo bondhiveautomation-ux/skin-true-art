@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Sparkles, Flame, Rocket, Briefcase, Timer, PartyPopper } from "lucide-react";
+import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Diamond, Zap, Crown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { GEM_PRICING, FEATURE_CATEGORIES } from "@/lib/gemCosts";
 
 type PaymentStatus = 'pending' | 'approved' | 'rejected';
 
@@ -33,44 +34,10 @@ interface ChatMessage {
 
 const BKASH_NUMBER = "01328845972";
 
-const NEW_YEAR_OFFER = {
-  name: "New Year Special",
-  price: 999,
-  credits: 2000,
-  description: "Our biggest credit pack ever — only for New Year."
-};
-
-const PRICING_TIERS = [
-  {
-    name: "Starter",
-    price: 199,
-    credits: 100,
-    description: "Best for trying the tools",
-    badge: null,
-    highlighted: false
-  },
-  {
-    name: "Growth",
-    price: 399,
-    credits: 300,
-    description: "Best value for regular sellers",
-    badge: "BEST VALUE",
-    highlighted: true
-  },
-  {
-    name: "Business",
-    price: 699,
-    credits: 500,
-    description: "For heavy users / agencies",
-    badge: null,
-    highlighted: false
-  }
-];
-
 const FAQ_ITEMS = [
   {
-    question: "How do credits work?",
-    answer: "Each AI tool operation uses 1 credit. For example, enhancing a photo or generating a caption each costs 1 credit. Credits are added to your account after payment verification."
+    question: "How do Gems work?",
+    answer: "Different features cost different amounts of Gems. High-impact features like Dress Change cost 15 Gems, Studio utilities cost 6 Gems, and Quick tools cost just 1 Gem."
   },
   {
     question: "How long does approval take?",
@@ -78,18 +45,18 @@ const FAQ_ITEMS = [
   },
   {
     question: "What if I send wrong amount?",
-    answer: "Please contact us through the inbox chat with your transaction details. We'll help resolve any payment issues and adjust credits accordingly."
+    answer: "Please contact us through the inbox chat with your transaction details. We'll help resolve any payment issues and adjust gems accordingly."
   },
   {
-    question: "Do credits expire?",
-    answer: "No, your credits never expire. Once added to your account, they remain available until you use them."
+    question: "Do Gems expire?",
+    answer: "Regular top-up Gems never expire. Subscription Gems are valid for the subscription period (7 days for Weekly, 30 days for Monthly)."
   }
 ];
 
 const Pricing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [selectedPackage, setSelectedPackage] = useState<typeof PRICING_TIERS[0] | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<{ name: string; gems: number; price: number } | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [txid, setTxid] = useState("");
   const [message, setMessage] = useState("");
@@ -101,15 +68,11 @@ const Pricing = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user) {
-      fetchUserRequests();
-    }
+    if (user) fetchUserRequests();
   }, [user]);
 
   useEffect(() => {
-    if (activeRequest) {
-      fetchChatMessages(activeRequest.id);
-    }
+    if (activeRequest) fetchChatMessages(activeRequest.id);
   }, [activeRequest]);
 
   useEffect(() => {
@@ -123,10 +86,7 @@ const Pricing = () => {
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    
-    if (!error && data) {
-      setUserRequests(data as PaymentRequest[]);
-    }
+    if (!error && data) setUserRequests(data as PaymentRequest[]);
   };
 
   const fetchChatMessages = async (requestId: string) => {
@@ -135,10 +95,7 @@ const Pricing = () => {
       .select("*")
       .eq("payment_request_id", requestId)
       .order("created_at", { ascending: true });
-    
-    if (!error && data) {
-      setChatMessages(data as ChatMessage[]);
-    }
+    if (!error && data) setChatMessages(data as ChatMessage[]);
   };
 
   const copyToClipboard = async () => {
@@ -148,26 +105,15 @@ const Pricing = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleInboxClick = (tier: typeof PRICING_TIERS[0] | typeof NEW_YEAR_OFFER) => {
+  const handlePackageSelect = (pkg: { name: string; gems: number; price: number }) => {
     if (!user) {
-      toast.error("Please sign in to purchase credits");
+      toast.error("Please sign in to purchase gems");
       navigate("/auth");
       return;
     }
-    setSelectedPackage(tier as typeof PRICING_TIERS[0]);
+    setSelectedPackage(pkg);
     setShowChat(true);
-    setMessage(`Hi, I want to buy: ${tier.name} (${tier.credits} credits for ${tier.price} Tk).\nI have sent payment via bKash.\nMy TxID: \nMy account email: ${user.email}`);
-  };
-
-  const handleNewYearOfferClick = () => {
-    if (!user) {
-      toast.error("Please sign in to claim this offer");
-      navigate("/auth");
-      return;
-    }
-    setSelectedPackage(NEW_YEAR_OFFER as typeof PRICING_TIERS[0]);
-    setShowChat(true);
-    setMessage(`Hi, I want to claim the New Year 999 Tk offer (2000 credits).\nI have sent payment via bKash.\nMy TxID: ______\nMy email: ${user.email}`);
+    setMessage(`Hi, I want to buy: ${pkg.name} (${pkg.gems} Gems for ৳${pkg.price}).\nI have sent payment via bKash.\nMy TxID: \nMy account email: ${user.email}`);
   };
 
   const handleSendMessage = async () => {
@@ -175,53 +121,36 @@ const Pricing = () => {
       toast.error("Please enter your Transaction ID");
       return;
     }
-
     setSendingMessage(true);
-
     try {
-      // Check duplicate TxID
       const { data: isDuplicate } = await supabase.rpc("check_duplicate_txid", { p_txid: txid.trim() });
-      
       if (isDuplicate) {
         toast.error("This Transaction ID has already been used");
         setSendingMessage(false);
         return;
       }
-
-      // Create payment request
       const { data: request, error: requestError } = await supabase
         .from("payment_requests")
         .insert({
           user_id: user.id,
           package_name: selectedPackage.name,
-          credits: selectedPackage.credits,
+          credits: selectedPackage.gems,
           amount: selectedPackage.price,
           txid: txid.trim()
         })
         .select()
         .single();
-
       if (requestError) throw requestError;
-
-      // Send initial message
       const fullMessage = message.replace("My TxID: ", `My TxID: ${txid.trim()}`);
-      
       const { error: messageError } = await supabase
         .from("chat_messages")
-        .insert({
-          payment_request_id: request.id,
-          sender_id: user.id,
-          is_admin: false,
-          message: fullMessage
-        });
-
+        .insert({ payment_request_id: request.id, sender_id: user.id, is_admin: false, message: fullMessage });
       if (messageError) throw messageError;
-
       setActiveRequest(request as PaymentRequest);
       await fetchChatMessages(request.id);
       await fetchUserRequests();
       setTxid("");
-      toast.success("Payment request submitted! We'll verify and add credits soon.");
+      toast.success("Payment request submitted! We'll verify and add gems soon.");
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to submit request. Please try again.");
@@ -232,24 +161,15 @@ const Pricing = () => {
 
   const handleSendFollowUp = async () => {
     if (!user || !activeRequest || !message.trim()) return;
-
     setSendingMessage(true);
     try {
       const { error } = await supabase
         .from("chat_messages")
-        .insert({
-          payment_request_id: activeRequest.id,
-          sender_id: user.id,
-          is_admin: false,
-          message: message.trim()
-        });
-
+        .insert({ payment_request_id: activeRequest.id, sender_id: user.id, is_admin: false, message: message.trim() });
       if (error) throw error;
-      
       setMessage("");
       await fetchChatMessages(activeRequest.id);
     } catch (error) {
-      console.error("Error sending message:", error);
       toast.error("Failed to send message");
     } finally {
       setSendingMessage(false);
@@ -258,281 +178,121 @@ const Pricing = () => {
 
   const getStatusBadge = (status: PaymentStatus) => {
     switch (status) {
-      case "pending":
-        return <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30"><Clock className="w-3 h-3 mr-1" />Pending Verification</Badge>;
-      case "approved":
-        return <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>;
-      case "rejected":
-        return <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
+      case "pending": return <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+      case "approved": return <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>;
+      case "rejected": return <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
     }
   };
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-      </div>
-    );
+    return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400"></div></div>;
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-gold/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-purple-500/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="text-cream/60 hover:text-gold px-2 sm:px-4"
-            size="sm"
-          >
-            <ArrowLeft className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Back to Home</span>
+          <Button variant="ghost" onClick={() => navigate("/")} className="text-cream/60 hover:text-purple-400 px-2 sm:px-4" size="sm">
+            <ArrowLeft className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Back to Home</span>
           </Button>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
-            <span className="font-serif text-base sm:text-xl text-cream">Credits & Pricing</span>
+            <Diamond className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+            <span className="font-serif text-base sm:text-xl text-cream">Gems & Pricing</span>
           </div>
           <div className="w-10 sm:w-24" />
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* New Year Special Offer Card */}
-        <div className="mb-12 sm:mb-16">
-          <Card className="relative overflow-hidden border-2 border-gold bg-gradient-to-br from-gold/10 via-background to-gold/5 shadow-2xl shadow-gold/20 rounded-2xl sm:rounded-3xl">
-            {/* Animated glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/10 to-gold/0 animate-pulse pointer-events-none" />
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
-            
-            {/* Badge */}
-            <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
-              <Badge className="bg-gradient-to-r from-gold to-amber-500 text-background font-bold px-3 sm:px-4 py-1.5 text-xs sm:text-sm animate-pulse shadow-lg shadow-gold/30">
-                <PartyPopper className="w-3.5 h-3.5 mr-1.5" />
-                NEW YEAR SPECIAL — LIMITED TIME
-              </Badge>
-            </div>
-            
-            <CardContent className="relative z-10 p-6 sm:p-8 pt-14 sm:pt-16">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                {/* Left: Offer Details */}
-                <div className="text-center md:text-left">
-                  <div className="mb-4">
-                    <span className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gold">{NEW_YEAR_OFFER.price}</span>
-                    <span className="text-cream/60 text-xl sm:text-2xl ml-2">Tk</span>
-                  </div>
-                  <p className="text-2xl sm:text-3xl font-serif text-cream mb-2">
-                    {NEW_YEAR_OFFER.credits.toLocaleString()} Credits
-                  </p>
-                  <p className="text-cream/70 text-sm sm:text-base mb-6">
-                    {NEW_YEAR_OFFER.description}
-                  </p>
-                  
-                  {/* Value Highlights */}
-                  <div className="space-y-2.5 mb-6">
-                    <div className="flex items-center gap-3 text-cream/80">
-                      <Flame className="w-5 h-5 text-orange-400 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">2000 Credits — save massive money</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-cream/80">
-                      <Rocket className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">Perfect for bulk posting & batch branding</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-cream/80">
-                      <Briefcase className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">Ideal for sellers, creators & agencies</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-cream/80">
-                      <Timer className="w-5 h-5 text-gold flex-shrink-0" />
-                      <span className="text-sm sm:text-base">Limited-time New Year deal only</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-cream/50 text-xs sm:text-sm italic">
-                    "Regular users would need multiple packs — this gives you everything at once."
-                  </p>
-                </div>
-                
-                {/* Right: Payment & CTA */}
-                <div className="space-y-5">
-                  {/* bKash Section */}
-                  <div className="bg-background/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 border border-gold/20">
-                    <p className="text-sm font-medium text-cream/80 flex items-center gap-2 mb-3">
-                      Pay via <span className="text-pink-500 font-semibold">bKash</span> (Manual)
-                    </p>
-                    
-                    <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 sm:p-4 border border-gold/10 mb-4">
-                      <span className="font-mono text-lg sm:text-xl text-gold font-bold">{BKASH_NUMBER}</span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={copyToClipboard}
-                        className="h-10 w-10 text-cream/60 hover:text-gold active:scale-95"
-                      >
-                        {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
-                      </Button>
-                    </div>
-                    
-                    <ol className="text-xs sm:text-sm text-cream/60 space-y-1.5 pl-1">
-                      <li>1. Send <span className="text-gold font-semibold">999 Tk</span> to the number above</li>
-                      <li>2. Copy your Transaction ID (TxID)</li>
-                      <li>3. Click Inbox and send us your TxID</li>
-                      <li>4. Credits will be added after verification</li>
-                    </ol>
-                  </div>
-                  
-                  {/* CTA Button */}
-                  <Button 
-                    onClick={handleNewYearOfferClick}
-                    className="w-full h-14 sm:h-12 text-base sm:text-lg font-bold bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-background shadow-lg shadow-gold/30 transition-all duration-300 hover:shadow-xl hover:shadow-gold/40 hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                      animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    }}
-                  >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Get New Year Deal
-                  </Button>
-                  
-                  {/* Inbox Button */}
-                  <Button 
-                    onClick={handleNewYearOfferClick}
-                    variant="outline"
-                    className="w-full h-12 sm:h-11 border-gold/30 text-gold hover:bg-gold/10 hover:border-gold"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Inbox to Claim This Offer
-                  </Button>
-                  
-                  {/* Urgency Text */}
-                  <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs text-cream/50">
-                    <span className="flex items-center gap-1">
-                      <Timer className="w-3.5 h-3.5" /> Limited time only
-                    </span>
-                    <span className="flex items-center gap-1">
-                      🎯 Offer will be removed soon
-                    </span>
-                    <span className="flex items-center gap-1">
-                      🎆 New Year exclusive
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Hero */}
         <div className="text-center mb-10 sm:mb-16">
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-cream mb-3 sm:mb-4">
-            Choose Your <span className="text-gold">Credit Package</span>
+            Power Your <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Creative Flow</span>
           </h1>
-          <p className="text-cream/60 text-base sm:text-lg max-w-2xl mx-auto px-2">
-            Power your content creation with AI credits. Pay via bKash and get credits added after quick verification.
-          </p>
-          <p className="text-cream/40 text-xs sm:text-sm mt-3 sm:mt-4">
-            Manual bKash verification usually takes 5–30 minutes.
-          </p>
+          <p className="text-cream/60 text-base sm:text-lg max-w-2xl mx-auto">Get Gems to unlock all AI features. Pay via bKash and get gems added after quick verification.</p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
-          {PRICING_TIERS.map((tier) => (
-            <Card 
-              key={tier.name}
-              className={`relative overflow-hidden transition-all duration-300 active:scale-[0.98] sm:hover:scale-105 rounded-2xl sm:rounded-3xl ${
-                tier.highlighted 
-                  ? "border-gold shadow-lg shadow-gold/20 ring-2 ring-gold/30" 
-                  : "hover:border-gold/30"
-              }`}
-            >
-              {tier.badge && (
-                <div className="absolute top-0 right-0">
-                  <Badge className="rounded-none rounded-bl-xl bg-gold text-background font-bold px-3 sm:px-4 py-1 text-xs sm:text-sm">
-                    {tier.badge}
-                  </Badge>
+        {/* Gem Cost Info */}
+        <div className="mb-12 p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-500/20">
+          <h3 className="text-lg font-serif text-cream mb-4 flex items-center gap-2"><Diamond className="w-5 h-5 text-purple-400" />Gem Costs by Feature</h3>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {Object.entries(FEATURE_CATEGORIES).map(([key, cat]) => (
+              <div key={key} className="bg-background/50 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl font-bold text-purple-400">{cat.cost}</span>
+                  <span className="text-cream/60 text-sm">Gems</span>
                 </div>
-              )}
-              <CardHeader className="text-center pb-2 pt-6 sm:pt-8">
-                <CardTitle className="font-serif text-xl sm:text-2xl text-cream">{tier.name}</CardTitle>
-                <CardDescription className="text-cream/50 text-sm">{tier.description}</CardDescription>
+                <p className="text-sm text-cream/70">{cat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Subscription Plans */}
+        <h2 className="font-serif text-2xl text-cream mb-6">Subscription Plans</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {GEM_PRICING.subscriptions.map((plan) => (
+            <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 rounded-2xl ${plan.highlighted ? "border-purple-500 shadow-lg shadow-purple-500/20 ring-2 ring-purple-500/30" : "hover:border-purple-500/30"}`}>
+              {plan.badge && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-1">{plan.badge}</Badge></div>}
+              <CardHeader className="text-center pb-2 pt-8">
+                <CardTitle className="font-serif text-2xl text-cream flex items-center justify-center gap-2">{plan.id === 'weekly-spark' ? <Zap className="w-5 h-5 text-yellow-400" /> : <Crown className="w-5 h-5 text-purple-400" />}{plan.name}</CardTitle>
+                <CardDescription className="text-cream/50">{plan.description}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-5 sm:space-y-6 p-5 sm:p-6">
+              <CardContent className="space-y-5 p-6">
                 <div className="text-center">
-                  <span className="text-4xl sm:text-5xl font-bold text-gold">{tier.price}</span>
-                  <span className="text-cream/60 ml-2">Tk</span>
-                  <p className="text-cream/70 mt-2 text-sm sm:text-base">{tier.credits} Credits</p>
+                  <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">৳{plan.price}</span>
+                  <p className="text-cream/70 mt-2 flex items-center justify-center gap-2"><Diamond className="w-4 h-4 text-purple-400" />{plan.gems} Gems • {plan.validDays} days</p>
                 </div>
-
-                {/* bKash Instructions */}
-                <div className="bg-background/50 rounded-xl sm:rounded-2xl p-4 space-y-3">
-                  <p className="text-sm font-medium text-cream/80 flex items-center gap-2">
-                    <span className="text-pink-500">bKash</span> Manual Payment
-                  </p>
-                  
-                  <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 sm:p-4 border border-gold/10">
-                    <span className="font-mono text-base sm:text-lg text-gold">{BKASH_NUMBER}</span>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={copyToClipboard}
-                      className="h-10 w-10 sm:h-8 sm:w-8 text-cream/60 hover:text-gold active:scale-95"
-                    >
-                      {copied ? <Check className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-400" /> : <Copy className="w-5 h-5 sm:w-4 sm:h-4" />}
-                    </Button>
+                <div className="bg-background/50 rounded-xl p-4 space-y-3">
+                  <p className="text-sm font-medium text-cream/80 flex items-center gap-2"><span className="text-pink-500">bKash</span> Manual Payment</p>
+                  <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 border border-purple-500/10">
+                    <span className="font-mono text-lg text-purple-400">{BKASH_NUMBER}</span>
+                    <Button size="icon" variant="ghost" onClick={copyToClipboard} className="h-8 w-8 text-cream/60 hover:text-purple-400">{copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}</Button>
                   </div>
-
-                  <ol className="text-xs text-cream/50 space-y-1.5 pl-4">
-                    <li>1. Send <span className="text-gold">{tier.price} Tk</span> to this bKash number</li>
-                    <li>2. Copy your Transaction ID (TxID)</li>
-                    <li>3. Click Inbox and message us your TxID</li>
-                    <li>4. We'll add credits after verification</li>
-                  </ol>
                 </div>
-
-                <Button 
-                  onClick={() => handleInboxClick(tier)}
-                  variant="gold"
-                  className="w-full btn-glow h-12 sm:h-11 text-sm sm:text-base"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Inbox to Confirm Payment
+                <Button onClick={() => handlePackageSelect({ name: plan.name, gems: plan.gems, price: plan.price })} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold">
+                  <MessageCircle className="w-4 h-4 mr-2" />Get {plan.name}
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* User's Payment Requests */}
+        {/* Top-ups */}
+        <h2 className="font-serif text-2xl text-cream mb-6">Manual Power-Ups</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {GEM_PRICING.topups.map((pkg) => (
+            <Card key={pkg.id} className="relative overflow-hidden transition-all duration-300 rounded-2xl hover:border-purple-500/30">
+              {pkg.badge && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-purple-500/80 text-white font-bold px-3 py-1 text-xs">{pkg.badge}</Badge></div>}
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-serif text-xl text-cream">{pkg.name}</h3>
+                    <p className="text-cream/50 text-sm">{pkg.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-3xl font-bold text-purple-400">৳{pkg.price}</span>
+                    <p className="text-cream/60 text-sm flex items-center gap-1 justify-end"><Diamond className="w-3 h-3" />{pkg.gems} Gems</p>
+                  </div>
+                </div>
+                <Button onClick={() => handlePackageSelect({ name: pkg.name, gems: pkg.gems, price: pkg.price })} variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
+                  <Sparkles className="w-4 h-4 mr-2" />Top-up Now
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* User Requests */}
         {user && userRequests.length > 0 && (
-          <div className="mb-12 sm:mb-16">
-            <h2 className="font-serif text-xl sm:text-2xl text-cream mb-4 sm:mb-6">Your Payment Requests</h2>
-            <div className="grid gap-3 sm:gap-4">
+          <div className="mb-12">
+            <h2 className="font-serif text-xl text-cream mb-4">Your Payment Requests</h2>
+            <div className="grid gap-3">
               {userRequests.map((request) => (
-                <Card 
-                  key={request.id} 
-                  className={`cursor-pointer transition-all active:scale-[0.98] hover:border-gold/30 rounded-xl sm:rounded-2xl ${
-                    activeRequest?.id === request.id ? "border-gold" : ""
-                  }`}
-                  onClick={() => {
-                    setActiveRequest(request);
-                    setShowChat(true);
-                    setSelectedPackage(PRICING_TIERS.find(t => t.name === request.package_name) || null);
-                  }}
-                >
-                  <CardContent className="p-4 sm:p-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <p className="font-medium text-cream">{request.package_name}</p>
-                        <p className="text-xs sm:text-sm text-cream/50">TxID: {request.txid}</p>
-                      </div>
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        {getStatusBadge(request.status)}
-                        <span className="text-xs sm:text-sm text-cream/40">
-                          {new Date(request.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
+                <Card key={request.id} className="cursor-pointer transition-all hover:border-purple-500/30 rounded-xl" onClick={() => { setActiveRequest(request); setShowChat(true); }}>
+                  <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div><p className="font-medium text-cream">{request.package_name}</p><p className="text-xs text-cream/50">TxID: {request.txid}</p></div>
+                    <div className="flex items-center gap-3">{getStatusBadge(request.status)}<span className="text-xs text-cream/40">{new Date(request.created_at).toLocaleDateString()}</span></div>
                   </CardContent>
                 </Card>
               ))}
@@ -540,22 +300,14 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* FAQ Section */}
+        {/* FAQ */}
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-serif text-xl sm:text-2xl text-cream text-center mb-6 sm:mb-8">Frequently Asked Questions</h2>
-          <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
+          <h2 className="font-serif text-xl text-cream text-center mb-6">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="space-y-3">
             {FAQ_ITEMS.map((item, index) => (
-              <AccordionItem 
-                key={index} 
-                value={`item-${index}`}
-                className="border border-gold/10 rounded-xl sm:rounded-2xl bg-card/30 px-4 sm:px-6"
-              >
-                <AccordionTrigger className="text-cream hover:text-gold text-left text-sm sm:text-base py-4 sm:py-5">
-                  {item.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-cream/60 text-sm pb-4 sm:pb-5">
-                  {item.answer}
-                </AccordionContent>
+              <AccordionItem key={index} value={`item-${index}`} className="border border-purple-500/10 rounded-xl bg-card/30 px-4">
+                <AccordionTrigger className="text-cream hover:text-purple-400 text-left text-sm py-4">{item.question}</AccordionTrigger>
+                <AccordionContent className="text-cream/60 text-sm pb-4">{item.answer}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -566,108 +318,28 @@ const Pricing = () => {
       {showChat && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-lg max-h-[80vh] flex flex-col">
-            <CardHeader className="border-b border-gold/10 flex-shrink-0">
+            <CardHeader className="border-b border-purple-500/10 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-cream font-serif">
-                    {activeRequest ? "Payment Chat" : "Confirm Payment"}
-                  </CardTitle>
-                  {activeRequest && getStatusBadge(activeRequest.status)}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setShowChat(false);
-                    setActiveRequest(null);
-                    setChatMessages([]);
-                  }}
-                  className="text-cream/60 hover:text-cream"
-                >
-                  ×
-                </Button>
+                <div><CardTitle className="text-cream font-serif">{activeRequest ? "Payment Chat" : "Confirm Payment"}</CardTitle>{activeRequest && getStatusBadge(activeRequest.status)}</div>
+                <Button variant="ghost" size="icon" onClick={() => { setShowChat(false); setActiveRequest(null); setChatMessages([]); }} className="text-cream/60 hover:text-cream">×</Button>
               </div>
             </CardHeader>
-            
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
               {activeRequest ? (
-                <>
-                  {chatMessages.map((msg) => (
-                    <div 
-                      key={msg.id}
-                      className={`flex ${msg.is_admin ? "justify-start" : "justify-end"}`}
-                    >
-                      <div 
-                        className={`max-w-[80%] rounded-xl p-3 ${
-                          msg.is_admin 
-                            ? "bg-muted text-cream" 
-                            : "bg-gold/20 text-cream border border-gold/30"
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        <p className="text-xs text-cream/40 mt-1">
-                          {new Date(msg.created_at).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </>
+                <>{chatMessages.map((msg) => (<div key={msg.id} className={`flex ${msg.is_admin ? "justify-start" : "justify-end"}`}><div className={`max-w-[80%] rounded-xl p-3 ${msg.is_admin ? "bg-muted text-cream" : "bg-purple-500/20 text-cream border border-purple-500/30"}`}><p className="text-sm whitespace-pre-wrap">{msg.message}</p><p className="text-xs text-cream/40 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p></div></div>))}<div ref={chatEndRef} /></>
               ) : (
                 <div className="space-y-4">
-                  <div>
-                    <Label className="text-cream/70">Package Selected</Label>
-                    <p className="text-gold font-medium">{selectedPackage?.name} - {selectedPackage?.credits} credits ({selectedPackage?.price} Tk)</p>
-                  </div>
-                  <div>
-                    <Label htmlFor="txid" className="text-cream/70">Transaction ID (TxID) *</Label>
-                    <Input
-                      id="txid"
-                      value={txid}
-                      onChange={(e) => setTxid(e.target.value)}
-                      placeholder="Enter your bKash Transaction ID"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-cream/70">Message</Label>
-                    <Textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      rows={5}
-                      className="mt-1"
-                    />
-                  </div>
+                  <div><Label className="text-cream/70">Package Selected</Label><p className="text-purple-400 font-medium">{selectedPackage?.name} - {selectedPackage?.gems} Gems (৳{selectedPackage?.price})</p></div>
+                  <div><Label htmlFor="txid" className="text-cream/70">Transaction ID (TxID) *</Label><Input id="txid" value={txid} onChange={(e) => setTxid(e.target.value)} placeholder="Enter your bKash Transaction ID" className="mt-1" /></div>
+                  <div><Label className="text-cream/70">Message</Label><Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5} className="mt-1" /></div>
                 </div>
               )}
             </CardContent>
-
-            <div className="border-t border-gold/10 p-4 flex-shrink-0">
+            <div className="border-t border-purple-500/10 p-4 flex-shrink-0">
               {activeRequest ? (
-                <div className="flex gap-2">
-                  <Input
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendFollowUp()}
-                  />
-                  <Button
-                    onClick={handleSendFollowUp}
-                    disabled={sendingMessage || !message.trim()}
-                    variant="gold"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
+                <div className="flex gap-2"><Input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendFollowUp()} /><Button onClick={handleSendFollowUp} disabled={sendingMessage || !message.trim()} className="bg-purple-500 hover:bg-purple-600"><Send className="w-4 h-4" /></Button></div>
               ) : (
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={sendingMessage || !txid.trim()}
-                  variant="gold"
-                  className="w-full"
-                >
-                  {sendingMessage ? "Submitting..." : "Submit Payment Request"}
-                </Button>
+                <Button onClick={handleSendMessage} disabled={sendingMessage || !txid.trim()} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">{sendingMessage ? "Submitting..." : "Submit Payment Request"}</Button>
               )}
             </div>
           </Card>

@@ -1,4 +1,4 @@
-import { X, Coins, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink } from "lucide-react";
+import { X, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink, Diamond } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -66,9 +66,9 @@ export const MobileNavDrawer = ({
           <div className="p-5 border-b border-gold/10">
             <p className="text-sm text-cream/50 truncate mb-2">{userEmail}</p>
             {credits !== null && credits !== undefined && (
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold/10 border border-gold/30">
-                <Coins className="w-4 h-4 text-gold" />
-                <span className="text-sm font-semibold text-gold">{credits} Credits</span>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30">
+                <Diamond className="w-4 h-4 text-purple-400" />
+                <span className="text-sm font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{credits} Gems</span>
               </div>
             )}
           </div>
