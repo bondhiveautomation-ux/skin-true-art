@@ -53,6 +53,7 @@ export const GEM_PRICING = {
       gems: 250,
       validDays: 7,
       description: "Perfect for trying out all features",
+      badge: null as string | null,
       highlighted: false,
     },
     {
@@ -62,7 +63,7 @@ export const GEM_PRICING = {
       gems: 1125,
       validDays: 30,
       description: "Best value for power users",
-      badge: "BEST VALUE",
+      badge: "BEST VALUE" as string | null,
       highlighted: true,
     },
   ],
@@ -73,6 +74,7 @@ export const GEM_PRICING = {
       price: 50,
       gems: 100,
       description: "Quick boost for small projects",
+      badge: null as string | null,
     },
     {
       id: "pro",
@@ -80,7 +82,7 @@ export const GEM_PRICING = {
       price: 100,
       gems: 225,
       description: "More gems, better value",
-      badge: "POPULAR",
+      badge: "POPULAR" as string | null,
     },
   ],
-} as const;
+};
