@@ -15,7 +15,7 @@ import {
   Minus, 
   Users, 
   History,
-  Coins,
+  Diamond,
   RefreshCw,
   UserPlus,
   Image,
@@ -109,40 +109,40 @@ const Admin = () => {
     );
   }
 
-  const handleAddCredits = async (userId: string, amount: number) => {
+  const handleAddGems = async (userId: string, amount: number) => {
     const currentUser = users.find(u => u.user_id === userId);
     if (!currentUser) return;
     
     setProcessingUser(userId);
-    const newCredits = Math.max(0, currentUser.gems + amount);
-    const success = await updateCredits(userId, newCredits);
+    const newGems = Math.max(0, currentUser.gems + amount);
+    const success = await updateCredits(userId, newGems);
     
     if (success) {
-      toast({ title: "Credits updated", description: `Added ${amount} credits` });
+      toast({ title: "Gems updated", description: amount > 0 ? `Added ${amount} gems` : `Removed ${Math.abs(amount)} gems` });
     } else {
-      toast({ title: "Failed to update credits", variant: "destructive" });
+      toast({ title: "Failed to update gems", variant: "destructive" });
     }
     setProcessingUser(null);
   };
 
-  const handleSetCredits = async (userId: string) => {
+  const handleSetGems = async (userId: string) => {
     const value = creditInputs[userId];
     if (!value) return;
     
-    const newCredits = parseInt(value, 10);
-    if (isNaN(newCredits) || newCredits < 0) {
-      toast({ title: "Invalid credit amount", variant: "destructive" });
+    const newGems = parseInt(value, 10);
+    if (isNaN(newGems) || newGems < 0) {
+      toast({ title: "Invalid gem amount", variant: "destructive" });
       return;
     }
 
     setProcessingUser(userId);
-    const success = await updateCredits(userId, newCredits);
+    const success = await updateCredits(userId, newGems);
     
     if (success) {
-      toast({ title: "Credits updated", description: `Set credits to ${newCredits}` });
+      toast({ title: "Gems updated", description: `Set gems to ${newGems}` });
       setCreditInputs(prev => ({ ...prev, [userId]: "" }));
     } else {
-      toast({ title: "Failed to update credits", variant: "destructive" });
+      toast({ title: "Failed to update gems", variant: "destructive" });
     }
     setProcessingUser(null);
   };
@@ -489,7 +489,7 @@ const Admin = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Credits</TableHead>
+                    <TableHead>Gems</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -519,7 +519,7 @@ const Admin = () => {
                       <TableCell>{u.full_name || "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Coins className="w-4 h-4 text-gold" />
+                          <Diamond className="w-4 h-4 text-purple-400" />
                           <span className="font-medium">{u.gems}</span>
                         </div>
                       </TableCell>
@@ -528,25 +528,27 @@ const Admin = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-2">
-                          {/* Quick add/remove credits */}
+                          {/* Quick add/remove gems */}
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleAddCredits(u.user_id, -1)}
+                            onClick={() => handleAddGems(u.user_id, -10)}
                             disabled={processingUser === u.user_id || u.gems <= 0}
+                            title="Remove 10 gems"
                           >
                             <Minus className="w-3 h-3" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleAddCredits(u.user_id, 1)}
+                            onClick={() => handleAddGems(u.user_id, 10)}
                             disabled={processingUser === u.user_id}
+                            title="Add 10 gems"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
                           
-                          {/* Set specific credits */}
+                          {/* Set specific gems */}
                           <div className="flex items-center gap-1">
                             <Input
                               type="number"
@@ -562,7 +564,7 @@ const Admin = () => {
                             <Button
                               variant="secondary"
                               size="sm"
-                              onClick={() => handleSetCredits(u.user_id)}
+                              onClick={() => handleSetGems(u.user_id)}
                               disabled={processingUser === u.user_id || !creditInputs[u.user_id]}
                             >
                               Set
