@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,9 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Diamond, Zap, Crown, Sparkles } from "lucide-react";
+import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Diamond, Zap, Crown, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { GEM_PRICING, FEATURE_CATEGORIES } from "@/lib/gemCosts";
+import { FEATURE_CATEGORIES } from "@/lib/gemCosts";
 
 type PaymentStatus = 'pending' | 'approved' | 'rejected';
 
@@ -56,6 +57,7 @@ const FAQ_ITEMS = [
 const Pricing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { packages, loading: pricingLoading } = usePricingConfig();
   const [selectedPackage, setSelectedPackage] = useState<{ name: string; gems: number; price: number } | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [txid, setTxid] = useState("");
@@ -66,6 +68,12 @@ const Pricing = () => {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [userRequests, setUserRequests] = useState<PaymentRequest[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Split packages into subscriptions and top-ups
+  const subscriptions = packages.filter(p => 
+    p.package_key.includes('day') || p.package_key.includes('monthly') || p.package_key.includes('weekly')
+  );
+  const topups = packages.filter(p => p.package_key.includes('topup'));
 
   useEffect(() => {
     if (user) fetchUserRequests();
@@ -230,52 +238,54 @@ const Pricing = () => {
 
         {/* Subscription Plans */}
         <h2 className="font-serif text-2xl text-cream mb-6">Subscription Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {GEM_PRICING.subscriptions.map((plan) => (
-            <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 rounded-2xl ${plan.highlighted ? "border-purple-500 shadow-lg shadow-purple-500/20 ring-2 ring-purple-500/30" : "hover:border-purple-500/30"}`}>
-              {plan.badge && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-1">{plan.badge}</Badge></div>}
-              <CardHeader className="text-center pb-2 pt-8">
-                <CardTitle className="font-serif text-2xl text-cream flex items-center justify-center gap-2">{plan.id === 'weekly-spark' ? <Zap className="w-5 h-5 text-yellow-400" /> : <Crown className="w-5 h-5 text-purple-400" />}{plan.name}</CardTitle>
-                <CardDescription className="text-cream/50">{plan.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5 p-6">
-                <div className="text-center">
-                  <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">৳{plan.price}</span>
-                  <p className="text-cream/70 mt-2 flex items-center justify-center gap-2"><Diamond className="w-4 h-4 text-purple-400" />{plan.gems} Gems • {plan.validDays} days</p>
-                </div>
-                <div className="bg-background/50 rounded-xl p-4 space-y-3">
-                  <p className="text-sm font-medium text-cream/80 flex items-center gap-2"><span className="text-pink-500">bKash</span> Manual Payment</p>
-                  <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 border border-purple-500/10">
-                    <span className="font-mono text-lg text-purple-400">{BKASH_NUMBER}</span>
-                    <Button size="icon" variant="ghost" onClick={copyToClipboard} className="h-8 w-8 text-cream/60 hover:text-purple-400">{copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}</Button>
+        {pricingLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {subscriptions.map((plan, idx) => (
+              <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 rounded-2xl ${idx === 1 ? "border-purple-500 shadow-lg shadow-purple-500/20 ring-2 ring-purple-500/30" : "hover:border-purple-500/30"}`}>
+                {idx === 1 && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-1">BEST VALUE</Badge></div>}
+                <CardHeader className="text-center pb-2 pt-8">
+                  <CardTitle className="font-serif text-2xl text-cream flex items-center justify-center gap-2">{idx === 0 ? <Zap className="w-5 h-5 text-yellow-400" /> : <Crown className="w-5 h-5 text-purple-400" />}{plan.package_name}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-5 p-6">
+                  <div className="text-center">
+                    <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">৳{plan.price_bdt}</span>
+                    <p className="text-cream/70 mt-2 flex items-center justify-center gap-2"><Diamond className="w-4 h-4 text-purple-400" />{plan.gems} Gems</p>
                   </div>
-                </div>
-                <Button onClick={() => handlePackageSelect({ name: plan.name, gems: plan.gems, price: plan.price })} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold">
-                  <MessageCircle className="w-4 h-4 mr-2" />Get {plan.name}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <div className="bg-background/50 rounded-xl p-4 space-y-3">
+                    <p className="text-sm font-medium text-cream/80 flex items-center gap-2"><span className="text-pink-500">bKash</span> Manual Payment</p>
+                    <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 border border-purple-500/10">
+                      <span className="font-mono text-lg text-purple-400">{BKASH_NUMBER}</span>
+                      <Button size="icon" variant="ghost" onClick={copyToClipboard} className="h-8 w-8 text-cream/60 hover:text-purple-400">{copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}</Button>
+                    </div>
+                  </div>
+                  <Button onClick={() => handlePackageSelect({ name: plan.package_name, gems: plan.gems, price: plan.price_bdt })} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold">
+                    <MessageCircle className="w-4 h-4 mr-2" />Get {plan.package_name}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Top-ups */}
         <h2 className="font-serif text-2xl text-cream mb-6">Manual Power-Ups</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {GEM_PRICING.topups.map((pkg) => (
+          {topups.map((pkg, idx) => (
             <Card key={pkg.id} className="relative overflow-hidden transition-all duration-300 rounded-2xl hover:border-purple-500/30">
-              {pkg.badge && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-purple-500/80 text-white font-bold px-3 py-1 text-xs">{pkg.badge}</Badge></div>}
+              {idx === 1 && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-purple-500/80 text-white font-bold px-3 py-1 text-xs">POPULAR</Badge></div>}
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="font-serif text-xl text-cream">{pkg.name}</h3>
-                    <p className="text-cream/50 text-sm">{pkg.description}</p>
+                    <h3 className="font-serif text-xl text-cream">{pkg.package_name}</h3>
                   </div>
                   <div className="text-right">
-                    <span className="text-3xl font-bold text-purple-400">৳{pkg.price}</span>
+                    <span className="text-3xl font-bold text-purple-400">৳{pkg.price_bdt}</span>
                     <p className="text-cream/60 text-sm flex items-center gap-1 justify-end"><Diamond className="w-3 h-3" />{pkg.gems} Gems</p>
                   </div>
                 </div>
-                <Button onClick={() => handlePackageSelect({ name: pkg.name, gems: pkg.gems, price: pkg.price })} variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
+                <Button onClick={() => handlePackageSelect({ name: pkg.package_name, gems: pkg.gems, price: pkg.price_bdt })} variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
                   <Sparkles className="w-4 h-4 mr-2" />Top-up Now
                 </Button>
               </CardContent>

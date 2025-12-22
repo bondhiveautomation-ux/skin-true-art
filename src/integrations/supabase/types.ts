@@ -244,6 +244,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_config: {
+        Row: {
+          created_at: string
+          display_order: number
+          gems: number
+          id: string
+          is_active: boolean
+          package_key: string
+          package_name: string
+          price_bdt: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          gems: number
+          id?: string
+          is_active?: boolean
+          package_key: string
+          package_name: string
+          price_bdt: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          gems?: number
+          id?: string
+          is_active?: boolean
+          package_key?: string
+          package_name?: string
+          price_bdt?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
