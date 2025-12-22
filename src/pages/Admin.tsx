@@ -114,7 +114,7 @@ const Admin = () => {
     if (!currentUser) return;
     
     setProcessingUser(userId);
-    const newCredits = Math.max(0, currentUser.credits + amount);
+    const newCredits = Math.max(0, currentUser.gems + amount);
     const success = await updateCredits(userId, newCredits);
     
     if (success) {
@@ -520,7 +520,7 @@ const Admin = () => {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Coins className="w-4 h-4 text-gold" />
-                          <span className="font-medium">{u.credits}</span>
+                          <span className="font-medium">{u.gems}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
@@ -533,7 +533,7 @@ const Admin = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleAddCredits(u.user_id, -1)}
-                            disabled={processingUser === u.user_id || u.credits <= 0}
+                            disabled={processingUser === u.user_id || u.gems <= 0}
                           >
                             <Minus className="w-3 h-3" />
                           </Button>

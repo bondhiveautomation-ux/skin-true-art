@@ -148,6 +148,36 @@ export type Database = {
         }
         Relationships: []
       }
+      gem_transactions: {
+        Row: {
+          created_at: string
+          feature_used: string | null
+          gems_amount: number
+          gems_balance_after: number
+          id: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature_used?: string | null
+          gems_amount: number
+          gems_balance_after: number
+          id?: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature_used?: string | null
+          gems_amount?: number
+          gems_balance_after?: number
+          id?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       generation_history: {
         Row: {
           created_at: string
@@ -280,22 +310,28 @@ export type Database = {
       user_credits: {
         Row: {
           created_at: string
-          credits: number
+          gems_balance: number
           id: string
+          subscription_expires_at: string | null
+          subscription_type: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          credits?: number
+          gems_balance?: number
           id?: string
+          subscription_expires_at?: string | null
+          subscription_type?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          credits?: number
+          gems_balance?: number
           id?: string
+          subscription_expires_at?: string | null
+          subscription_type?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -372,6 +408,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_gems: {
+        Args: {
+          p_expires_at?: string
+          p_gems: number
+          p_subscription_type?: string
+          p_transaction_type: string
+          p_user_id: string
+        }
+        Returns: number
+      }
       admin_delete_user: {
         Args: { p_admin_id: string; p_target_user_id: string }
         Returns: boolean
@@ -392,13 +438,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_update_gems: {
+        Args: { p_admin_id: string; p_gems: number; p_target_user_id: string }
+        Returns: boolean
+      }
       approve_payment: {
         Args: { p_admin_id: string; p_request_id: string }
         Returns: boolean
       }
       check_duplicate_txid: { Args: { p_txid: string }; Returns: boolean }
-      deduct_credit: { Args: { p_user_id: string }; Returns: number }
-      get_user_credits: { Args: { p_user_id: string }; Returns: number }
+      deduct_gems: {
+        Args: { p_feature_name: string; p_gem_cost: number; p_user_id: string }
+        Returns: number
+      }
+      get_user_gems: {
+        Args: { p_user_id: string }
+        Returns: {
+          gems_balance: number
+          subscription_expires_at: string
+          subscription_type: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
