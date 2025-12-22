@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useCredits } from "@/hooks/useCredits";
+import { useGems } from "@/hooks/useGems";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { ProcessingModal } from "@/components/gems/ProcessingModal";
+import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { getGemCost } from "@/lib/gemCosts";
 
 type PhotoType = "product" | "portrait" | "lifestyle";
 type StylePreset = "clean_studio" | "luxury_brand" | "soft_natural" | "dark_premium" | "ecommerce_white" | "instagram_editorial";
@@ -22,9 +25,10 @@ type SkinFinishIntensity = "light" | "medium" | "pro";
 const PhotographyStudio = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { credits, deductCredit, hasCredits } = useCredits();
+  const { gems, deductGems, hasEnoughGems, refetchGems } = useGems();
   const { toast } = useToast();
   const comparisonRef = useRef<HTMLDivElement>(null);
+  const [showLowBalance, setShowLowBalance] = useState(false);
 
   // States
   const [originalImage, setOriginalImage] = useState<string | null>(null);
@@ -121,20 +125,16 @@ const PhotographyStudio = () => {
       return;
     }
 
-    if (!hasCredits) {
-      toast({
-        title: "No credits",
-        description: "You have no credits remaining",
-        variant: "destructive",
-      });
+    if (!hasEnoughGems("enhance-photo")) {
+      setShowLowBalance(true);
       return;
     }
 
-    const success = await deductCredit();
-    if (!success) {
+    const result = await deductGems("enhance-photo");
+    if (!result.success) {
       toast({
-        title: "No credits",
-        description: "You have no credits remaining",
+        title: "Insufficient gems",
+        description: "Please top up your gems to continue",
         variant: "destructive",
       });
       return;
@@ -245,7 +245,7 @@ const PhotographyStudio = () => {
     <div className="min-h-screen bg-background">
       <Navbar 
         onNavigate={(section) => navigate(`/#${section}`)} 
-        credits={credits}
+        credits={gems}
       />
 
       {/* Hero Section */}

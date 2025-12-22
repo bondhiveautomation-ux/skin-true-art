@@ -23,6 +23,9 @@ import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { ResultDisplay } from "@/components/ui/ResultDisplay";
 import { SelectionGrid } from "@/components/ui/SelectionGrid";
+import { ProcessingModal } from "@/components/gems/ProcessingModal";
+import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { getGemCost } from "@/lib/gemCosts";
 
 const Index = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useCredits } from "@/hooks/useCredits";
+import { useGems } from "@/hooks/useGems";
 import { supabase } from "@/integrations/supabase/client";
 import { fileToNormalizedDataUrl } from "@/lib/image";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,13 @@ import {
   ChevronDown,
   Loader2,
   Shield,
-  Coins,
-  FileArchive
+  FileArchive,
+  Diamond
 } from "lucide-react";
 import { toast } from "sonner";
+import { ProcessingModal } from "@/components/gems/ProcessingModal";
+import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { getGemCost } from "@/lib/gemCosts";
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 type LogoStyle = "clean" | "watermark" | "badge";
@@ -93,7 +96,8 @@ const CTA_PRESETS: { value: CTAPreset; label: string }[] = [
 const BrandingStudio = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { credits, deductCredit, hasCredits } = useCredits();
+  const { gems, deductGems, hasEnoughGems, refetchGems } = useGems();
+  const [showLowBalance, setShowLowBalance] = useState(false);
   
   const [mode, setMode] = useState<"single" | "batch">("single");
   const [settings, setSettings] = useState<BrandingSettings>(DEFAULT_SETTINGS);
@@ -185,16 +189,17 @@ const BrandingStudio = () => {
       toast.error("Please upload both a post image and logo");
       return;
     }
-    if (!hasCredits) {
-      toast.error("Insufficient credits");
+    if (!hasEnoughGems("apply-branding")) {
+      setShowLowBalance(true);
       return;
     }
 
     setProcessing(true);
     try {
-      const success = await deductCredit();
-      if (!success) {
-        toast.error("Failed to deduct credit");
+      const result = await deductGems("apply-branding");
+      if (!result.success) {
+        toast.error("Insufficient gems");
+        setProcessing(false);
         return;
       }
 
@@ -246,8 +251,9 @@ const BrandingStudio = () => {
       toast.error("Please upload at least one image");
       return;
     }
-    if (credits !== null && credits < batchImages.length) {
-      toast.error(`Insufficient credits. Need ${batchImages.length}, have ${credits}`);
+    const requiredGems = batchImages.length * getGemCost("apply-branding");
+    if (gems !== null && gems < requiredGems) {
+      toast.error(`Insufficient gems. Need ${requiredGems}, have ${gems}`);
       return;
     }
 
@@ -264,8 +270,8 @@ const BrandingStudio = () => {
       setBatchImages([...results]);
 
       try {
-        const success = await deductCredit();
-        if (!success) {
+        const result = await deductGems("apply-branding");
+        if (!result.success) {
           results[i] = { ...results[i], status: "error" };
           continue;
         }
@@ -344,9 +350,9 @@ const BrandingStudio = () => {
             <Shield className="w-5 h-5 text-gold" />
             <span className="font-serif text-xl text-cream">Branding Studio</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30">
-            <Coins className="w-4 h-4 text-gold" />
-            <span className="text-sm font-medium text-gold">{credits ?? 0}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30">
+            <Diamond className="w-4 h-4 text-purple-400" />
+            <span className="text-sm font-medium bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{gems ?? 0}</span>
           </div>
         </div>
       </header>
