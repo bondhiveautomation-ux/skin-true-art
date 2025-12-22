@@ -17,14 +17,24 @@ import {
   Palette,
   Mail,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  Star,
+  Users,
+  Zap,
+  Gift
 } from "lucide-react";
 
 const FEATURES = [
-  { icon: Camera, title: "Photography Studio", description: "DSLR-quality upgrades" },
-  { icon: Type, title: "Caption Studio", description: "Bangla/English captions" },
-  { icon: Shield, title: "Branding Studio", description: "Logo batch processing" },
-  { icon: Palette, title: "Makeup & Pose Tools", description: "Full look transfer" },
+  { icon: Camera, title: "Photo Studio", description: "DSLR-quality" },
+  { icon: Type, title: "Captions", description: "Bangla/English" },
+  { icon: Shield, title: "Branding", description: "Logo batch" },
+  { icon: Palette, title: "Makeup AI", description: "Full look transfer" },
+];
+
+const BENEFITS = [
+  { icon: Gift, text: "Free gems to start" },
+  { icon: Zap, text: "Results in seconds" },
+  { icon: Users, text: "10,000+ creators" },
 ];
 
 const Auth = () => {
@@ -353,25 +363,65 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Auth Card */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 relative z-10 min-h-screen lg:min-h-0">
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-4 sm:px-6 py-6 sm:py-12 relative z-10 min-h-screen lg:min-h-0">
         <div className="w-full max-w-md">
-          {/* Mobile Logo & Headline */}
-          <div className="lg:hidden text-center mb-6 sm:mb-8">
-            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl gold-icon flex items-center justify-center animate-pulse-glow">
-                <Sparkles className="w-5 h-5 text-gold" />
+          {/* Mobile Hero Section - Redesigned for conversion */}
+          <div className="lg:hidden mb-6">
+            {/* Logo + Free Badge */}
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-lg gold-icon flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-gold" />
+                </div>
+                <span className="font-serif text-lg font-semibold text-cream">Brandify</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
+                <Gift className="w-3.5 h-3.5 text-green-400" />
+                <span className="text-xs font-semibold text-green-400">Free to Start</span>
               </div>
             </div>
-            <h1 className="font-serif text-xl sm:text-2xl font-semibold text-cream">
-              Your All-in-One Content Studio
+
+            {/* Compelling Headline */}
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-cream leading-tight mb-3">
+              Create <span className="gradient-text">Stunning Content</span> in Seconds
             </h1>
-            <p className="text-cream/50 text-xs sm:text-sm mt-2">
-              Built for creators and sellers
+            
+            {/* Sub-headline with urgency */}
+            <p className="text-cream/60 text-sm mb-5 leading-relaxed">
+              Join 10,000+ Bangladeshi sellers & influencers using AI to grow their business
             </p>
+
+            {/* Horizontal scrolling features */}
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
+              {FEATURES.map((feature, index) => (
+                <div 
+                  key={index}
+                  className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-card/50 border border-gold/15"
+                >
+                  <div className="w-7 h-7 rounded-lg gold-icon flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="w-3.5 h-3.5 text-gold" />
+                  </div>
+                  <div className="pr-1">
+                    <p className="text-xs font-medium text-cream whitespace-nowrap">{feature.title}</p>
+                    <p className="text-[10px] text-cream/50 whitespace-nowrap">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust indicators row */}
+            <div className="flex items-center justify-center gap-4 py-3 border-y border-gold/10">
+              {BENEFITS.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-1.5">
+                  <benefit.icon className="w-3.5 h-3.5 text-gold" />
+                  <span className="text-[11px] text-cream/60 whitespace-nowrap">{benefit.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Auth Card */}
-          <div className="glass-card p-5 sm:p-8 border border-gold/15 rounded-2xl sm:rounded-3xl backdrop-blur-md">
+          <div className="glass-card p-5 sm:p-8 border border-gold/15 rounded-2xl sm:rounded-3xl backdrop-blur-md mt-4 lg:mt-0">
             {showEmailSent ? (
               /* Email Sent Confirmation */
               <div className="space-y-6">
@@ -466,12 +516,12 @@ const Auth = () => {
             ) : (
               /* Login/Signup Tabs */
               <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as "login" | "signup"); setErrors({}); }}>
-                <TabsList className="grid w-full grid-cols-2 mb-8 bg-charcoal/50">
-                  <TabsTrigger value="login" className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold">
+                <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-charcoal/50 h-11">
+                  <TabsTrigger value="login" className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold h-9">
                     Log In
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold">
-                    Sign Up
+                  <TabsTrigger value="signup" className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold h-9">
+                    Sign Up Free
                   </TabsTrigger>
                 </TabsList>
 
@@ -546,13 +596,24 @@ const Auth = () => {
 
                 {/* Signup Tab */}
                 <TabsContent value="signup">
+                  {/* Signup incentive - mobile only */}
+                  <div className="lg:hidden bg-gradient-to-r from-gold/10 to-rose-gold/10 border border-gold/20 rounded-xl p-3 mb-5 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
+                      <Star className="w-5 h-5 text-gold" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-cream">Get 50 Free Gems</p>
+                      <p className="text-xs text-cream/50">Create your account and start creating</p>
+                    </div>
+                  </div>
+                  
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name" className="text-sm text-cream/70">Full Name <span className="text-cream/30">(optional)</span></Label>
                       <Input
                         id="signup-name"
                         type="text"
-                        placeholder="John Doe"
+                        placeholder="Your name"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         className="bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30"
@@ -620,7 +681,7 @@ const Auth = () => {
                       {errors.confirmPassword && <p className="text-red-400 text-xs">{errors.confirmPassword}</p>}
                     </div>
 
-                    <Button type="submit" variant="gold" size="lg" className="w-full btn-glow mt-2" disabled={loading}>
+                    <Button type="submit" variant="gold" size="lg" className="w-full btn-glow mt-2 h-12" disabled={loading}>
                       {loading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -628,20 +689,20 @@ const Auth = () => {
                         </>
                       ) : (
                         <>
-                          Create Account
+                          Start Creating Free
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                       )}
                     </Button>
 
-                    <p className="text-xs text-cream/30 text-center mt-4">
-                      By signing up, you agree to our Terms of Service and Privacy Policy.
+                    <p className="text-[11px] text-cream/30 text-center mt-3">
+                      By signing up, you agree to our Terms & Privacy Policy
                     </p>
                   </form>
 
-                  <p className="text-center text-sm text-cream/40 mt-6">
+                  <p className="text-center text-sm text-cream/40 mt-5">
                     Already have an account?{" "}
-                    <button onClick={() => setActiveTab("login")} className="text-gold hover:underline">
+                    <button onClick={() => setActiveTab("login")} className="text-gold hover:underline font-medium">
                       Log in
                     </button>
                   </p>
@@ -650,10 +711,10 @@ const Auth = () => {
             )}
           </div>
 
-          {/* Trust badge */}
-          <p className="text-center text-xs text-cream/30 mt-6">
+          {/* Trust badge - only show on desktop or when scrolled down */}
+          <div className="hidden lg:block text-center text-xs text-cream/30 mt-6">
             🔒 Your data is encrypted and secure
-          </p>
+          </div>
         </div>
       </div>
     </div>
