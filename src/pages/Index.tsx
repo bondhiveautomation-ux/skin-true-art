@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Upload, Loader2, Download, Copy, Search, Sparkles } from "lucide-react";
+import { Upload, Loader2, Download, Copy, Search, Sparkles, Diamond } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -906,6 +906,10 @@ const Index = () => {
                   Generate Image
                 </LoadingButton>
               </div>
+              <div className="flex items-center justify-center gap-1.5 text-cream/50 text-xs">
+                <Diamond className="w-3.5 h-3.5 text-purple-400" />
+                <span>Costs {getGemCost("generate-character-image")} gems</span>
+              </div>
 
               {/* Result */}
               {generatedImage && (
@@ -941,7 +945,7 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handleExtractPrompt}
               isLoading={isExtracting}
@@ -952,6 +956,10 @@ const Index = () => {
             >
               Extract Prompt
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("extract-image-prompt")} gem</span>
+            </div>
           </div>
 
           {extractedPrompt && (
@@ -988,7 +996,7 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handleExtractDress}
               isLoading={isExtractingDress}
@@ -999,6 +1007,10 @@ const Index = () => {
             >
               Generate Dress on Dummy
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("extract-dress-to-dummy")} gems</span>
+            </div>
           </div>
 
           {extractedDressImage && (
@@ -1032,7 +1044,7 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handleRemovePeople}
               isLoading={isRemovingPeople}
@@ -1043,6 +1055,10 @@ const Index = () => {
             >
               Generate Clean Background
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("remove-people-from-image")} gems</span>
+            </div>
           </div>
 
           {cleanBackground && (
@@ -1087,7 +1103,7 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handlePoseTransfer}
               isLoading={isTransferringPose}
@@ -1098,6 +1114,10 @@ const Index = () => {
             >
               Generate Pose Transfer
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("pose-transfer")} gems</span>
+            </div>
           </div>
 
           {poseTransferResult && (
@@ -1148,7 +1168,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handleApplyMakeup}
               isLoading={isApplyingMakeup}
@@ -1159,6 +1179,10 @@ const Index = () => {
             >
               Apply Selected Makeup
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("apply-makeup")} gems</span>
+            </div>
           </div>
 
           {makeupResult && (
@@ -1204,7 +1228,7 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handleFullLookTransfer}
               isLoading={isTransferringLook}
@@ -1215,6 +1239,10 @@ const Index = () => {
             >
               Generate Full Look
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("full-look-transfer")} gems</span>
+            </div>
           </div>
 
           {fullLookResult && (
@@ -1384,7 +1412,7 @@ const Index = () => {
           )}
 
           {/* Generate Button */}
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <LoadingButton
               onClick={handleDressChange}
               isLoading={isChangingDress}
@@ -1395,6 +1423,10 @@ const Index = () => {
             >
               Generate Dress Change
             </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("dress-change")} gems</span>
+            </div>
           </div>
 
           {/* Result */}

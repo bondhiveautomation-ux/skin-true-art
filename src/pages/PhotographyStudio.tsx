@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Download, RefreshCw, ArrowLeft, Camera, Sparkles, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
+import { Loader2, Download, RefreshCw, ArrowLeft, Camera, Sparkles, Maximize2, ZoomIn, ZoomOut, Diamond } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -496,7 +496,7 @@ const PhotographyStudio = () => {
               </div>
 
               {/* Enhance Button */}
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-2">
                 <LoadingButton
                   onClick={handleEnhance}
                   isLoading={isEnhancing}
@@ -508,6 +508,10 @@ const PhotographyStudio = () => {
                   <Camera className="w-4 h-4 mr-2" />
                   Enhance Photo
                 </LoadingButton>
+                <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Costs {getGemCost("enhance-photo")} gems</span>
+                </div>
               </div>
 
               {/* Before/After Comparison */}
