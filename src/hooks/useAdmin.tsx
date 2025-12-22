@@ -9,6 +9,8 @@ interface UserWithGems {
   gems: number;
   created_at: string;
   is_blocked: boolean;
+  subscription_type: string | null;
+  subscription_expires_at: string | null;
 }
 
 interface GenerationHistory {
@@ -56,7 +58,7 @@ export const useAdmin = () => {
     checkAdmin();
   }, [user?.id]);
 
-  // Fetch all users with gems
+  // Fetch all users with gems and subscription info
   const fetchUsers = useCallback(async () => {
     if (!isAdmin) return;
 
@@ -69,20 +71,25 @@ export const useAdmin = () => {
 
       const { data: credits, error: creditsError } = await supabase
         .from('user_credits')
-        .select('user_id, gems_balance');
+        .select('user_id, gems_balance, subscription_type, subscription_expires_at');
 
       if (creditsError) throw creditsError;
 
-      const gemsMap = new Map(credits?.map(c => [c.user_id, c.gems_balance]) || []);
+      const creditsMap = new Map(credits?.map(c => [c.user_id, c]) || []);
 
-      const usersWithGems: UserWithGems[] = (profiles || []).map(p => ({
-        user_id: p.user_id,
-        email: p.email,
-        full_name: p.full_name,
-        gems: gemsMap.get(p.user_id) ?? 0,
-        created_at: p.created_at,
-        is_blocked: p.is_blocked ?? false,
-      }));
+      const usersWithGems: UserWithGems[] = (profiles || []).map(p => {
+        const credit = creditsMap.get(p.user_id);
+        return {
+          user_id: p.user_id,
+          email: p.email,
+          full_name: p.full_name,
+          gems: credit?.gems_balance ?? 0,
+          created_at: p.created_at,
+          is_blocked: p.is_blocked ?? false,
+          subscription_type: credit?.subscription_type ?? null,
+          subscription_expires_at: credit?.subscription_expires_at ?? null,
+        };
+      });
 
       setUsers(usersWithGems);
     } catch (error) {
@@ -210,6 +217,52 @@ export const useAdmin = () => {
     }
   }, [user?.id, isAdmin, fetchUsers]);
 
+  // Set user subscription period
+  const setSubscription = useCallback(async (targetUserId: string, subscriptionType: string, days: number): Promise<boolean> => {
+    if (!user?.id || !isAdmin) return false;
+
+    try {
+      const { data, error } = await supabase.rpc('admin_set_subscription', {
+        p_admin_id: user.id,
+        p_target_user_id: targetUserId,
+        p_subscription_type: subscriptionType,
+        p_days: days,
+      });
+
+      if (error) throw error;
+      if (data) {
+        await fetchUsers();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error setting subscription:", error);
+      return false;
+    }
+  }, [user?.id, isAdmin, fetchUsers]);
+
+  // Clear user subscription
+  const clearSubscription = useCallback(async (targetUserId: string): Promise<boolean> => {
+    if (!user?.id || !isAdmin) return false;
+
+    try {
+      const { data, error } = await supabase.rpc('admin_clear_subscription', {
+        p_admin_id: user.id,
+        p_target_user_id: targetUserId,
+      });
+
+      if (error) throw error;
+      if (data) {
+        await fetchUsers();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error clearing subscription:", error);
+      return false;
+    }
+  }, [user?.id, isAdmin, fetchUsers]);
+
   // Create new user (admin only)
   const createUser = useCallback(async (email: string, password: string, fullName?: string): Promise<{ success: boolean; error?: string }> => {
     if (!user?.id || !isAdmin) return { success: false, error: "Unauthorized" };
@@ -265,6 +318,8 @@ export const useAdmin = () => {
     deleteHistoryEntry,
     createUser,
     toggleBlockUser,
+    setSubscription,
+    clearSubscription,
     refetchUsers: fetchUsers,
     refetchHistory: fetchHistory,
   };

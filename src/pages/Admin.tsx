@@ -30,7 +30,11 @@ import {
   Radio,
   Ban,
   CheckCircle,
-  Inbox
+  Inbox,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  X
 } from "lucide-react";
 import {
   Table,
@@ -74,7 +78,7 @@ import AdminInbox from "@/components/admin/AdminInbox";
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, toggleBlockUser, refetchUsers, refetchHistory } = useAdmin();
+  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, toggleBlockUser, setSubscription, clearSubscription, refetchUsers, refetchHistory } = useAdmin();
   const { toast } = useToast();
   const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
   const [processingUser, setProcessingUser] = useState<string | null>(null);
@@ -164,9 +168,58 @@ const Admin = () => {
     setProcessingUser(null);
   };
 
+  const handleSetSubscription = async (userId: string, type: string, days: number) => {
+    setProcessingUser(userId);
+    const success = await setSubscription(userId, type, days);
+    if (success) {
+      toast({ title: "Subscription set", description: `${type} subscription for ${days} days` });
+    } else {
+      toast({ title: "Failed to set subscription", variant: "destructive" });
+    }
+    setProcessingUser(null);
+  };
+
+  const handleClearSubscription = async (userId: string) => {
+    setProcessingUser(userId);
+    const success = await clearSubscription(userId);
+    if (success) {
+      toast({ title: "Subscription cleared" });
+    } else {
+      toast({ title: "Failed to clear subscription", variant: "destructive" });
+    }
+    setProcessingUser(null);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
+
+  const getDaysUntilExpiry = (expiresAt: string | null): number | null => {
+    if (!expiresAt) return null;
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const getExpiryStatus = (expiresAt: string | null): { label: string; color: string; urgent: boolean } => {
+    const days = getDaysUntilExpiry(expiresAt);
+    if (days === null) return { label: 'No subscription', color: 'text-muted-foreground', urgent: false };
+    if (days < 0) return { label: 'Expired', color: 'text-destructive', urgent: true };
+    if (days === 0) return { label: 'Expires today', color: 'text-orange-500', urgent: true };
+    if (days <= 2) return { label: `${days}d left`, color: 'text-orange-500', urgent: true };
+    return { label: `${days}d left`, color: 'text-green-500', urgent: false };
+  };
+
+  // Get users with expiring/expired subscriptions
+  const expiringUsers = users.filter(u => {
+    const days = getDaysUntilExpiry(u.subscription_expires_at);
+    return days !== null && days <= 2;
+  }).sort((a, b) => {
+    const daysA = getDaysUntilExpiry(a.subscription_expires_at) ?? 999;
+    const daysB = getDaysUntilExpiry(b.subscription_expires_at) ?? 999;
+    return daysA - daysB;
+  });
 
   const handleCreateUser = async () => {
     if (!newUserEmail || !newUserPassword) {
@@ -482,20 +535,67 @@ const Admin = () => {
               </div>
             </div>
 
+            {/* Expiring Subscriptions Alert */}
+            {expiringUsers.length > 0 && (
+              <div className="mb-6 p-4 rounded-lg border border-orange-500/30 bg-orange-500/10">
+                <h3 className="text-sm font-medium mb-3 flex items-center gap-2 text-orange-500">
+                  <AlertTriangle className="w-4 h-4" />
+                  Expiring Subscriptions ({expiringUsers.length})
+                </h3>
+                <div className="space-y-2">
+                  {expiringUsers.map(u => {
+                    const status = getExpiryStatus(u.subscription_expires_at);
+                    return (
+                      <div key={u.user_id} className="flex items-center justify-between p-2 rounded bg-background/50">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium text-sm">{u.email}</span>
+                          <span className={`text-xs font-medium ${status.color}`}>
+                            {u.subscription_type} • {status.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetSubscription(u.user_id, u.subscription_type || '7-day', 7)}
+                            disabled={processingUser === u.user_id}
+                            className="text-xs"
+                          >
+                            +7 Days
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetSubscription(u.user_id, 'monthly', 30)}
+                            disabled={processingUser === u.user_id}
+                            className="text-xs"
+                          >
+                            +30 Days
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="rounded-lg border border-gold/10 overflow-x-auto">
-              <Table className="min-w-[700px]">
+              <Table className="min-w-[900px]">
                 <TableHeader>
                   <TableRow className="bg-card/50">
                     <TableHead>Status</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Name</TableHead>
                     <TableHead>Gems</TableHead>
+                    <TableHead>Subscription</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((u) => (
+                  {users.map((u) => {
+                    const expiryStatus = getExpiryStatus(u.subscription_expires_at);
+                    return (
                     <TableRow key={u.user_id} className={u.is_blocked ? "opacity-60" : ""}>
                       <TableCell>
                         {u.is_blocked ? (
@@ -511,23 +611,76 @@ const Admin = () => {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {u.email}
+                        <div className="flex flex-col">
+                          <span>{u.email}</span>
+                          {u.full_name && <span className="text-xs text-muted-foreground">{u.full_name}</span>}
+                        </div>
                         {u.user_id === user.id && (
                           <span className="ml-2 text-xs text-gold">(You)</span>
                         )}
                       </TableCell>
-                      <TableCell>{u.full_name || "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Diamond className="w-4 h-4 text-purple-400" />
                           <span className="font-medium">{u.gems}</span>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          {u.subscription_type ? (
+                            <>
+                              <span className="text-xs font-medium capitalize">{u.subscription_type}</span>
+                              <span className={`text-xs ${expiryStatus.color} flex items-center gap-1`}>
+                                <Clock className="w-3 h-3" />
+                                {expiryStatus.label}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No subscription</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {formatDate(u.created_at)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1 flex-wrap">
+                          {/* Subscription buttons */}
+                          <div className="flex items-center gap-1 mr-2">
+                            <Button
+                              variant={u.subscription_type === '7-day' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => handleSetSubscription(u.user_id, '7-day', 7)}
+                              disabled={processingUser === u.user_id}
+                              className="text-xs px-2"
+                              title="Set 7-day subscription"
+                            >
+                              7D
+                            </Button>
+                            <Button
+                              variant={u.subscription_type === 'monthly' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => handleSetSubscription(u.user_id, 'monthly', 30)}
+                              disabled={processingUser === u.user_id}
+                              className="text-xs px-2"
+                              title="Set Monthly subscription"
+                            >
+                              30D
+                            </Button>
+                            {u.subscription_type && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleClearSubscription(u.user_id)}
+                                disabled={processingUser === u.user_id}
+                                className="text-xs px-1 text-muted-foreground hover:text-destructive"
+                                title="Clear subscription"
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
+                          
                           {/* Quick add/remove gems */}
                           <Button
                             variant="outline"
@@ -650,7 +803,8 @@ const Admin = () => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
