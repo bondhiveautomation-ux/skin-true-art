@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Copy, RefreshCw, ArrowLeft, Type, Languages, Smile, AlignLeft, Sparkles } from "lucide-react";
+import { Loader2, Copy, RefreshCw, ArrowLeft, Type, Languages, Smile, AlignLeft, Sparkles, Diamond } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -403,7 +403,7 @@ const CaptionStudio = () => {
               </div>
 
               {/* Generate Button */}
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-2">
                 <LoadingButton
                   onClick={handleGenerate}
                   isLoading={isGenerating}
@@ -415,6 +415,10 @@ const CaptionStudio = () => {
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate Caption
                 </LoadingButton>
+                <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Costs {getGemCost("generate-caption")} gem</span>
+                </div>
               </div>
 
               {/* Output Section */}
