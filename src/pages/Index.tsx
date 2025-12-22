@@ -769,7 +769,7 @@ const Index = () => {
       >
         <div className="space-y-6">
           {/* Character Upload */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <ImageUploader
               id="character-upload"
               image={characterImage}
@@ -807,7 +807,7 @@ const Index = () => {
           {characterImage && (
             <>
               {/* Product upload */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <ImageUploader
                   id="product-upload"
                   image={productImage}
@@ -833,7 +833,7 @@ const Index = () => {
               </div>
 
               {/* Background */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <ImageUploader
                   id="background-upload"
                   image={backgroundImage}
@@ -1082,7 +1082,7 @@ const Index = () => {
         description="Apply the pose from one image to another character"
       >
         <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <ImageUploader
               id="pose-influencer"
               image={poseInfluencerImage}

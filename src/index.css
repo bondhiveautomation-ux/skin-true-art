@@ -481,3 +481,19 @@
   background: hsla(43, 74%, 49%, 0.3);
   color: hsl(var(--cream));
 }
+
+/* Mobile safe area for notched devices */
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.safe-area-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
+/* Improve tap targets on mobile */
+@media (max-width: 640px) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
