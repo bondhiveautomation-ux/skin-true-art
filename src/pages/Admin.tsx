@@ -29,7 +29,8 @@ import {
   Download,
   Radio,
   Ban,
-  CheckCircle
+  CheckCircle,
+  Inbox
 } from "lucide-react";
 import {
   Table,
@@ -68,6 +69,7 @@ import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 import { PaymentInbox } from "@/components/admin/PaymentInbox";
 import { LeadsInbox } from "@/components/admin/LeadsInbox";
 import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
+import AdminInbox from "@/components/admin/AdminInbox";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -385,6 +387,10 @@ const Admin = () => {
                 <Radio className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden xs:inline">Live</span> Users
               </TabsTrigger>
+              <TabsTrigger value="inbox" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <Inbox className="w-3 h-3 sm:w-4 sm:h-4" />
+                Inbox
+              </TabsTrigger>
               <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                 Users ({users.length})
@@ -414,6 +420,10 @@ const Admin = () => {
 
           <TabsContent value="live-users">
             <LiveUsersMonitor />
+          </TabsContent>
+
+          <TabsContent value="inbox">
+            <AdminInbox />
           </TabsContent>
 
           <TabsContent value="users">
