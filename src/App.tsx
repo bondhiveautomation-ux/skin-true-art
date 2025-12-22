@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PresenceProvider } from "@/components/PresenceProvider";
+import { WelcomePopup } from "@/components/WelcomePopup";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
@@ -24,6 +25,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <PresenceProvider>
+          <WelcomePopup />
           <Routes>
             {/* Public route */}
             <Route path="/auth" element={<Auth />} />

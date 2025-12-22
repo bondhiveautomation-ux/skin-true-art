@@ -72,6 +72,7 @@ import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
 import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 import { PaymentInbox } from "@/components/admin/PaymentInbox";
 import { LeadsInbox } from "@/components/admin/LeadsInbox";
+import { PricingManager } from "@/components/admin/PricingManager";
 import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
 
@@ -459,6 +460,10 @@ const Admin = () => {
               <TabsTrigger value="dress-library" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Shirt className="w-3 h-3 sm:w-4 sm:h-4" />
                 Dresses
+              </TabsTrigger>
+              <TabsTrigger value="pricing" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <Diamond className="w-3 h-3 sm:w-4 sm:h-4" />
+                Pricing
               </TabsTrigger>
               <TabsTrigger value="website-cms" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Settings2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1009,6 +1014,10 @@ const Admin = () => {
 
           <TabsContent value="dress-library">
             <DressLibraryManager />
+          </TabsContent>
+
+          <TabsContent value="pricing">
+            <PricingManager />
           </TabsContent>
 
           <TabsContent value="website-cms">
