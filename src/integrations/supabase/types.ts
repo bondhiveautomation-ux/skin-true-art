@@ -418,8 +418,21 @@ export type Database = {
         }
         Returns: number
       }
+      admin_clear_subscription: {
+        Args: { p_admin_id: string; p_target_user_id: string }
+        Returns: boolean
+      }
       admin_delete_user: {
         Args: { p_admin_id: string; p_target_user_id: string }
+        Returns: boolean
+      }
+      admin_set_subscription: {
+        Args: {
+          p_admin_id: string
+          p_days: number
+          p_subscription_type: string
+          p_target_user_id: string
+        }
         Returns: boolean
       }
       admin_toggle_block_user: {
