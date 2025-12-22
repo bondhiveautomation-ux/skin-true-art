@@ -329,6 +329,11 @@ const Pricing = () => {
                 <>{chatMessages.map((msg) => (<div key={msg.id} className={`flex ${msg.is_admin ? "justify-start" : "justify-end"}`}><div className={`max-w-[80%] rounded-xl p-3 ${msg.is_admin ? "bg-muted text-cream" : "bg-purple-500/20 text-cream border border-purple-500/30"}`}><p className="text-sm whitespace-pre-wrap">{msg.message}</p><p className="text-xs text-cream/40 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p></div></div>))}<div ref={chatEndRef} /></>
               ) : (
                 <div className="space-y-4">
+                  <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/30">
+                    <Label className="text-cream/70">Send Payment to bKash</Label>
+                    <p className="text-pink-400 font-bold text-lg mt-1">01XXXXXXXXX</p>
+                    <p className="text-cream/50 text-xs mt-1">Send the exact amount and note down your TxID</p>
+                  </div>
                   <div><Label className="text-cream/70">Package Selected</Label><p className="text-purple-400 font-medium">{selectedPackage?.name} - {selectedPackage?.gems} Gems (৳{selectedPackage?.price})</p></div>
                   <div><Label htmlFor="txid" className="text-cream/70">Transaction ID (TxID) *</Label><Input id="txid" value={txid} onChange={(e) => setTxid(e.target.value)} placeholder="Enter your bKash Transaction ID" className="mt-1" /></div>
                   <div><Label className="text-cream/70">Message</Label><Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5} className="mt-1" /></div>
