@@ -9,7 +9,6 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
   const { toast } = useToast();
-  const initializedRef = useRef(false);
   const toastRef = useRef(toast);
 
   // Keep toast ref updated
@@ -39,10 +38,6 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    // Prevent double initialization in strict mode
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-
     let isMounted = true;
 
     // Get initial session first
