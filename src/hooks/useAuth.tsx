@@ -40,37 +40,53 @@ export const useAuth = () => {
   useEffect(() => {
     let isMounted = true;
 
+    const withTimeout = async <T,>(promise: Promise<T>, ms: number, fallback: T): Promise<T> => {
+      let timeoutId: number | undefined;
+      const timeout = new Promise<T>((resolve) => {
+        timeoutId = window.setTimeout(() => resolve(fallback), ms);
+      });
+
+      const result = await Promise.race([promise, timeout]);
+      if (timeoutId) window.clearTimeout(timeoutId);
+      return result;
+    };
+
     // Get initial session first
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error("Error getting session:", error);
           if (isMounted) setLoading(false);
           return;
         }
 
-        if (isMounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (session?.user) {
-            const blocked = await checkBlockedStatus(session.user.id);
-            if (blocked && isMounted) {
-              setIsBlocked(true);
-              toastRef.current({
-                title: "Account Blocked",
-                description: "Your account has been blocked. Please contact support.",
-                variant: "destructive",
-              });
-              await supabase.auth.signOut();
-              setSession(null);
-              setUser(null);
-            }
+        if (!isMounted) return;
+
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        // Run blocked check in the background so auth loading never hangs
+        if (session?.user) {
+          const blocked = await withTimeout(
+            checkBlockedStatus(session.user.id),
+            4000,
+            false
+          );
+
+          if (blocked && isMounted) {
+            setIsBlocked(true);
+            toastRef.current({
+              title: "Account Blocked",
+              description: "Your account has been blocked. Please contact support.",
+              variant: "destructive",
+            });
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
           }
-          
-          setLoading(false);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
