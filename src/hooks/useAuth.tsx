@@ -40,7 +40,11 @@ export const useAuth = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const withTimeout = async <T,>(promise: Promise<T>, ms: number, fallback: T): Promise<T> => {
+    const withTimeout = async <T,>(
+      promise: Promise<T>,
+      ms: number,
+      fallback: T
+    ): Promise<T> => {
       let timeoutId: number | undefined;
       const timeout = new Promise<T>((resolve) => {
         timeoutId = window.setTimeout(() => resolve(fallback), ms);
@@ -51,74 +55,66 @@ export const useAuth = () => {
       return result;
     };
 
-    // Get initial session first
-    const initializeAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error("Error getting session:", error);
-          if (isMounted) setLoading(false);
-          return;
-        }
-
-        if (!isMounted) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        // Run blocked check in the background so auth loading never hangs
-        if (session?.user) {
-          const blocked = await withTimeout(
-            checkBlockedStatus(session.user.id),
-            4000,
-            false
-          );
-
-          if (blocked && isMounted) {
-            setIsBlocked(true);
-            toastRef.current({
-              title: "Account Blocked",
-              description: "Your account has been blocked. Please contact support.",
-              variant: "destructive",
-            });
-            await supabase.auth.signOut();
-            setSession(null);
-            setUser(null);
-          }
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-        if (isMounted) setLoading(false);
-      }
+    const handleBlockedUser = async () => {
+      setIsBlocked(true);
+      toastRef.current({
+        title: "Account Blocked",
+        description: "Your account has been blocked. Please contact support.",
+        variant: "destructive",
+      });
+      await supabase.auth.signOut();
+      if (!isMounted) return;
+      setSession(null);
+      setUser(null);
     };
 
-    initializeAuth();
-
-    // Set up auth state listener for subsequent changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    const runBlockedCheck = (userId: string) => {
+      // Never block auth state updates
+      window.setTimeout(async () => {
+        const blocked = await withTimeout(checkBlockedStatus(userId), 4000, false);
         if (!isMounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (blocked) await handleBlockedUser();
+      }, 0);
+    };
 
-        // Check blocked status after auth state change
-        if (session?.user && event !== 'INITIAL_SESSION') {
-          const blocked = await checkBlockedStatus(session.user.id);
-          if (blocked && isMounted) {
-            setIsBlocked(true);
-            toastRef.current({
-              title: "Account Blocked",
-              description: "Your account has been blocked. Please contact support.",
-              variant: "destructive",
-            });
-            await supabase.auth.signOut();
-          }
-        }
+    // 1) Listener FIRST (must be synchronous; no awaits inside callback)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setLoading(false);
+
+      if (nextSession?.user && event !== "INITIAL_SESSION") {
+        runBlockedCheck(nextSession.user.id);
       }
-    );
+    });
+
+    // 2) Then get the initial session (with a hard timeout to prevent infinite loading)
+    (async () => {
+      const { data, error } = await withTimeout(
+        supabase.auth.getSession(),
+        7000,
+        { data: { session: null }, error: null }
+      );
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error("Error getting session:", error);
+        setLoading(false);
+        return;
+      }
+
+      const initialSession = data.session;
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+      setLoading(false);
+
+      if (initialSession?.user) {
+        runBlockedCheck(initialSession.user.id);
+      }
+    })();
 
     return () => {
       isMounted = false;
