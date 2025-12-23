@@ -10,6 +10,12 @@ export const useAuth = () => {
   const [isBlocked, setIsBlocked] = useState(false);
   const { toast } = useToast();
   const initializedRef = useRef(false);
+  const toastRef = useRef(toast);
+
+  // Keep toast ref updated
+  useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
 
   // Check if user is blocked
   const checkBlockedStatus = useCallback(async (userId: string) => {
@@ -33,7 +39,7 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    // Prevent double initialization
+    // Prevent double initialization in strict mode
     if (initializedRef.current) return;
     initializedRef.current = true;
 
@@ -58,7 +64,7 @@ export const useAuth = () => {
             const blocked = await checkBlockedStatus(session.user.id);
             if (blocked && isMounted) {
               setIsBlocked(true);
-              toast({
+              toastRef.current({
                 title: "Account Blocked",
                 description: "Your account has been blocked. Please contact support.",
                 variant: "destructive",
@@ -92,7 +98,7 @@ export const useAuth = () => {
           const blocked = await checkBlockedStatus(session.user.id);
           if (blocked && isMounted) {
             setIsBlocked(true);
-            toast({
+            toastRef.current({
               title: "Account Blocked",
               description: "Your account has been blocked. Please contact support.",
               variant: "destructive",
@@ -107,7 +113,7 @@ export const useAuth = () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [checkBlockedStatus, toast]);
+  }, [checkBlockedStatus]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
