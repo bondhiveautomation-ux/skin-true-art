@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -9,9 +9,10 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
   const { toast } = useToast();
+  const initializedRef = useRef(false);
 
   // Check if user is blocked
-  const checkBlockedStatus = async (userId: string) => {
+  const checkBlockedStatus = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -29,21 +30,33 @@ export const useAuth = () => {
       console.error("Error checking blocked status:", error);
       return false;
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    // Prevent double initialization
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
-        // Check blocked status after auth state change
-        if (session?.user) {
-          setTimeout(async () => {
+    let isMounted = true;
+
+    // Get initial session first
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          if (isMounted) setLoading(false);
+          return;
+        }
+
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
             const blocked = await checkBlockedStatus(session.user.id);
-            if (blocked) {
+            if (blocked && isMounted) {
               setIsBlocked(true);
               toast({
                 title: "Account Blocked",
@@ -51,37 +64,50 @@ export const useAuth = () => {
                 variant: "destructive",
               });
               await supabase.auth.signOut();
+              setSession(null);
+              setUser(null);
             }
-          }, 0);
+          }
+          
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Set up auth state listener for subsequent changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!isMounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // Check blocked status after auth state change
+        if (session?.user && event !== 'INITIAL_SESSION') {
+          const blocked = await checkBlockedStatus(session.user.id);
+          if (blocked && isMounted) {
+            setIsBlocked(true);
+            toast({
+              title: "Account Blocked",
+              description: "Your account has been blocked. Please contact support.",
+              variant: "destructive",
+            });
+            await supabase.auth.signOut();
+          }
         }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const blocked = await checkBlockedStatus(session.user.id);
-        if (blocked) {
-          setIsBlocked(true);
-          toast({
-            title: "Account Blocked",
-            description: "Your account has been blocked. Please contact support.",
-            variant: "destructive",
-          });
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-        }
-      }
-      
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [toast]);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [checkBlockedStatus, toast]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
