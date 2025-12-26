@@ -1,6 +1,7 @@
-import { X, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink, Diamond } from "lucide-react";
+import { X, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { GemBalance } from "@/components/gems/GemBalance";
 
 interface MobileNavDrawerProps {
   isOpen: boolean;
@@ -67,10 +68,7 @@ export const MobileNavDrawer = ({
           <div className="p-4 sm:p-5 border-b border-gold/10 flex-shrink-0">
             <p className="text-xs sm:text-sm text-cream/50 truncate mb-2">{userEmail}</p>
             {credits !== null && credits !== undefined && (
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30">
-                <Diamond className="w-4 h-4 text-purple-400" />
-                <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{credits} Gems</span>
-              </div>
+              <GemBalance gems={credits} size="md" showLabel className="rounded-xl" />
             )}
           </div>
         )}
