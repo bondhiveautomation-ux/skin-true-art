@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Sparkles, Menu, Play, ExternalLink, Diamond } from "lucide-react";
+import { LogOut, Shield, Sparkles, Menu, Play, ExternalLink } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -10,6 +10,7 @@ import {
 import { useContent } from "@/hooks/useSiteContent";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import UserInbox from "@/components/user/UserInbox";
+import { GemBalance } from "@/components/gems/GemBalance";
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
@@ -126,10 +127,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                 </Button>
               )}
               {credits !== null && credits !== undefined && (
-                <div className="flex items-center gap-2 px-3 lg:px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 backdrop-blur-sm">
-                  <Diamond className="w-4 h-4 text-purple-400" />
-                  <span className="text-sm font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{credits}</span>
-                </div>
+                <GemBalance gems={credits} size="md" />
               )}
               {userEmail && (
                 <>
@@ -164,10 +162,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
             <div className="flex lg:hidden items-center gap-2">
               {userEmail && <UserInbox />}
               {credits !== null && credits !== undefined && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30">
-                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="text-xs font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{credits}</span>
-                </div>
+                <GemBalance gems={credits} size="sm" />
               )}
               <button 
                 onClick={() => setMobileMenuOpen(true)}
