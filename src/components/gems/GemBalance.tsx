@@ -1,4 +1,5 @@
 import { Diamond } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface GemBalanceProps {
@@ -6,9 +7,12 @@ interface GemBalanceProps {
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
   className?: string;
+  clickable?: boolean;
 }
 
-export const GemBalance = ({ gems, size = "md", showLabel = false, className }: GemBalanceProps) => {
+export const GemBalance = ({ gems, size = "md", showLabel = false, className, clickable = true }: GemBalanceProps) => {
+  const navigate = useNavigate();
+  
   if (gems === null || gems === undefined) return null;
 
   const sizeClasses = {
@@ -23,13 +27,22 @@ export const GemBalance = ({ gems, size = "md", showLabel = false, className }: 
     lg: "w-5 h-5",
   };
 
+  const handleClick = () => {
+    if (clickable) {
+      navigate("/pricing");
+    }
+  };
+
   return (
     <div 
+      onClick={handleClick}
       className={cn(
         "flex items-center rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 backdrop-blur-sm",
         sizeClasses[size],
+        clickable && "cursor-pointer hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-400/50 transition-all duration-200",
         className
       )}
+      title={clickable ? "Click to top up gems" : undefined}
     >
       <Diamond className={cn("text-purple-400", iconSizes[size])} />
       <span className="font-semibold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
