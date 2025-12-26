@@ -7,7 +7,7 @@ import { Upload, Loader2, Download, Copy, Search, Sparkles, Diamond } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useCredits } from "@/hooks/useCredits";
+import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useDressLibrary, Dress } from "@/hooks/useDressLibrary";
 import { Navbar } from "@/components/layout/Navbar";
@@ -30,7 +30,7 @@ import { getGemCost } from "@/lib/gemCosts";
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { credits, deductCredit, hasCredits, refetchCredits } = useCredits();
+  const { gems, deductGems, hasEnoughGems, refetchGems } = useGems();
   const { isAdmin } = useAdmin();
   const { toast } = useToast();
 
@@ -199,13 +199,13 @@ const Index = () => {
       toast({ title: "Empty prompt", description: "Please enter a scenario prompt, upload a product, or add a background", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("generate-character-image")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("generate-character-image")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("generate-character-image");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
 
@@ -303,13 +303,13 @@ const Index = () => {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("extract-image-prompt")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("extract-image-prompt")} gem for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("extract-image-prompt");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsExtracting(true);
@@ -341,13 +341,13 @@ const Index = () => {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("extract-dress-to-dummy")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("extract-dress-to-dummy")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("extract-dress-to-dummy");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsExtractingDress(true);
@@ -387,13 +387,13 @@ const Index = () => {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("remove-people-from-image")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("remove-people-from-image")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("remove-people-from-image");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsRemovingPeople(true);
@@ -443,13 +443,13 @@ const Index = () => {
       toast({ title: "Missing Pose Reference", description: "Please upload a pose reference image", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("pose-transfer")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("pose-transfer")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("pose-transfer");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsTransferringPose(true);
@@ -514,13 +514,13 @@ const Index = () => {
       toast({ title: "No Style Selected", description: "Please select a makeup style", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("apply-makeup")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("apply-makeup")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("apply-makeup");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsApplyingMakeup(true);
@@ -575,13 +575,13 @@ const Index = () => {
       toast({ title: "Missing Reference Image", description: "Please upload the reference look image", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("full-look-transfer")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("full-look-transfer")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("full-look-transfer");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsTransferringLook(true);
@@ -648,13 +648,13 @@ const Index = () => {
       toast({ title: "No Dress Selected", description: "Please select a dress from the library", variant: "destructive" });
       return;
     }
-    if (!hasCredits) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    if (!hasEnoughGems("dress-change")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("dress-change")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const success = await deductCredit();
-    if (!success) {
-      toast({ title: "No credits", description: "You have no credits remaining", variant: "destructive" });
+    const gemResult = await deductGems("dress-change");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
       return;
     }
     setIsChangingDress(true);
@@ -731,7 +731,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} credits={credits} isAdmin={isAdmin} />
+      <Navbar onNavigate={scrollToSection} onSignOut={signOut} userEmail={user?.email} credits={gems} isAdmin={isAdmin} />
       
       {/* Hero Section */}
       <Hero onExplore={() => scrollToSection("features")} />
