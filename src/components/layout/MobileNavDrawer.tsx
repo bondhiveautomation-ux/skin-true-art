@@ -1,7 +1,14 @@
-import { X, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink } from "lucide-react";
+import { X, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink, Camera, Pen, Palette, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { GemBalance } from "@/components/gems/GemBalance";
+
+const STUDIOS = [
+  { name: "Photography Studio", path: "/photography-studio", icon: Camera },
+  { name: "Caption Studio", path: "/caption-studio", icon: Pen },
+  { name: "Branding Studio", path: "/branding-studio", icon: Palette },
+  { name: "Cinematic Studio", path: "/#cinematic-studio", icon: Film },
+];
 
 interface MobileNavDrawerProps {
   isOpen: boolean;
@@ -98,12 +105,27 @@ export const MobileNavDrawer = ({
             <span className="text-sm font-medium tracking-wide">Tutorial</span>
             <ExternalLink className="w-3 h-3 opacity-50 ml-auto flex-shrink-0" />
           </a>
-          <button
-            onClick={() => handleNavigate("tools")}
-            className="w-full flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left active:scale-[0.98] min-h-[48px]"
-          >
-            <span className="text-sm font-medium tracking-wide">Studio</span>
-          </button>
+          <div className="py-2">
+            <p className="px-4 py-2 text-xs text-cream/40 uppercase tracking-wider">Studios</p>
+            {STUDIOS.map((studio) => (
+              <button
+                key={studio.path}
+                onClick={() => {
+                  if (studio.path.startsWith("/#")) {
+                    navigate("/");
+                    setTimeout(() => onNavigate(studio.path.replace("/#", "")), 100);
+                    onClose();
+                  } else {
+                    handleRoute(studio.path);
+                  }
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left active:scale-[0.98] min-h-[48px]"
+              >
+                <studio.icon className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm font-medium tracking-wide">{studio.name}</span>
+              </button>
+            ))}
+          </div>
           <button
             onClick={() => handleRoute("/pricing")}
             className="w-full flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left active:scale-[0.98] min-h-[48px]"
