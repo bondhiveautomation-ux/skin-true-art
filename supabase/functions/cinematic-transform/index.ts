@@ -57,16 +57,57 @@ const CINEMATIC_PRESETS: Record<string, { name: string; prompt: string }> = {
   }
 };
 
+const BACKGROUND_OPTIONS: Record<string, { name: string; prompt: string }> = {
+  "warm-neutral-luxury": {
+    name: "Warm Neutral Luxury Wall",
+    prompt: `Soft beige to warm ivory textured wall with subtle plaster finish. Minimal, elegant studio environment. Warm ambient lighting with gentle falloff. No patterns, no props, no decorations. Feels like a premium Gulshan makeup studio interior. Realistic shadows and depth.`
+  },
+  "dark-mocha-editorial": {
+    name: "Dark Mocha Editorial Studio",
+    prompt: `Deep mocha brown studio wall with soft gradient lighting. Rich, editorial tone. Low-contrast cinematic lighting creating depth without overpowering the subject. High-end bridal photoshoot aesthetic used in luxury Dhaka studios.`
+  },
+  "classic-off-white-panel": {
+    name: "Classic Off-White Panel Room",
+    prompt: `Elegant off-white wall with subtle rectangular panel detailing. Soft indoor lighting. Clean, timeless interior resembling upscale Gulshan apartments used for bridal shoots. Natural shadows, realistic perspective.`
+  },
+  "window-light-corner": {
+    name: "Window-Light Studio Corner",
+    prompt: `Soft studio corner with a large window off-frame. Natural daylight entering from one side, creating gentle highlights and realistic shadows. Minimal interior, calm and airy. Looks like a real daylight bridal studio in Dhaka.`
+  },
+  "luxury-fabric-backdrop": {
+    name: "Luxury Fabric Backdrop",
+    prompt: `Softly draped premium fabric backdrop in muted champagne or warm taupe tones. Natural folds, no symmetry. Subtle depth and shadow. Looks like a real cloth backdrop used by professional makeup studios, not a digital background.`
+  },
+  "royal-burgundy-editorial": {
+    name: "Royal Burgundy Editorial Wall",
+    prompt: `Deep burgundy textured wall with cinematic lighting. Rich but controlled saturation. Editorial bridal photography vibe used for jewellery and lehenga campaigns. Soft shadow separation between subject and background.`
+  },
+  "minimal-grey-studio": {
+    name: "Minimal Grey Studio Interior",
+    prompt: `Soft grey studio wall with smooth matte texture. Neutral, balanced lighting suitable for showcasing makeup and jewellery accurately. Clean, modern Dhaka makeup studio look. No props, no clutter.`
+  },
+  "warm-indoor-apartment": {
+    name: "Warm Indoor Apartment Lounge",
+    prompt: `Upscale Dhaka apartment interior with soft warm lighting. Minimal furniture blurred in the distance. Feels like a real bridal shoot done in a Gulshan living room. Natural depth, realistic indoor ambience.`
+  },
+  "soft-shadow-editorial": {
+    name: "Soft Shadow Editorial Backdrop",
+    prompt: `Neutral studio wall with gentle shadow gradients cast naturally behind the subject. Controlled cinematic lighting. Editorial fashion photography style. No visible light sources, no patterns.`
+  },
+  "classic-dark-studio-fade": {
+    name: "Classic Dark Studio Fade",
+    prompt: `Dark studio background fading from charcoal to deep brown. Subtle vignette effect. High-end bridal editorial style commonly used in jewellery campaigns. Realistic contrast and depth.`
+  }
+};
+
 const GLOBAL_SYSTEM_PROMPT = `CRITICAL RULES - MUST FOLLOW:
-1. NEVER rotate the image. Keep the exact same orientation as the original.
-2. NEVER change the background. Keep the exact same background as the original.
-3. Preserve the exact identity of the person in the uploaded image.
-4. Do not change face structure, skin tone, age, hairstyle, outfit, jewellery, or accessories.
-5. No added or missing jewellery. No extra limbs, no distortion, no anatomy errors.
-6. Maintain realistic proportions and natural expressions.
-7. Photorealistic DSLR quality only. Cinematic lighting, shallow depth of field.
-8. No AI artifacts, no plastic skin, no over-smoothing.
-9. The output image must have the SAME orientation and aspect ratio as the input.`;
+1. Preserve the exact identity of the person in the uploaded image.
+2. Do not change face, makeup, skin tone, hairstyle, jewellery, outfit, pose, or body proportions.
+3. NEVER rotate the image. Keep the exact same orientation as the original.
+4. Maintain realistic proportions and natural expressions.
+5. Photorealistic DSLR quality only. Cinematic lighting. Natural skin texture.
+6. No AI artifacts, no plastic skin, no over-smoothing, no cut-out edges, no fake blur, no studio greenscreen look.
+7. The output image must have the SAME orientation and aspect ratio as the input.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -74,7 +115,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, presetId } = await req.json();
+    const { image, presetId, backgroundId } = await req.json();
 
     if (!image || !presetId) {
       return new Response(
@@ -96,9 +137,27 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log(`Processing cinematic transform with preset: ${preset.name}`);
+    const background = backgroundId ? BACKGROUND_OPTIONS[backgroundId] : null;
+    console.log(`Processing cinematic transform with preset: ${preset.name}, background: ${background?.name || 'Original'}`);
+
+    // Build background instructions
+    let backgroundInstructions = '';
+    if (background) {
+      backgroundInstructions = `
+BACKGROUND REPLACEMENT INSTRUCTIONS:
+Replace ONLY the background using the following description while keeping the subject completely unchanged:
+${background.prompt}
+
+Ensure realistic lighting integration, natural shadows, correct perspective, and seamless blending. The subject must look naturally photographed in the new environment.`;
+    } else {
+      backgroundInstructions = `
+BACKGROUND PRESERVATION:
+Preserve the original background exactly as it appears in the uploaded image. Do NOT change the background in any way.`;
+    }
 
     const fullPrompt = `${GLOBAL_SYSTEM_PROMPT}
+
+${backgroundInstructions}
 
 CINEMATIC STYLE TO APPLY: ${preset.name}
 
@@ -106,9 +165,9 @@ ${preset.prompt}
 
 IMPORTANT REMINDERS:
 - DO NOT rotate the image under any circumstances
-- DO NOT change the background - keep the exact same environment
-- Only apply lighting, color grading, and subtle enhancements
-- Preserve the exact identity, pose, and setting of the person`;
+- ${background ? 'Replace ONLY the background as specified, keep subject unchanged' : 'Keep the exact same background'}
+- Apply cinematic lighting and color grading
+- Preserve the exact identity, pose, and appearance of the person`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -164,7 +223,8 @@ IMPORTANT REMINDERS:
     return new Response(
       JSON.stringify({ 
         result: generatedImage,
-        presetName: preset.name
+        presetName: preset.name,
+        backgroundName: background?.name || 'Original'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

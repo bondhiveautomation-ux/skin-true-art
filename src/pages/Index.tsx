@@ -113,6 +113,7 @@ const Index = () => {
   // Cinematic Studio states
   const [cinematicImage, setCinematicImage] = useState<string | null>(null);
   const [selectedCinematicPreset, setSelectedCinematicPreset] = useState<string>("over-shoulder");
+  const [selectedCinematicBackground, setSelectedCinematicBackground] = useState<string | null>(null);
   const [cinematicResult, setCinematicResult] = useState<string | null>(null);
   const [isTransformingCinematic, setIsTransformingCinematic] = useState(false);
 
@@ -790,6 +791,20 @@ const Index = () => {
     { id: "mirror", name: "Mirror Reflection Elegance", emoji: "🪞" },
   ];
 
+  const CINEMATIC_BACKGROUNDS = [
+    { id: null, name: "Keep Original Background", emoji: "📷" },
+    { id: "warm-neutral-luxury", name: "Warm Neutral Luxury Wall", emoji: "1️⃣" },
+    { id: "dark-mocha-editorial", name: "Dark Mocha Editorial Studio", emoji: "2️⃣" },
+    { id: "classic-off-white-panel", name: "Classic Off-White Panel Room", emoji: "3️⃣" },
+    { id: "window-light-corner", name: "Window-Light Studio Corner", emoji: "4️⃣" },
+    { id: "luxury-fabric-backdrop", name: "Luxury Fabric Backdrop", emoji: "5️⃣" },
+    { id: "royal-burgundy-editorial", name: "Royal Burgundy Editorial Wall", emoji: "6️⃣" },
+    { id: "minimal-grey-studio", name: "Minimal Grey Studio Interior", emoji: "7️⃣" },
+    { id: "warm-indoor-apartment", name: "Warm Indoor Apartment Lounge", emoji: "8️⃣" },
+    { id: "soft-shadow-editorial", name: "Soft Shadow Editorial Backdrop", emoji: "9️⃣" },
+    { id: "classic-dark-studio-fade", name: "Classic Dark Studio Fade", emoji: "🔟" },
+  ];
+
   const handleCinematicImageUpload = createImageUploadHandler(setCinematicImage, [() => setCinematicResult(null)]);
 
   const handleCinematicTransform = async () => {
@@ -810,7 +825,7 @@ const Index = () => {
     setCinematicResult(null);
     try {
       const { data, error } = await supabase.functions.invoke("cinematic-transform", {
-        body: { image: cinematicImage, presetId: selectedCinematicPreset },
+        body: { image: cinematicImage, presetId: selectedCinematicPreset, backgroundId: selectedCinematicBackground },
       });
       if (error) throw error;
       if (data?.error) {
@@ -843,6 +858,7 @@ const Index = () => {
     setCinematicImage(null);
     setCinematicResult(null);
     setSelectedCinematicPreset("over-shoulder");
+    setSelectedCinematicBackground(null);
   };
 
   // Preset options
@@ -1678,33 +1694,67 @@ const Index = () => {
 
           {/* Preset Selection Tabs */}
           {cinematicImage && !cinematicResult && (
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-foreground text-center">
-                Select Cinematic Style
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {CINEMATIC_PRESETS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => setSelectedCinematicPreset(preset.id)}
-                    disabled={isTransformingCinematic}
-                    className={`relative rounded-xl border text-left transition-all duration-300 p-4 ${
-                      selectedCinematicPreset === preset.id
-                        ? "border-gold/50 bg-gold/10 text-cream shadow-gold"
-                        : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30 hover:bg-charcoal"
-                    } ${isTransformingCinematic ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg flex-shrink-0">{preset.emoji}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium leading-tight">{preset.name}</p>
+            <div className="space-y-6">
+              {/* Cinematic Style Selection */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-foreground text-center">
+                  Select Cinematic Style
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {CINEMATIC_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => setSelectedCinematicPreset(preset.id)}
+                      disabled={isTransformingCinematic}
+                      className={`relative rounded-xl border text-left transition-all duration-300 p-4 ${
+                        selectedCinematicPreset === preset.id
+                          ? "border-gold/50 bg-gold/10 text-cream shadow-gold"
+                          : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30 hover:bg-charcoal"
+                      } ${isTransformingCinematic ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-lg flex-shrink-0">{preset.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium leading-tight">{preset.name}</p>
+                        </div>
                       </div>
-                    </div>
-                    {selectedCinematicPreset === preset.id && (
-                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold" />
-                    )}
-                  </button>
-                ))}
+                      {selectedCinematicPreset === preset.id && (
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Background Selection */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-foreground text-center">
+                  Select Background (Optional)
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {CINEMATIC_BACKGROUNDS.map((bg) => (
+                    <button
+                      key={bg.id || 'original'}
+                      onClick={() => setSelectedCinematicBackground(bg.id)}
+                      disabled={isTransformingCinematic}
+                      className={`relative rounded-xl border text-left transition-all duration-300 p-4 ${
+                        selectedCinematicBackground === bg.id
+                          ? "border-gold/50 bg-gold/10 text-cream shadow-gold"
+                          : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30 hover:bg-charcoal"
+                      } ${isTransformingCinematic ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-lg flex-shrink-0">{bg.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium leading-tight">{bg.name}</p>
+                        </div>
+                      </div>
+                      {selectedCinematicBackground === bg.id && (
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
