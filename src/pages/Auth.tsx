@@ -422,51 +422,7 @@ const Auth = () => {
 
           {/* Auth Card */}
           <div className="glass-card p-5 sm:p-8 border border-gold/15 rounded-2xl sm:rounded-3xl backdrop-blur-md mt-4 lg:mt-0">
-            {showEmailSent ? (
-              /* Email Sent Confirmation */
-              <div className="space-y-6">
-                <div className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-green-500/20 mx-auto mb-4 flex items-center justify-center">
-                    <CheckCircle className="w-8 h-8 text-green-400" />
-                  </div>
-                  <h2 className="font-serif text-2xl font-semibold text-cream">
-                    Check Your Email
-                  </h2>
-                  <p className="text-sm text-cream/60 mt-3 leading-relaxed">
-                    We sent a confirmation link to<br />
-                    <span className="text-gold font-medium">{pendingEmail}</span>
-                  </p>
-                </div>
-
-                <div className="bg-gold/10 border border-gold/20 rounded-xl p-4 text-center">
-                  <p className="text-sm text-cream/70">
-                    📧 Click the link in your email to complete signup and start using Brandify!
-                  </p>
-                </div>
-
-                <div className="text-center space-y-4">
-                  <p className="text-sm text-cream/50">
-                    Didn't receive the email?{" "}
-                    <button 
-                      onClick={handleResendEmail}
-                      disabled={loading}
-                      className="text-gold hover:text-gold/80 transition-colors disabled:opacity-50 font-medium"
-                    >
-                      {loading ? "Sending..." : "Resend"}
-                    </button>
-                  </p>
-                  <button 
-                    onClick={() => { 
-                      setShowEmailSent(false); 
-                      setPendingEmail(""); 
-                    }}
-                    className="text-sm text-cream/40 hover:text-cream/60 transition-colors"
-                  >
-                    ← Back to Sign Up
-                  </button>
-                </div>
-              </div>
-            ) : forgotPassword ? (
+            {forgotPassword ? (
               /* Forgot Password Form */
               <div className="space-y-6">
                 <div className="text-center">
@@ -514,200 +470,72 @@ const Auth = () => {
                 </button>
               </div>
             ) : (
-              /* Login/Signup Tabs */
-              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as "login" | "signup"); setErrors({}); }}>
-                <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-charcoal/50 h-11">
-                  <TabsTrigger value="login" className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold h-9">
-                    Log In
-                  </TabsTrigger>
-                  <TabsTrigger value="signup" className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold h-9">
-                    Sign Up Free
-                  </TabsTrigger>
-                </TabsList>
+              /* Login Form Only */
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="font-serif text-2xl font-semibold text-cream">Welcome Back</h2>
+                  <p className="text-sm text-cream/50 mt-2">Sign in to continue</p>
+                </div>
+                
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm text-cream/70">Email</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30"
+                      disabled={loading}
+                    />
+                  </div>
 
-                {/* Login Tab */}
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-5">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-sm text-cream/70">Email</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password" className="text-sm text-cream/70">Password</Label>
+                    <div className="relative">
                       <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30"
+                        id="login-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30 pr-10"
                         disabled={loading}
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password" className="text-sm text-cream/70">Password</Label>
-                      <div className="relative">
-                        <Input
-                          id="login-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30 pr-10"
-                          disabled={loading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/60"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setForgotPassword(true)}
-                      className="text-sm text-gold/70 hover:text-gold transition-colors"
-                    >
-                      Forgot password?
-                    </button>
-
-                    <Button type="submit" variant="gold" size="lg" className="w-full btn-glow" disabled={loading}>
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        <>
-                          Log In
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-
-                  <p className="text-center text-sm text-cream/40 mt-6">
-                    Don't have an account?{" "}
-                    <button onClick={() => setActiveTab("signup")} className="text-gold hover:underline">
-                      Sign up
-                    </button>
-                  </p>
-                </TabsContent>
-
-                {/* Signup Tab */}
-                <TabsContent value="signup">
-                  {/* Signup incentive - mobile only */}
-                  <div className="lg:hidden bg-gradient-to-r from-gold/10 to-rose-gold/10 border border-gold/20 rounded-xl p-3 mb-5 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
-                      <Star className="w-5 h-5 text-gold" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-cream">Get 50 Free Gems</p>
-                      <p className="text-xs text-cream/50">Create your account and start creating</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/60"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
-                  
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name" className="text-sm text-cream/70">Full Name <span className="text-cream/30">(optional)</span></Label>
-                      <Input
-                        id="signup-name"
-                        type="text"
-                        placeholder="Your name"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30"
-                        disabled={loading}
-                      />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-sm text-cream/70">Email <span className="text-red-400">*</span></Label>
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => { setEmail(e.target.value); setErrors(prev => ({ ...prev, email: "" })); }}
-                        className={`bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30 ${errors.email ? "border-red-400" : ""}`}
-                        disabled={loading}
-                      />
-                      {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
-                    </div>
+                  <button
+                    type="button"
+                    onClick={() => setForgotPassword(true)}
+                    className="text-sm text-gold/70 hover:text-gold transition-colors"
+                  >
+                    Forgot password?
+                  </button>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-sm text-cream/70">Password <span className="text-red-400">*</span></Label>
-                      <div className="relative">
-                        <Input
-                          id="signup-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Min 8 characters"
-                          value={password}
-                          onChange={(e) => { setPassword(e.target.value); setErrors(prev => ({ ...prev, password: "" })); }}
-                          className={`bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30 pr-10 ${errors.password ? "border-red-400" : ""}`}
-                          disabled={loading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/60"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      {errors.password && <p className="text-red-400 text-xs">{errors.password}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-confirm" className="text-sm text-cream/70">Confirm Password <span className="text-red-400">*</span></Label>
-                      <div className="relative">
-                        <Input
-                          id="signup-confirm"
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Repeat password"
-                          value={confirmPassword}
-                          onChange={(e) => { setConfirmPassword(e.target.value); setErrors(prev => ({ ...prev, confirmPassword: "" })); }}
-                          className={`bg-charcoal border-gold/20 focus:border-gold/50 h-12 text-cream placeholder:text-cream/30 pr-10 ${errors.confirmPassword ? "border-red-400" : ""}`}
-                          disabled={loading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream/60"
-                        >
-                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      {errors.confirmPassword && <p className="text-red-400 text-xs">{errors.confirmPassword}</p>}
-                    </div>
-
-                    <Button type="submit" variant="gold" size="lg" className="w-full btn-glow mt-2 h-12" disabled={loading}>
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Creating account...
-                        </>
-                      ) : (
-                        <>
-                          Start Creating Free
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </>
-                      )}
-                    </Button>
-
-                    <p className="text-[11px] text-cream/30 text-center mt-3">
-                      By signing up, you agree to our Terms & Privacy Policy
-                    </p>
-                  </form>
-
-                  <p className="text-center text-sm text-cream/40 mt-5">
-                    Already have an account?{" "}
-                    <button onClick={() => setActiveTab("login")} className="text-gold hover:underline font-medium">
-                      Log in
-                    </button>
-                  </p>
-                </TabsContent>
-              </Tabs>
+                  <Button type="submit" variant="gold" size="lg" className="w-full btn-glow" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      <>
+                        Log In
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </div>
             )}
           </div>
 
