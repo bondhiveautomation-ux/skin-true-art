@@ -117,15 +117,23 @@ serve(async (req) => {
   try {
     const { image, presetId, backgroundId } = await req.json();
 
-    if (!image || !presetId) {
+    if (!image) {
       return new Response(
-        JSON.stringify({ error: 'Image and preset ID are required' }),
+        JSON.stringify({ error: 'Image is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const preset = CINEMATIC_PRESETS[presetId];
-    if (!preset) {
+    // At least one option must be selected
+    if (!presetId && !backgroundId) {
+      return new Response(
+        JSON.stringify({ error: 'Please select at least a cinematic style or a background option' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const preset = presetId ? CINEMATIC_PRESETS[presetId] : null;
+    if (presetId && !preset) {
       return new Response(
         JSON.stringify({ error: 'Invalid preset ID' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -138,7 +146,7 @@ serve(async (req) => {
     }
 
     const background = backgroundId ? BACKGROUND_OPTIONS[backgroundId] : null;
-    console.log(`Processing cinematic transform with preset: ${preset.name}, background: ${background?.name || 'Original'}`);
+    console.log(`Processing cinematic transform with preset: ${preset?.name || 'None'}, background: ${background?.name || 'Original'}`);
 
     // Build background instructions
     let backgroundInstructions = '';
@@ -155,19 +163,30 @@ BACKGROUND PRESERVATION:
 Preserve the original background exactly as it appears in the uploaded image. Do NOT change the background in any way.`;
     }
 
+    // Build cinematic style instructions
+    let cinematicInstructions = '';
+    if (preset) {
+      cinematicInstructions = `
+CINEMATIC STYLE TO APPLY: ${preset.name}
+
+${preset.prompt}`;
+    } else {
+      cinematicInstructions = `
+STYLE PRESERVATION:
+Keep the original cinematic style, pose, and framing of the photo exactly as it appears. Only apply background changes if specified above.`;
+    }
+
     const fullPrompt = `${GLOBAL_SYSTEM_PROMPT}
 
 ${backgroundInstructions}
 
-CINEMATIC STYLE TO APPLY: ${preset.name}
-
-${preset.prompt}
+${cinematicInstructions}
 
 IMPORTANT REMINDERS:
 - DO NOT rotate the image under any circumstances
 - ${background ? 'Replace ONLY the background as specified, keep subject unchanged' : 'Keep the exact same background'}
-- Apply cinematic lighting and color grading
-- Preserve the exact identity, pose, and appearance of the person`;
+- ${preset ? 'Apply the specified cinematic style with appropriate lighting and color grading' : 'Keep the original style and pose'}
+- Preserve the exact identity and appearance of the person`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -223,7 +242,7 @@ IMPORTANT REMINDERS:
     return new Response(
       JSON.stringify({ 
         result: generatedImage,
-        presetName: preset.name,
+        presetName: preset?.name || 'None',
         backgroundName: background?.name || 'Original'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

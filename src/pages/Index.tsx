@@ -113,7 +113,7 @@ const Index = () => {
 
   // Cinematic Studio states
   const [cinematicImage, setCinematicImage] = useState<string | null>(null);
-  const [selectedCinematicPreset, setSelectedCinematicPreset] = useState<string>("over-shoulder");
+  const [selectedCinematicPreset, setSelectedCinematicPreset] = useState<string | null>(null);
   const [selectedCinematicBackground, setSelectedCinematicBackground] = useState<string | null>(null);
   const [cinematicResult, setCinematicResult] = useState<string | null>(null);
   const [isTransformingCinematic, setIsTransformingCinematic] = useState(false);
@@ -778,6 +778,7 @@ const Index = () => {
 
   // ==================== CINEMATIC STUDIO ====================
   const CINEMATIC_PRESETS = [
+    { id: null, name: "None (Keep Original Style)", emoji: "📷" },
     { id: "over-shoulder", name: "Over-the-Shoulder Grace", emoji: "🌟" },
     { id: "birds-eye", name: "Bird's-Eye Bridal Symphony", emoji: "🦅" },
     { id: "high-angle", name: "High-Angle Royal Gaze", emoji: "👑" },
@@ -793,7 +794,7 @@ const Index = () => {
   ];
 
   const CINEMATIC_BACKGROUNDS = [
-    { id: null, name: "Keep Original Background", emoji: "📷" },
+    { id: null, name: "None (Keep Original Background)", emoji: "📷" },
     { id: "warm-neutral-luxury", name: "Warm Neutral Luxury Wall", emoji: "1️⃣" },
     { id: "dark-mocha-editorial", name: "Dark Mocha Editorial Studio", emoji: "2️⃣" },
     { id: "classic-off-white-panel", name: "Classic Off-White Panel Room", emoji: "3️⃣" },
@@ -848,6 +849,11 @@ const Index = () => {
       toast({ title: "No image", description: "Please upload a photo first", variant: "destructive" });
       return;
     }
+    // At least one option must be selected
+    if (!selectedCinematicPreset && !selectedCinematicBackground) {
+      toast({ title: "No options selected", description: "Please select at least a cinematic style or a background option", variant: "destructive" });
+      return;
+    }
     if (!hasEnoughGems("cinematic-transform")) {
       toast({ title: "Insufficient gems", description: `You need ${getGemCost("cinematic-transform")} gems for this feature`, variant: "destructive" });
       return;
@@ -871,7 +877,11 @@ const Index = () => {
       if (data?.result) {
         setCinematicResult(data.result);
         await logGeneration("Cinematic Studio", [], [data.result]);
-        toast({ title: "Cinematic Transform Complete!", description: `Applied: ${data.presetName}` });
+        const appliedText = [
+          data.presetName && data.presetName !== 'None' ? data.presetName : null,
+          data.backgroundName && data.backgroundName !== 'Original' ? data.backgroundName : null
+        ].filter(Boolean).join(' + ') || 'Enhancements';
+        toast({ title: "Cinematic Transform Complete!", description: `Applied: ${appliedText}` });
       }
     } catch (error: any) {
       toast({ title: "Transform Failed", description: error.message, variant: "destructive" });
@@ -884,7 +894,7 @@ const Index = () => {
     if (!cinematicResult) return;
     const link = document.createElement("a");
     link.href = cinematicResult;
-    link.download = `cinematic-${selectedCinematicPreset}.png`;
+    link.download = `cinematic-${selectedCinematicPreset || 'result'}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -893,7 +903,7 @@ const Index = () => {
   const handleResetCinematic = () => {
     setCinematicImage(null);
     setCinematicResult(null);
-    setSelectedCinematicPreset("over-shoulder");
+    setSelectedCinematicPreset(null);
     setSelectedCinematicBackground(null);
   };
 
