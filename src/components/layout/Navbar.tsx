@@ -1,16 +1,29 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Sparkles, Menu, Play, ExternalLink } from "lucide-react";
+import { LogOut, Shield, Sparkles, Menu, Play, ExternalLink, ChevronDown, Camera, Pen, Palette, Film } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useContent } from "@/hooks/useSiteContent";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import UserInbox from "@/components/user/UserInbox";
 import { GemBalance } from "@/components/gems/GemBalance";
+
+const STUDIOS = [
+  { name: "Photography Studio", path: "/photography-studio", icon: Camera },
+  { name: "Caption Studio", path: "/caption-studio", icon: Pen },
+  { name: "Branding Studio", path: "/branding-studio", icon: Palette },
+  { name: "Cinematic Studio", path: "/#cinematic-studio", icon: Film },
+];
 
 interface NavbarProps {
   onNavigate: (section: string) => void;
@@ -94,12 +107,31 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                   <p>Watch the full Brandify tutorial</p>
                 </TooltipContent>
               </Tooltip>
-              <button 
-                onClick={() => onNavigate("tools")}
-                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
-              >
-                {navStudio}
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap">
+                  Studios
+                  <ChevronDown className="w-3 h-3" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="bg-card/95 backdrop-blur-xl border-gold/20">
+                  {STUDIOS.map((studio) => (
+                    <DropdownMenuItem 
+                      key={studio.path}
+                      onClick={() => {
+                        if (studio.path.startsWith("/#")) {
+                          navigate("/");
+                          setTimeout(() => onNavigate(studio.path.replace("/#", "")), 100);
+                        } else {
+                          navigate(studio.path);
+                        }
+                      }}
+                      className="flex items-center gap-2 text-cream/70 hover:text-gold cursor-pointer"
+                    >
+                      <studio.icon className="w-4 h-4" />
+                      {studio.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <button 
                 onClick={() => navigate("/pricing")}
                 className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
