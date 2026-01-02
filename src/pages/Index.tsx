@@ -104,6 +104,12 @@ const Index = () => {
   const [fullLookResult, setFullLookResult] = useState<string | null>(null);
   const [isTransferringLook, setIsTransferringLook] = useState(false);
 
+  // Swap Studio (Face Swap) states
+  const [swapInfluencerImage, setSwapInfluencerImage] = useState<string | null>(null);
+  const [swapReferenceImage, setSwapReferenceImage] = useState<string | null>(null);
+  const [swapResult, setSwapResult] = useState<string | null>(null);
+  const [isSwappingFace, setIsSwappingFace] = useState(false);
+
   // Dress Change Studio states
   const { activeDresses, loading: dressesLoading } = useDressLibrary();
   const [dressChangeCategory, setDressChangeCategory] = useState<"male" | "female" | "kids">("female");
@@ -623,6 +629,66 @@ const Index = () => {
     setFullLookResult(null);
   };
 
+  // ==================== SWAP STUDIO (FACE SWAP) ====================
+  const handleSwapInfluencerUpload = createImageUploadHandler(setSwapInfluencerImage, [() => setSwapResult(null)]);
+  const handleSwapReferenceUpload = createImageUploadHandler(setSwapReferenceImage, [() => setSwapResult(null)]);
+
+  const handleFaceSwap = async () => {
+    if (!swapInfluencerImage) {
+      toast({ title: "Missing Influencer Image", description: "Please upload the influencer photo", variant: "destructive" });
+      return;
+    }
+    if (!swapReferenceImage) {
+      toast({ title: "Missing Reference Image", description: "Please upload the reference image", variant: "destructive" });
+      return;
+    }
+    if (!hasEnoughGems("face-swap")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("face-swap")} gems for this feature`, variant: "destructive" });
+      return;
+    }
+    const gemResult = await deductGems("face-swap");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+    setIsSwappingFace(true);
+    setSwapResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('face-swap', {
+        body: { influencerImage: swapInfluencerImage, referenceImage: swapReferenceImage }
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Face Swap Failed", description: data.error, variant: "destructive" });
+        return;
+      }
+      if (data?.generatedImageUrl) {
+        setSwapResult(data.generatedImageUrl);
+        await logGeneration("Face Swap", [swapInfluencerImage, swapReferenceImage], [data.generatedImageUrl]);
+        toast({ title: "Face Swap Complete!", description: "Your face swap has been created successfully" });
+      }
+    } catch (error: any) {
+      toast({ title: "Face Swap Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSwappingFace(false);
+    }
+  };
+
+  const handleDownloadSwap = () => {
+    if (!swapResult) return;
+    const link = document.createElement('a');
+    link.href = swapResult;
+    link.download = 'face-swap-result.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleResetSwap = () => {
+    setSwapInfluencerImage(null);
+    setSwapReferenceImage(null);
+    setSwapResult(null);
+  };
 
   // ==================== DRESS CHANGE STUDIO ====================
   const handleDressChangeUserImageUpload = createImageUploadHandler(setDressChangeUserImage, [
@@ -1262,6 +1328,68 @@ const Index = () => {
         </div>
       </ToolSection>
 
+      {/* Swap Studio (Face Swap) Section */}
+      <ToolSection
+        id="swap-studio"
+        title="Swap Studio"
+        subtitle="– Face Swap"
+        description="Swap the influencer's face onto a reference image while keeping everything else unchanged"
+      >
+        <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <ImageUploader
+              id="swap-influencer-upload"
+              image={swapInfluencerImage}
+              onUpload={handleSwapInfluencerUpload}
+              onRemove={() => { setSwapInfluencerImage(null); setSwapResult(null); }}
+              label="Influencer Image"
+              description="The face to use for swapping"
+              aspectRatio="portrait"
+            />
+            <ImageUploader
+              id="swap-reference-upload"
+              image={swapReferenceImage}
+              onUpload={handleSwapReferenceUpload}
+              onRemove={() => { setSwapReferenceImage(null); setSwapResult(null); }}
+              label="Reference Image"
+              description="Background, dress & pose stay the same"
+              aspectRatio="portrait"
+            />
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <LoadingButton
+              onClick={handleFaceSwap}
+              isLoading={isSwappingFace}
+              loadingText="Swapping Face..."
+              disabled={!swapInfluencerImage || !swapReferenceImage}
+              size="lg"
+              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
+            >
+              Swap Face
+            </LoadingButton>
+            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+              <Diamond className="w-3.5 h-3.5 text-purple-400" />
+              <span>Costs {getGemCost("face-swap")} gems</span>
+            </div>
+          </div>
+
+          {swapResult && (
+            <ResultDisplay
+              result={swapResult}
+              originalImages={[
+                ...(swapInfluencerImage ? [{ src: swapInfluencerImage, label: "Influencer" }] : []),
+                ...(swapReferenceImage ? [{ src: swapReferenceImage, label: "Reference" }] : []),
+              ]}
+              onDownload={handleDownloadSwap}
+              onRegenerate={handleFaceSwap}
+              onReset={handleResetSwap}
+              isProcessing={isSwappingFace}
+              resetLabel="Try Another Swap"
+            />
+          )}
+        </div>
+      </ToolSection>
 
       {/* Dress Change Studio Section */}
       <ToolSection

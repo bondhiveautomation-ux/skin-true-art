@@ -6,6 +6,7 @@ export const GEM_COSTS = {
   "generate-character-image": 15,
   "pose-transfer": 15,
   "full-look-transfer": 15,
+  "face-swap": 15,
   
   // Studio Utility Features - 6 Gems
   "enhance-photo": 6,
@@ -29,7 +30,7 @@ export const FEATURE_CATEGORIES = {
   "high-impact": {
     label: "High-Impact Features",
     cost: 15,
-    features: ["dress-change", "apply-makeup", "generate-character-image", "pose-transfer", "full-look-transfer"],
+    features: ["dress-change", "apply-makeup", "generate-character-image", "pose-transfer", "full-look-transfer", "face-swap"],
   },
   "studio-utility": {
     label: "Studio Utility Features", 
