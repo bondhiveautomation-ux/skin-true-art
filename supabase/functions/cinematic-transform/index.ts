@@ -57,7 +57,16 @@ const CINEMATIC_PRESETS: Record<string, { name: string; prompt: string }> = {
   }
 };
 
-const GLOBAL_SYSTEM_PROMPT = `Preserve the exact identity of the person in the uploaded image. Do not change face structure, skin tone, age, hairstyle, outfit, jewellery, or accessories. No added or missing jewellery. No extra limbs, no distortion, no anatomy errors. Maintain realistic proportions and natural expressions. Photorealistic DSLR quality only. Cinematic lighting, shallow depth of field. No AI artifacts, no plastic skin, no over-smoothing.`;
+const GLOBAL_SYSTEM_PROMPT = `CRITICAL RULES - MUST FOLLOW:
+1. NEVER rotate the image. Keep the exact same orientation as the original.
+2. NEVER change the background. Keep the exact same background as the original.
+3. Preserve the exact identity of the person in the uploaded image.
+4. Do not change face structure, skin tone, age, hairstyle, outfit, jewellery, or accessories.
+5. No added or missing jewellery. No extra limbs, no distortion, no anatomy errors.
+6. Maintain realistic proportions and natural expressions.
+7. Photorealistic DSLR quality only. Cinematic lighting, shallow depth of field.
+8. No AI artifacts, no plastic skin, no over-smoothing.
+9. The output image must have the SAME orientation and aspect ratio as the input.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -95,7 +104,11 @@ CINEMATIC STYLE TO APPLY: ${preset.name}
 
 ${preset.prompt}
 
-Transform the uploaded image according to this cinematic style while preserving the exact identity of the person.`;
+IMPORTANT REMINDERS:
+- DO NOT rotate the image under any circumstances
+- DO NOT change the background - keep the exact same environment
+- Only apply lighting, color grading, and subtle enhancements
+- Preserve the exact identity, pose, and setting of the person`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
