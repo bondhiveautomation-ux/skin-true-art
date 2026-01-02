@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.apply-branding]
 verify_jwt = false
+
+[functions.face-swap]
+verify_jwt = false
