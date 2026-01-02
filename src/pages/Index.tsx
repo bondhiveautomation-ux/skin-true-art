@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useDressLibrary, Dress } from "@/hooks/useDressLibrary";
+import { fileToNormalizedDataUrl } from "@/lib/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { ToolSection } from "@/components/layout/ToolSection";
@@ -805,7 +806,42 @@ const Index = () => {
     { id: "classic-dark-studio-fade", name: "Classic Dark Studio Fade", emoji: "🔟" },
   ];
 
-  const handleCinematicImageUpload = createImageUploadHandler(setCinematicImage, [() => setCinematicResult(null)]);
+  const handleCinematicImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Normalize EXIF orientation into pixels so the model never sees a rotated input.
+      const normalized = await fileToNormalizedDataUrl(file);
+      setCinematicImage(normalized);
+      setCinematicResult(null);
+    } catch (err) {
+      console.error("Failed to normalize image:", err);
+      toast({
+        title: "Upload failed",
+        description: "Could not process this image. Please try a different file.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleCinematicTransform = async () => {
     if (!cinematicImage) {
