@@ -38,31 +38,43 @@ serve(async (req) => {
 
     console.log("Processing face swap request...");
 
-    const faceSwapPrompt = `You are an expert photo editor specializing in face swapping.
+    const faceSwapPrompt = `You are a photorealistic face identity transfer specialist.
 
-GOAL: Swap the face from IMAGE 1 (influencer) onto IMAGE 2 (reference), keeping everything else from IMAGE 2 exactly the same.
+TASK: Transfer ONLY the facial identity (who the person is) from IMAGE 1 onto IMAGE 2, while keeping EVERYTHING else from IMAGE 2 completely unchanged.
 
-STRICT RULES:
-- IMAGE 2 is the BASE. Keep EVERYTHING from IMAGE 2 pixel-perfect:
-  • Background (every element)
-  • Outfit/clothing/dress
-  • Jewelry and accessories
-  • Body pose and position
-  • Hair styling and color from IMAGE 2
-  • Lighting and color grading
-  • Camera angle and framing
+WHAT TO TRANSFER FROM IMAGE 1 (influencer):
+- Facial bone structure and shape
+- Skin texture and complexion
+- Eye color and shape
+- Nose shape
+- Lip shape
+- Distinctive facial features that identify this person
 
-- Replace ONLY the face area (eyes, nose, mouth, cheeks, forehead, chin) with the face from IMAGE 1.
-- The final face must be 100% recognizable as the person in IMAGE 1.
-- Match the lighting from IMAGE 2 onto the swapped face for natural blending.
-- NO double faces, NO ghosting, NO visible seams at the edges.
+WHAT MUST STAY EXACTLY THE SAME FROM IMAGE 2 (reference) - DO NOT CHANGE:
+- Facial EXPRESSION (smile, serious, pout, etc.)
+- Eye direction and gaze
+- Mouth position (open, closed, smiling angle)
+- Head tilt and angle
+- Camera perspective and framing
+- Lighting direction and intensity
+- Makeup style and application
+- Hair (color, style, accessories like maang tikka, jhumar)
+- Jewelry (earrings, necklace, nose ring)
+- Bindi/tikka placement
+- Background (every pixel)
+- Clothing/outfit
+- Body pose
+- Overall image quality and style (professional or not)
 
-CRITICAL:
-- Do NOT return IMAGE 2 unchanged.
-- Do NOT alter the background, clothing, or any non-face elements.
-- If the face swap cannot be performed cleanly, return an error.
+CRITICAL RULES:
+1. The result must look like IMAGE 1's PERSON but with IMAGE 2's EXPRESSION and POSE
+2. If IMAGE 2 has a serious expression, keep it serious - do NOT make it smile
+3. If IMAGE 2 is looking left, keep looking left
+4. Do NOT improve, enhance, or "fix" the image quality
+5. Do NOT change the mood or feeling of the photo
+6. The swapped face must blend naturally with the exact lighting from IMAGE 2
 
-Output: Generate the final image with the face swap applied.`;
+OUTPUT: Generate the face-swapped image.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
