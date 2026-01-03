@@ -100,14 +100,27 @@ const BACKGROUND_OPTIONS: Record<string, { name: string; prompt: string }> = {
   }
 };
 
-const GLOBAL_SYSTEM_PROMPT = `CRITICAL RULES - MUST FOLLOW:
-1. Preserve the exact identity of the person in the uploaded image.
-2. Do not change face, makeup, skin tone, hairstyle, jewellery, outfit, pose, or body proportions.
-3. NEVER rotate the image. Keep the exact same orientation as the original.
-4. Maintain realistic proportions and natural expressions.
-5. Photorealistic DSLR quality only. Cinematic lighting. Natural skin texture.
-6. No AI artifacts, no plastic skin, no over-smoothing, no cut-out edges, no fake blur, no studio greenscreen look.
-7. The output image must have the SAME orientation and aspect ratio as the input.`;
+const GLOBAL_SYSTEM_PROMPT = `CRITICAL RULES - ABSOLUTE MUST FOLLOW:
+
+IDENTITY PRESERVATION (HIGHEST PRIORITY):
+1. Preserve the EXACT identity of the person - face, makeup, skin tone, hairstyle, jewellery must remain 100% identical.
+2. NEVER rotate the image. Keep the exact same orientation as the original.
+3. Maintain exact body proportions - do not stretch, compress, or distort.
+
+CLOTHING & OUTFIT PRESERVATION (CRITICAL):
+4. The outfit/clothing must remain EXACTLY as in the original - same shape, same drape, same folds, same position.
+5. Do NOT add any extra fabric, cloth pieces, or extensions to the outfit.
+6. Do NOT remove or hide any part of the outfit.
+7. Do NOT change how the dupatta/scarf/veil is draped or positioned.
+8. Preserve the exact silhouette and boundaries of the clothing - no extra floating fabric.
+9. Every piece of clothing (blouse, lehenga, dupatta) must maintain its original form without distortion.
+10. The outfit edges must be clean and natural - no AI-generated extra pieces or artifacts.
+
+QUALITY REQUIREMENTS:
+11. Photorealistic DSLR quality only. Cinematic lighting. Natural skin texture.
+12. No AI artifacts, no plastic skin, no over-smoothing, no cut-out edges, no fake blur.
+13. The output image must have the SAME orientation and aspect ratio as the input.
+14. Seamless, natural result - should look like a real photograph, not AI-generated.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -182,11 +195,15 @@ ${backgroundInstructions}
 
 ${cinematicInstructions}
 
-IMPORTANT REMINDERS:
+FINAL CRITICAL REMINDERS:
 - DO NOT rotate the image under any circumstances
-- ${background ? 'Replace ONLY the background as specified, keep subject unchanged' : 'Keep the exact same background'}
-- ${preset ? 'Apply the specified cinematic style with appropriate lighting and color grading' : 'Keep the original style and pose'}
-- Preserve the exact identity and appearance of the person`;
+- DO NOT add extra fabric, cloth pieces, or extensions to clothing
+- DO NOT distort the outfit silhouette or boundaries
+- Keep clothing exactly as worn in the original - same shape, folds, drape
+- ${background ? 'Replace ONLY the background as specified, keep subject and outfit completely unchanged' : 'Keep the exact same background'}
+- ${preset ? 'Apply cinematic lighting/color grading without altering clothing structure' : 'Keep the original style and pose'}
+- Preserve the exact identity, outfit, and appearance of the person
+- Output must look like a natural photograph with no AI artifacts`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
