@@ -901,7 +901,7 @@ const Index = () => {
   };
 
   const handleResetCinematic = () => {
-    setCinematicImage(null);
+    // Keep the original image so user doesn't have to re-upload
     setCinematicResult(null);
     setSelectedCinematicPreset(null);
     setSelectedCinematicBackground(null);
