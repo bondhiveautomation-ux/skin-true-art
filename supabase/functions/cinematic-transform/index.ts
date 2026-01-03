@@ -100,27 +100,19 @@ const BACKGROUND_OPTIONS: Record<string, { name: string; prompt: string }> = {
   }
 };
 
-const GLOBAL_SYSTEM_PROMPT = `CRITICAL RULES - ABSOLUTE MUST FOLLOW:
+const GLOBAL_SYSTEM_PROMPT = `You are a professional bridal photography editor. Your task is to transform photos according to the specific instructions below.
 
-IDENTITY PRESERVATION (HIGHEST PRIORITY):
-1. Preserve the EXACT identity of the person - face, makeup, skin tone, hairstyle, jewellery must remain 100% identical.
-2. NEVER rotate the image. Keep the exact same orientation as the original.
-3. Maintain exact body proportions - do not stretch, compress, or distort.
-
-CLOTHING & OUTFIT PRESERVATION (CRITICAL):
-4. The outfit/clothing must remain EXACTLY as in the original - same shape, same drape, same folds, same position.
-5. Do NOT add any extra fabric, cloth pieces, or extensions to the outfit.
-6. Do NOT remove or hide any part of the outfit.
-7. Do NOT change how the dupatta/scarf/veil is draped or positioned.
-8. Preserve the exact silhouette and boundaries of the clothing - no extra floating fabric.
-9. Every piece of clothing (blouse, lehenga, dupatta) must maintain its original form without distortion.
-10. The outfit edges must be clean and natural - no AI-generated extra pieces or artifacts.
+IDENTITY PRESERVATION (ALWAYS APPLY):
+- The person's FACE must remain 100% identical - same facial features, makeup, skin tone
+- All JEWELLERY must remain exactly the same - same pieces, same style, same placement
+- CLOTHING/OUTFIT must look the same - same colors, patterns, embroidery, fabric type
+- Natural skin texture, no plastic look, no AI artifacts
 
 QUALITY REQUIREMENTS:
-11. Photorealistic DSLR quality only. Cinematic lighting. Natural skin texture.
-12. No AI artifacts, no plastic skin, no over-smoothing, no cut-out edges, no fake blur.
-13. The output image must have the SAME orientation and aspect ratio as the input.
-14. Seamless, natural result - should look like a real photograph, not AI-generated.`;
+- Photorealistic DSLR quality output
+- Cinematic lighting appropriate to the scene
+- No AI artifacts, no cut-out edges, no fake blur
+- Seamless, natural result that looks like a real photograph`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -171,39 +163,57 @@ ${background.prompt}
 
 Ensure realistic lighting integration, natural shadows, correct perspective, and seamless blending. The subject must look naturally photographed in the new environment.`;
     } else {
-      backgroundInstructions = `
-BACKGROUND PRESERVATION:
-Preserve the original background exactly as it appears in the uploaded image. Do NOT change the background in any way.`;
+      backgroundInstructions = '';
     }
 
-    // Build cinematic style instructions
+    // Build cinematic style instructions - this is the PRIMARY transformation
     let cinematicInstructions = '';
     if (preset) {
       cinematicInstructions = `
-CINEMATIC STYLE TO APPLY: ${preset.name}
+PRIMARY TASK - CINEMATIC POSE/COMPOSITION TRANSFORMATION:
+You MUST recreate this exact person in the following new pose and composition:
 
-${preset.prompt}`;
+"${preset.name}": ${preset.prompt}
+
+IMPORTANT: This is an image-to-image transformation. Take the person from the input image and recreate them in this new pose/angle/composition. The person's face, jewellery, and outfit should look exactly the same, but the pose, camera angle, and framing should match the description above.`;
     } else {
       cinematicInstructions = `
-STYLE PRESERVATION:
-Keep the original cinematic style, pose, and framing of the photo exactly as it appears. Only apply background changes if specified above.`;
+POSE PRESERVATION:
+Keep the exact same pose, angle, and composition as the original photo.`;
+    }
+
+    // Combine instructions with clear priority
+    let taskInstructions = '';
+    if (preset && background) {
+      taskInstructions = `
+DUAL TASK - Apply BOTH transformations:
+1. FIRST: Transform the pose/composition as described in the cinematic style
+2. THEN: Place the transformed subject in the new background environment
+
+Both transformations must be applied together in the final output.`;
+    } else if (preset) {
+      taskInstructions = `
+SINGLE TASK - Cinematic Style Only:
+Transform the pose/composition as described. Keep the original background.`;
+    } else if (background) {
+      taskInstructions = `
+SINGLE TASK - Background Only:
+Keep the exact same pose. Only replace the background as described.`;
     }
 
     const fullPrompt = `${GLOBAL_SYSTEM_PROMPT}
 
-${backgroundInstructions}
+${taskInstructions}
 
 ${cinematicInstructions}
 
-FINAL CRITICAL REMINDERS:
-- DO NOT rotate the image under any circumstances
-- DO NOT add extra fabric, cloth pieces, or extensions to clothing
-- DO NOT distort the outfit silhouette or boundaries
-- Keep clothing exactly as worn in the original - same shape, folds, drape
-- ${background ? 'Replace ONLY the background as specified, keep subject and outfit completely unchanged' : 'Keep the exact same background'}
-- ${preset ? 'Apply cinematic lighting/color grading without altering clothing structure' : 'Keep the original style and pose'}
-- Preserve the exact identity, outfit, and appearance of the person
-- Output must look like a natural photograph with no AI artifacts`;
+${backgroundInstructions}
+
+QUALITY REMINDERS:
+- The person's face, makeup, and jewellery must look identical to the original
+- The outfit should appear natural in the new pose (same clothing, natural drape for the pose)
+- Photorealistic DSLR quality, no AI artifacts
+- Output should look like a real professional photograph`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
