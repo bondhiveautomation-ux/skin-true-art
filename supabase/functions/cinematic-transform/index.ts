@@ -9,52 +9,101 @@ const corsHeaders = {
 const CINEMATIC_PRESETS: Record<string, { name: string; prompt: string }> = {
   "over-shoulder": {
     name: "Over-the-Shoulder Grace",
-    prompt: `Model facing away from the camera with her body slightly turned. She gently turns her head back over her shoulder, making soft eye contact with the camera. Back of the blouse embroidery clearly visible, including tie details. Earrings and maang-tikka chain falling naturally along the face. Dupatta draped elegantly behind her. Graceful posture, calm expression. Warm cinematic lighting, soft highlights on skin and jewellery. Shallow depth of field, background softly blurred. Ultra-realistic bridal editorial photography, DSLR look.`
+    prompt: `CAMERA: Behind the subject, shooting from back at 45-degree angle.
+BODY: Subject's BACK is facing camera. Body turned away. Head rotated to look OVER LEFT SHOULDER toward camera.
+VISIBLE: Back of blouse, shoulder, profile of face, back of head, one side of face making eye contact.
+FRAMING: Upper body from waist up, emphasis on back and shoulder line.
+This is a BACK VIEW shot - the camera sees the subject from behind.`
   },
   "birds-eye": {
     name: "Bird's-Eye Bridal Symphony",
-    prompt: `Camera placed directly above the model, looking straight down. Model standing gracefully at the center, eyes lifted upward toward the camera. Lehenga spread evenly in a circular pattern around her, creating a symmetrical, elegant shape. Jewellery glowing softly under warm light. Dupatta arranged neatly around the body. Balanced composition, overhead cinematic lighting, soft shadows. Ultra-high-resolution bridal editorial photography, realistic textures, DSLR quality.`
+    prompt: `CAMERA: Directly overhead, 90-degrees above subject, shooting straight DOWN at the floor.
+BODY: Subject lying flat on floor OR standing with face tilted UP toward ceiling/camera.
+VISIBLE: Top of head, full lehenga spread in circular pattern on floor, arms extended outward.
+FRAMING: Full body visible from directly above, lehenga creates circular/symmetrical pattern.
+This is a TOP-DOWN AERIAL shot - camera is on ceiling looking down.`
   },
   "high-angle": {
     name: "High-Angle Royal Gaze",
-    prompt: `Camera positioned slightly above eye level, angled downward. Model gazing softly to the side, not directly at the camera. Upper torso and neckline visible with detailed lehenga blouse embroidery. Dupatta draped gracefully over the shoulder. Gold choker and maang-tikka catching top light. Warm vintage tones, soft shadow behind her. Cinematic, royal bridal portrait with shallow depth of field and DSLR realism.`
+    prompt: `CAMERA: Above eye level, angled 30-degrees downward toward subject.
+BODY: Subject looking to the side (NOT at camera), chin slightly lowered.
+VISIBLE: Top of head, forehead, full face from above, shoulders, upper chest, neckline jewellery prominent.
+FRAMING: Head and shoulders, shot from above making subject look elegant and demure.
+This is a HIGH ANGLE portrait - camera is higher than subject's eyes.`
   },
   "joy-closeup": {
     name: "Spontaneous Joy Close-Up",
-    prompt: `Extreme close-up portrait capturing a natural, candid smile. Slightly open lips, soft laugh lines, expressive eyes filled with warmth. Jewellery sparkling subtly in warm golden light, especially the choker and nose ring chain. Skin texture realistic with a soft cinematic glow. Very shallow depth of field, background fully blurred. Focus on eyes, smile, and facial jewellery. Luxury bridal advertisement aesthetic, ultra-realistic DSLR quality.`
+    prompt: `CAMERA: Eye level, very close to face (macro portrait distance).
+EXPRESSION: Genuine LAUGHING smile - teeth visible, eyes crinkled with joy, natural laugh.
+VISIBLE: Only face fills the frame - eyes, nose, lips, cheeks. Ears and hair partially cropped.
+FRAMING: EXTREME close-up, face fills 90% of frame, background completely blurred.
+This is a TIGHT FACE CROP with joyful expression.`
   },
   "neckline": {
     name: "Neckline Elegance Detail",
-    prompt: `Close-up shot focused on the choker necklace and neckline. Model's hand gently touching or lifting the necklace, fingers relaxed. Subtle henna or mehendi visible on fingers. Collarbone, neckline, blouse embroidery, and jewellery in frame. Warm golden highlights reflecting off the jewellery. Background softly blurred. High-detail cinematic jewellery editorial photography, realistic textures, DSLR quality.`
+    prompt: `CAMERA: Slightly below chin level, angled upward at neckline.
+BODY: One hand raised to TOUCH the necklace/choker gently with fingertips.
+VISIBLE: Chin, neck, collarbone, upper chest, choker/necklace, fingers touching jewellery, blouse neckline.
+FRAMING: Neck and chest area fills frame, face cropped at lips or nose level. Hand in frame.
+This is a NECKLINE DETAIL shot focusing on jewellery and hand.`
   },
   "eyes": {
     name: "Eyes of the Bride",
-    prompt: `Tight portrait framing focused on the eyes and upper face. Soft warm smile visible. Nose ring chain, choker, and jhumkas subtly glowing. Warm vintage lighting, shallow depth of field. Natural skin texture retained, no over-processing. Eyes in sharp focus with cinematic softness elsewhere. Luxury bridal portrait photography, ultra-realistic DSLR look.`
+    prompt: `CAMERA: Exact eye level, close portrait distance.
+EXPRESSION: Soft, gentle gaze directly at camera. Slight smile, mysterious look.
+VISIBLE: ONLY from forehead to nose/upper lip. Eyes are the focal point. Eyebrows, nose bridge visible.
+FRAMING: ULTRA TIGHT crop - only eyes and bridge of nose in sharp focus. Rest soft.
+This is an EYES-ONLY portrait - the tightest possible face crop.`
   },
   "full-frame": {
     name: "Full-Frame Royal Stance",
-    prompt: `Wide-angle full-body shot. Model standing gracefully with a relaxed posture and gentle smile. Full lehenga silhouette visible, dupatta draped naturally over the arms. Jewellery shining softly under warm cinematic lighting. Environment visible but softly blurred to keep focus on the subject. Balanced composition, elegant royal bridal editorial style. Ultra-realistic DSLR photography.`
+    prompt: `CAMERA: At waist level, wide angle lens, 3-4 meters away from subject.
+BODY: Full standing pose - feet visible, arms relaxed at sides or holding dupatta.
+VISIBLE: Entire body head to toe - full lehenga, full dupatta, all jewellery, footwear, floor.
+FRAMING: WIDE SHOT with full body centered, significant space above head and below feet.
+This is a FULL BODY portrait - the widest possible framing showing everything.`
   },
   "window-light": {
     name: "Window-Light Serenity",
-    prompt: `Model positioned near a window with soft natural light falling across her face from one side. Gentle shadows adding depth and realism. Calm, serene expression. Jewellery softly glowing in the light. Background minimal and elegant. Natural cinematic realism, fine-art bridal portrait, DSLR quality.`
+    prompt: `CAMERA: Side angle, 90-degrees to window light source.
+LIGHTING: Strong directional light from ONE SIDE creating half-lit face (split lighting).
+BODY: Face turned toward window, eyes closed or looking at window peacefully.
+VISIBLE: Half face in light, half in shadow. Dramatic light/shadow contrast.
+FRAMING: Head and shoulders, emphasis on dramatic one-sided lighting.
+This is a SPLIT-LIT portrait with strong window light from the side.`
   },
   "candid-walk": {
     name: "Candid Side Walk",
-    prompt: `Model captured mid-movement, taking a gentle step forward. Dupatta flowing subtly with motion. Looking away from the camera naturally. Movement frozen cleanly without blur. Warm indoor cinematic lighting. Realistic candid bridal moment, editorial DSLR photography.`
+    prompt: `CAMERA: Side angle, subject walking LEFT to RIGHT across frame.
+BODY: Mid-stride walking pose - one foot forward, weight shifting, arms in natural walking motion.
+VISIBLE: Full body in profile/side view. Dupatta flowing behind with movement.
+FRAMING: Full or 3/4 body, motion blur in fabric, walking direction clear.
+This is a WALKING ACTION shot captured from the side - shows movement.`
   },
   "floor-seated": {
     name: "Floor-Seated Royal Pose",
-    prompt: `Model seated gracefully on the floor with lehenga arranged neatly around her. Hands resting softly. Calm, composed expression. Camera slightly above eye level. Warm ambient lighting, royal indoor mood. Cinematic bridal storytelling frame, ultra-realistic DSLR quality.`
+    prompt: `CAMERA: Slightly above subject (who is on floor), angled down.
+BODY: SITTING on floor - legs folded or extended, lehenga spread around on floor.
+VISIBLE: Subject seated on ground, lehenga fabric arranged on floor, hands in lap or on floor.
+FRAMING: Full seated figure with lehenga spread visible on floor around subject.
+This is a SEATED ON FLOOR pose - subject is sitting down, not standing.`
   },
   "jewellery-glow": {
     name: "Jewellery Glow Portrait",
-    prompt: `Mid-close portrait balancing face and the EXISTING jewellery equally. Enhance the glow/shine of the jewellery that is already present in the input photo (lighting + reflections only).
-DO NOT add any new jewellery pieces. Do not add extra chains, earrings, bangles, rings, headpieces, or nose ring chains. Do not change the jewellery design or placement. Premium bridal advertisement aesthetic. Cinematic lighting, shallow depth of field, DSLR realism.`
+    prompt: `CAMERA: Eye level, standard portrait distance.
+LIGHTING: Enhance golden glow and reflections on ALL EXISTING jewellery pieces only.
+BODY: Natural standing pose, same as input photo.
+VISIBLE: Face and upper body with jewellery catching beautiful light reflections.
+FRAMING: Head to chest, jewellery prominently lit.
+CRITICAL: DO NOT add any new jewellery. Only enhance lighting on existing pieces. Same pose as input.`
   },
   "mirror": {
     name: "Mirror Reflection Elegance",
-    prompt: `Artistic composition using a mirror reflection. Model partially visible through the mirror, face softly framed. Warm cinematic lighting, shallow depth of field. Elegant, storytelling bridal editorial style. Ultra-realistic textures, DSLR quality.`
+    prompt: `COMPOSITION: A decorative mirror is visible in the scene. Subject's REFLECTION appears in the mirror.
+CAMERA: Angled to capture both the real subject AND their mirror reflection simultaneously.
+VISIBLE: Part of subject's back/side + their face visible IN THE MIRROR reflection.
+FRAMING: Artistic split composition - real subject on one side, mirror with reflection on other.
+This requires adding a MIRROR element to the scene showing the subject's reflection.`
   }
 };
 
