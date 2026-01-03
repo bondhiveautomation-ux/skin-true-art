@@ -49,7 +49,8 @@ const CINEMATIC_PRESETS: Record<string, { name: string; prompt: string }> = {
   },
   "jewellery-glow": {
     name: "Jewellery Glow Portrait",
-    prompt: `Mid-close portrait balancing face and jewellery equally. Lighting designed to enhance gold textures without overpowering skin tones. Neutral elegant pose. Premium bridal advertisement aesthetic. Cinematic lighting, shallow depth of field, DSLR realism.`
+    prompt: `Mid-close portrait balancing face and the EXISTING jewellery equally. Enhance the glow/shine of the jewellery that is already present in the input photo (lighting + reflections only).
+DO NOT add any new jewellery pieces. Do not add extra chains, earrings, bangles, rings, headpieces, or nose ring chains. Do not change the jewellery design or placement. Premium bridal advertisement aesthetic. Cinematic lighting, shallow depth of field, DSLR realism.`
   },
   "mirror": {
     name: "Mirror Reflection Elegance",
@@ -100,19 +101,24 @@ const BACKGROUND_OPTIONS: Record<string, { name: string; prompt: string }> = {
   }
 };
 
-const GLOBAL_SYSTEM_PROMPT = `You are a professional bridal photography editor. Your task is to transform photos according to the specific instructions below.
+const GLOBAL_SYSTEM_PROMPT = `You are a professional bridal photography editor. Your task is to transform the provided photo according to the instructions below.
 
-IDENTITY PRESERVATION (ALWAYS APPLY):
-- The person's FACE must remain 100% identical - same facial features, makeup, skin tone
-- All JEWELLERY must remain exactly the same - same pieces, same style, same placement
-- CLOTHING/OUTFIT must look the same - same colors, patterns, embroidery, fabric type
-- Natural skin texture, no plastic look, no AI artifacts
+LOCKED ELEMENTS (MUST NEVER CHANGE):
+- Face identity: EXACT same person, same facial structure, same makeup style/shape, same skin tone.
+- Jewellery: EXACT same jewellery pieces as the input. Same number of items, same design, same stones/metal style, same size, same placement.
+  - DO NOT add new jewellery.
+  - DO NOT remove jewellery.
+  - DO NOT replace jewellery with different designs.
+  - DO NOT "invent" extra chains, extra earrings, extra nose ring chains, extra bangles, extra headpieces, etc.
+- Clothing/outfit: must remain the same outfit (same color, embroidery/patterns, fabric type). Do not introduce new clothing pieces.
 
 QUALITY REQUIREMENTS:
 - Photorealistic DSLR quality output
 - Cinematic lighting appropriate to the scene
+- Natural skin texture (no plastic look)
 - No AI artifacts, no cut-out edges, no fake blur
 - Seamless, natural result that looks like a real photograph`;
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
