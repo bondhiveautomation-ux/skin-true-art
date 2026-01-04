@@ -125,6 +125,8 @@ export const useAuth = () => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setIsBlocked(false);
+    // Redirect to homepage after logout
+    window.location.href = "/";
   };
 
   return {
