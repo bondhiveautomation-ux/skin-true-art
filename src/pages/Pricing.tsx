@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Diamond, Zap, Crown, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Check, MessageCircle, Send, Clock, CheckCircle, XCircle, Diamond, Zap, Crown, Sparkles, Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { FEATURE_CATEGORIES } from "@/lib/gemCosts";
 
@@ -60,6 +60,9 @@ const Pricing = () => {
   const { packages, loading: pricingLoading } = usePricingConfig();
   const [selectedPackage, setSelectedPackage] = useState<{ name: string; gems: number; price: number } | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const [showEnterpriseChat, setShowEnterpriseChat] = useState(false);
+  const [enterpriseMessage, setEnterpriseMessage] = useState("");
+  const [sendingEnterprise, setSendingEnterprise] = useState(false);
   const [txid, setTxid] = useState("");
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
@@ -71,9 +74,9 @@ const Pricing = () => {
 
   // Split packages into subscriptions and top-ups
   const subscriptions = packages.filter(p => 
-    p.package_key.includes('day') || p.package_key.includes('monthly') || p.package_key.includes('weekly')
+    p.package_key.includes('trial') || p.package_key.includes('starter') || p.package_key.includes('weekly') || p.package_key.includes('monthly')
   );
-  const topups = packages.filter(p => p.package_key.includes('topup'));
+  const topups = packages.filter(p => p.package_key.includes('topup') || p.package_key === 'studio');
 
   useEffect(() => {
     if (user) fetchUserRequests();
@@ -184,6 +187,33 @@ const Pricing = () => {
     }
   };
 
+  const handleEnterpriseSubmit = async () => {
+    if (!user || !enterpriseMessage.trim()) {
+      toast.error("Please enter your requirements");
+      return;
+    }
+    setSendingEnterprise(true);
+    try {
+      const { error } = await supabase
+        .from("admin_messages")
+        .insert({
+          user_id: user.id,
+          sender_id: user.id,
+          is_from_admin: false,
+          message: `🏢 ENTERPRISE INQUIRY\n\n${enterpriseMessage.trim()}\n\nFrom: ${user.email}`
+        });
+      if (error) throw error;
+      setEnterpriseMessage("");
+      setShowEnterpriseChat(false);
+      toast.success("Enterprise inquiry sent! We'll get back to you soon.");
+    } catch (error) {
+      console.error("Error sending enterprise inquiry:", error);
+      toast.error("Failed to send inquiry. Please try again.");
+    } finally {
+      setSendingEnterprise(false);
+    }
+  };
+
   const getStatusBadge = (status: PaymentStatus) => {
     switch (status) {
       case "pending": return <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
@@ -269,29 +299,63 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Top-ups */}
         <h2 className="font-serif text-2xl text-cream mb-6">Manual Power-Ups</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {topups.map((pkg, idx) => (
-            <Card key={pkg.id} className="relative overflow-hidden transition-all duration-300 rounded-2xl hover:border-purple-500/30">
-              {idx === 1 && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-purple-500/80 text-white font-bold px-3 py-1 text-xs">POPULAR</Badge></div>}
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-serif text-xl text-cream">{pkg.package_name}</h3>
+        {pricingLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+        ) : topups.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+            {topups.map((pkg) => (
+              <Card key={pkg.id} className="relative overflow-hidden transition-all duration-300 rounded-2xl hover:border-purple-500/30">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-serif text-lg sm:text-xl text-cream">{pkg.package_name}</h3>
+                    <Diamond className="w-5 h-5 text-purple-400" />
                   </div>
-                  <div className="text-right">
-                    <span className="text-3xl font-bold text-purple-400">৳{pkg.price_bdt}</span>
-                    <p className="text-cream/60 text-sm flex items-center gap-1 justify-end"><Diamond className="w-3 h-3" />{pkg.gems} Gems</p>
+                  <div className="mb-4">
+                    <span className="text-2xl sm:text-3xl font-bold text-purple-400">৳{pkg.price_bdt}</span>
+                    <p className="text-cream/60 text-sm flex items-center gap-1 mt-1"><Diamond className="w-3 h-3" />{pkg.gems} Gems</p>
                   </div>
+                  <Button onClick={() => handlePackageSelect({ name: pkg.package_name, gems: pkg.gems, price: pkg.price_bdt })} variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
+                    <Sparkles className="w-4 h-4 mr-2" />Top-up Now
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <p className="text-cream/50 text-center py-6 mb-8">No top-up packages available at the moment.</p>
+        )}
+
+        {/* Enterprise Option */}
+        <Card className="mb-12 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30 rounded-2xl overflow-hidden">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-purple-500/20">
+                  <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
                 </div>
-                <Button onClick={() => handlePackageSelect({ name: pkg.package_name, gems: pkg.gems, price: pkg.price_bdt })} variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
-                  <Sparkles className="w-4 h-4 mr-2" />Top-up Now
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <div>
+                  <h3 className="font-serif text-xl sm:text-2xl text-cream mb-1">Enterprise Plan</h3>
+                  <p className="text-cream/60 text-sm sm:text-base">Need a custom package for your agency or studio? Let's talk!</p>
+                  <p className="text-purple-400/80 text-xs sm:text-sm mt-2">✓ Custom gem volumes  ✓ Priority support  ✓ Bulk discounts</p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => {
+                  if (!user) {
+                    toast.error("Please sign in first");
+                    navigate("/auth");
+                    return;
+                  }
+                  setShowEnterpriseChat(true);
+                }} 
+                className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />Contact Us
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* User Requests */}
         {user && userRequests.length > 0 && (
@@ -359,6 +423,49 @@ const Pricing = () => {
               ) : (
                 <Button onClick={handleSendMessage} disabled={sendingMessage || !txid.trim()} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">{sendingMessage ? "Submitting..." : "Submit Payment Request"}</Button>
               )}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Enterprise Modal */}
+      {showEnterpriseChat && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <Card className="w-full sm:max-w-lg flex flex-col rounded-t-2xl sm:rounded-2xl">
+            <CardHeader className="border-b border-purple-500/10 flex-shrink-0 p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-purple-500/20">
+                    <Building2 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <CardTitle className="text-cream font-serif text-base sm:text-lg">Enterprise Inquiry</CardTitle>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowEnterpriseChat(false)} className="text-cream/60 hover:text-cream h-10 w-10 flex-shrink-0">×</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-4">
+              <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                <p className="text-cream/80 text-sm">Tell us about your needs - how many gems you need monthly, your team size, or any custom requirements. We'll get back to you with a tailored offer!</p>
+              </div>
+              <div>
+                <Label className="text-cream/70 mb-2 block">Your Requirements</Label>
+                <Textarea 
+                  value={enterpriseMessage} 
+                  onChange={(e) => setEnterpriseMessage(e.target.value)} 
+                  placeholder="e.g., I need around 10,000 gems per month for my fashion studio. We have a team of 5 people..."
+                  rows={5} 
+                  className="resize-none"
+                />
+              </div>
+            </CardContent>
+            <div className="border-t border-purple-500/10 p-4 sm:p-6">
+              <Button 
+                onClick={handleEnterpriseSubmit} 
+                disabled={sendingEnterprise || !enterpriseMessage.trim()} 
+                className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              >
+                {sendingEnterprise ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : <><Send className="w-4 h-4 mr-2" />Send Inquiry</>}
+              </Button>
             </div>
           </Card>
         </div>
