@@ -28,7 +28,7 @@ import { ProcessingModal } from "@/components/gems/ProcessingModal";
 import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
 import { getGemCost } from "@/lib/gemCosts";
 
-const Index = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { gems, deductGems, hasEnoughGems, refetchGems } = useGems();
@@ -1891,4 +1891,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Dashboard;
