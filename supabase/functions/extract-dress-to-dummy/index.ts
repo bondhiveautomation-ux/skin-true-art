@@ -52,7 +52,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, userId } = await req.json();
+    const { image, userId, dummyStyle = "standard" } = await req.json();
 
     if (!image) {
       return new Response(
@@ -75,7 +75,46 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log("Processing dress extraction, userId:", userId || "not provided");
+    console.log("Processing dress extraction, userId:", userId || "not provided", "style:", dummyStyle);
+
+    // Define mannequin and background styles
+    const DUMMY_STYLES: Record<string, { mannequin: string; background: string }> = {
+      "standard": {
+        mannequin: `Use a simple, minimal, professional mannequin/dummy:
+   - No facial features, no hair, no skin details
+   - Clean white or grey mannequin body
+   - Position the dress naturally on the mannequin as it would appear in a catalog`,
+        background: `Use a clean, professional studio background (light grey or white)`
+      },
+      "premium-wood": {
+        mannequin: `Use a premium, elegant mannequin/dummy:
+   - High-end boutique-style mannequin with a sophisticated matte finish
+   - Warm beige or champagne-toned mannequin body
+   - Elegant posture, professional catalog positioning
+   - No facial features, no hair, no skin details`,
+        background: `Use a warm, premium wooden background:
+   - Rich dark wood paneling or warm walnut wood backdrop
+   - Subtle wood grain texture visible
+   - Professional boutique or showroom ambiance
+   - Soft, warm lighting that complements the wood tones
+   - Keep the background realistic and not overly stylized`
+      },
+      "luxury-marble": {
+        mannequin: `Use a luxury, high-fashion mannequin/dummy:
+   - Sleek, modern mannequin with a polished, glossy finish
+   - Pure white or soft pearl-toned mannequin body
+   - Graceful, editorial-style posture
+   - No facial features, no hair, no skin details`,
+        background: `Use a luxurious marble background:
+   - Elegant white or cream marble with subtle grey veining
+   - Clean, high-end jewelry store or fashion boutique aesthetic
+   - Soft, diffused lighting creating a premium look
+   - Polished, reflective floor surface for added luxury feel
+   - Keep it realistic and tasteful, not gaudy`
+      }
+    };
+
+    const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
 
     const systemPrompt = `You are an expert clothing extraction and mannequin placement AI. Your task is to:
 
@@ -92,12 +131,10 @@ serve(async (req) => {
    - Same fabric texture and material appearance
    - Same folds, draping, and structure
    - Same embellishments that are part of the clothing (embroidery, sequins on fabric)
-4. PLACE ON NEUTRAL MANNEQUIN:
-   - Use a simple, minimal, professional mannequin/dummy
-   - No facial features, no hair, no skin details
-   - Clean white or grey mannequin body
-   - Position the dress naturally on the mannequin as it would appear in a catalog
-5. BACKGROUND: Use a clean, professional studio background (light grey or white)
+4. PLACE ON MANNEQUIN:
+${selectedStyle.mannequin}
+5. BACKGROUND: 
+${selectedStyle.background}
 6. OUTPUT QUALITY: Generate a high-resolution, catalog-ready image
 
 CRITICAL RULES:
