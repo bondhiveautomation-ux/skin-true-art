@@ -973,9 +973,9 @@ const Index = () => {
         subtitle="Image Generator"
         description="Generate new images while keeping the exact same face and identity"
       >
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Character Upload */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
             <ImageUploader
               id="character-upload"
               image={characterImage}
@@ -1013,7 +1013,7 @@ const Index = () => {
           {characterImage && (
             <>
               {/* Product upload */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                 <ImageUploader
                   id="product-upload"
                   image={productImage}
@@ -1024,8 +1024,8 @@ const Index = () => {
                 />
                 
                 {productImage && (
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-foreground">Styling Preset</label>
+                  <div className="space-y-2 sm:space-y-3">
+                    <label className="block text-xs sm:text-sm font-medium text-foreground">Styling Preset</label>
                     <SelectionGrid
                       options={presetOptions}
                       selectedId={selectedPreset}
@@ -1039,7 +1039,7 @@ const Index = () => {
               </div>
 
               {/* Background */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                 <ImageUploader
                   id="background-upload"
                   image={backgroundImage}
@@ -1050,8 +1050,8 @@ const Index = () => {
                 />
                 
                 {backgroundImage && (
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-foreground">Character Pose</label>
+                  <div className="space-y-2 sm:space-y-3">
+                    <label className="block text-xs sm:text-sm font-medium text-foreground">Character Pose</label>
                     <SelectionGrid
                       options={poseOptions}
                       selectedId={selectedPose}
@@ -1066,13 +1066,13 @@ const Index = () => {
 
               {/* Prompt input */}
               {!productImage && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground">Scenario Prompt</label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <label className="block text-xs sm:text-sm font-medium text-foreground">Scenario Prompt</label>
                   <Textarea
                     value={generationPrompt}
                     onChange={(e) => setGenerationPrompt(e.target.value)}
-                    placeholder="Describe the scenario you want to generate..."
-                    className="min-h-[80px] bg-secondary/30 border-border/50"
+                    placeholder="Describe the scenario..."
+                    className="min-h-[70px] sm:min-h-[80px] bg-secondary/30 border-border/50 text-sm"
                   />
                 </div>
               )}

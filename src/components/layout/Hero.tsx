@@ -94,7 +94,7 @@ export const Hero = ({ onExplore }: HeroProps) => {
   const trustText = content.trust_text || "Trusted by creators & brands worldwide";
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 px-4 sm:px-6">
+    <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-20 pb-8 px-4 sm:px-6">
       {/* Dark cinematic background */}
       <div className="absolute inset-0">
         {/* Deep dark gradient base */}
@@ -120,42 +120,42 @@ export const Hero = ({ onExplore }: HeroProps) => {
         </div>
 
         {/* Main headline - Editorial Serif */}
-        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-semibold text-cream leading-[1.1] sm:leading-[1.05] tracking-tight mb-6 sm:mb-8 section-animate delay-1">
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-cream leading-[1.15] sm:leading-[1.1] tracking-tight mb-5 sm:mb-8 section-animate delay-1 px-2">
           {headline1}
           <br />
           <span className="gradient-text">{headline2}</span>
         </h1>
 
         {/* Sub-headline */}
-        <p className="text-base sm:text-lg md:text-xl text-cream/60 max-w-2xl mx-auto mb-10 sm:mb-14 leading-relaxed section-animate delay-2 font-light px-2">
+        <p className="text-sm sm:text-base md:text-lg text-cream/60 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed section-animate delay-2 font-light px-4">
           {subheadline}
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 section-animate delay-3">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 section-animate delay-3 px-4 w-full max-w-md sm:max-w-none mx-auto">
           <Button 
             onClick={onExplore}
             variant="gold"
-            size="xl"
-            className="w-full sm:w-auto min-w-[200px] sm:min-w-[220px] btn-glow h-12 sm:h-14"
+            size="lg"
+            className="w-full sm:w-auto sm:min-w-[200px] btn-glow h-11 sm:h-12"
           >
             {ctaPrimary}
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             onClick={onExplore}
             variant="luxury"
-            size="xl"
-            className="w-full sm:w-auto min-w-[200px] sm:min-w-[220px] h-12 sm:h-14"
+            size="lg"
+            className="w-full sm:w-auto sm:min-w-[200px] h-11 sm:h-12"
           >
             {ctaSecondary}
           </Button>
         </div>
 
         {/* Trust indicator */}
-        <div className="mt-16 sm:mt-24 section-animate delay-4">
-          <div className="luxury-divider max-w-xs mx-auto mb-6" />
-          <p className="text-xs sm:text-sm text-cream/40 tracking-widest uppercase font-light">
+        <div className="mt-10 sm:mt-16 section-animate delay-4">
+          <div className="luxury-divider max-w-[200px] sm:max-w-xs mx-auto mb-4 sm:mb-6" />
+          <p className="text-[10px] sm:text-xs text-cream/40 tracking-widest uppercase font-light px-4">
             {trustText}
           </p>
         </div>

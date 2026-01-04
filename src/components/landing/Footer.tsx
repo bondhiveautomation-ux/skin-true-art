@@ -14,47 +14,47 @@ export const Footer = () => {
   const linkContact = content.link_contact || "Contact";
 
   return (
-    <footer className="py-12 sm:py-20 border-t border-gold/10 bg-charcoal-deep relative overflow-hidden">
+    <footer className="py-10 sm:py-16 border-t border-gold/10 bg-charcoal-deep relative overflow-hidden">
       {/* Subtle gradient */}
       <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-gradient-to-b from-gold/5 to-transparent blur-3xl" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-8 sm:gap-10 md:flex-row md:justify-between">
+        <div className="flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:justify-between">
           {/* Brand */}
           <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg gold-icon flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold" />
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-2 sm:mb-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg gold-icon flex items-center justify-center">
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold" />
               </div>
-              <span className="font-serif text-xl sm:text-2xl font-semibold text-cream">
+              <span className="font-serif text-lg sm:text-xl font-semibold text-cream">
                 {brandName}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-cream/40 font-light tracking-wide">
+            <p className="text-[11px] sm:text-xs text-cream/40 font-light">
               {tagline}
             </p>
           </div>
 
           {/* Links */}
-          <div className="flex items-center gap-6 sm:gap-10 text-sm">
-            <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 tracking-wide uppercase text-xs font-medium py-2">
+          <div className="flex items-center gap-5 sm:gap-8">
+            <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 uppercase text-[10px] sm:text-xs font-medium py-2 px-1">
               {linkPrivacy}
             </a>
-            <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 tracking-wide uppercase text-xs font-medium py-2">
+            <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 uppercase text-[10px] sm:text-xs font-medium py-2 px-1">
               {linkTerms}
             </a>
-            <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 tracking-wide uppercase text-xs font-medium py-2">
+            <a href="#" className="text-cream/40 hover:text-gold transition-colors duration-300 uppercase text-[10px] sm:text-xs font-medium py-2 px-1">
               {linkContact}
             </a>
           </div>
         </div>
 
         {/* Luxury divider */}
-        <div className="luxury-divider my-8 sm:my-12" />
+        <div className="luxury-divider my-6 sm:my-10" />
 
         {/* Copyright */}
         <div className="text-center">
-          <p className="text-[10px] sm:text-xs text-cream/25 tracking-widest uppercase font-light px-4">
+          <p className="text-[9px] sm:text-[10px] text-cream/25 tracking-wider uppercase font-light px-2">
             {copyright}
           </p>
         </div>
