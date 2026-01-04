@@ -160,6 +160,105 @@ export type Database = {
         }
         Relationships: []
       }
+      classes: {
+        Row: {
+          badge_text: string
+          bkash_number: string | null
+          color_theme: string
+          created_at: string
+          cta_link: string | null
+          cta_text: string
+          cta_type: string
+          days_online: string
+          display_order: number
+          duration_text: string
+          features: Json
+          hours: string
+          icon_type: string
+          id: string
+          is_active: boolean
+          is_popular: boolean
+          price: number
+          price_label: string
+          support_text: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge_text?: string
+          bkash_number?: string | null
+          color_theme?: string
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string
+          cta_type?: string
+          days_online?: string
+          display_order?: number
+          duration_text?: string
+          features?: Json
+          hours?: string
+          icon_type?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          price?: number
+          price_label?: string
+          support_text?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          badge_text?: string
+          bkash_number?: string | null
+          color_theme?: string
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string
+          cta_type?: string
+          days_online?: string
+          display_order?: number
+          duration_text?: string
+          features?: Json
+          hours?: string
+          icon_type?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          price?: number
+          price_label?: string
+          support_text?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      classes_page_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          setting_key: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dress_library: {
         Row: {
           category: string
