@@ -16,7 +16,9 @@ import {
   MessageCircle,
   Target,
   Zap,
-  Loader2
+  Loader2,
+  Facebook,
+  Share2
 } from "lucide-react";
 
 const WHATSAPP_NUMBER = "8801234567890"; // Replace with actual WhatsApp number
@@ -182,19 +184,43 @@ const Info = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {articles.map((article) => {
                 const IconComponent = getIconComponent(article.icon);
+                const shareUrl = `${window.location.origin}/info?article=${article.id}`;
+                const shareText = encodeURIComponent(`${article.title} - ${article.excerpt}`);
+                
+                const handleFacebookShare = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  window.open(
+                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${shareText}`,
+                    '_blank',
+                    'width=600,height=400'
+                  );
+                };
+                
                 return (
                   <article
                     key={article.id}
-                    className="group p-6 sm:p-8 rounded-2xl bg-card/30 border border-gold/10 backdrop-blur-sm hover:border-gold/25 transition-all duration-500 cursor-pointer"
+                    className="group p-6 sm:p-8 rounded-2xl bg-card/30 border border-gold/10 backdrop-blur-sm hover:border-gold/25 transition-all duration-500"
                   >
-                    {/* Category & Read Time */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="px-3 py-1 text-[10px] font-semibold text-gold uppercase tracking-wider bg-gold/10 rounded-full">
-                        {article.category}
-                      </span>
-                      <span className="text-xs text-cream/40">
-                        {article.read_time}
-                      </span>
+                    {/* Category, Read Time & Share */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 text-[10px] font-semibold text-gold uppercase tracking-wider bg-gold/10 rounded-full">
+                          {article.category}
+                        </span>
+                        <span className="text-xs text-cream/40">
+                          {article.read_time}
+                        </span>
+                      </div>
+                      
+                      {/* Share Button */}
+                      <button
+                        onClick={handleFacebookShare}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1877F2]/10 hover:bg-[#1877F2]/20 border border-[#1877F2]/20 hover:border-[#1877F2]/40 transition-all duration-300 group/share"
+                        title="Share on Facebook"
+                      >
+                        <Facebook className="w-3.5 h-3.5 text-[#1877F2]" />
+                        <span className="text-[10px] font-medium text-[#1877F2] uppercase tracking-wide">Share</span>
+                      </button>
                     </div>
 
                     {/* Icon & Title */}
@@ -213,7 +239,7 @@ const Info = () => {
                     </p>
 
                     {/* Read More */}
-                    <div className="flex items-center gap-2 text-gold/70 group-hover:text-gold transition-colors duration-300">
+                    <div className="flex items-center gap-2 text-gold/70 group-hover:text-gold transition-colors duration-300 cursor-pointer">
                       <span className="text-xs font-semibold uppercase tracking-wider">Read More</span>
                       <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
