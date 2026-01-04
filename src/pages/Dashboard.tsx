@@ -128,6 +128,14 @@ const Dashboard = () => {
   const [isChangingDress, setIsChangingDress] = useState(false);
   const [dressSearchQuery, setDressSearchQuery] = useState("");
 
+  // Videography Studio states
+  const [videoImage, setVideoImage] = useState<string | null>(null);
+  const [selectedVideoPreset, setSelectedVideoPreset] = useState<string>("elegant");
+  const [videoCustomPrompt, setVideoCustomPrompt] = useState("");
+  const [videoResult, setVideoResult] = useState<string | null>(null);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [videoProgress, setVideoProgress] = useState<string>("");
+
   // Scroll to section handler
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -906,6 +914,141 @@ const Dashboard = () => {
     setCinematicResult(null);
     setSelectedCinematicPreset(null);
     setSelectedCinematicBackground(null);
+  };
+
+  // ==================== VIDEOGRAPHY STUDIO ====================
+  const VIDEO_PRESETS = [
+    { id: "elegant", name: "Elegant", emoji: "✨", description: "Premium, calm, elegant mood" },
+    { id: "luxury-fashion", name: "Luxury Fashion", emoji: "👗", description: "High-end fashion campaign" },
+    { id: "soft-glam-beauty", name: "Soft Glam Beauty", emoji: "💄", description: "Beauty studio aesthetic" },
+    { id: "cinematic-portrait", name: "Cinematic Portrait", emoji: "🎬", description: "Film-like atmosphere" },
+    { id: "studio-commercial", name: "Studio Commercial", emoji: "📸", description: "Brand advertising ready" },
+    { id: "modern-influencer", name: "Modern Influencer", emoji: "📱", description: "Social-media ready" },
+    { id: "bridal-premium", name: "Bridal / Premium", emoji: "👰", description: "Romantic bridal aesthetic" },
+    { id: "editorial-fashion", name: "Editorial Fashion", emoji: "📰", description: "Magazine shoot style" },
+    { id: "minimal-luxury", name: "Minimal Luxury", emoji: "🤍", description: "Understated elegance" },
+    { id: "cinematic-glow", name: "Cinematic Glow", emoji: "🌟", description: "Soft luminous lighting" },
+  ];
+
+  const handleVideoImageUpload = createImageUploadHandler(setVideoImage, [
+    () => setVideoResult(null),
+    () => setVideoProgress(""),
+  ]);
+
+  const pollVideoStatus = async (predictionId: string): Promise<string | null> => {
+    const maxAttempts = 120; // 10 minutes max (5s intervals)
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
+      
+      try {
+        const { data, error } = await supabase.functions.invoke("generate-video", {
+          body: { predictionId },
+        });
+        
+        if (error) throw error;
+        
+        if (data.status === "succeeded") {
+          // Luma returns video URL in output
+          return data.output || null;
+        } else if (data.status === "failed" || data.status === "canceled") {
+          throw new Error(data.error || "Video generation failed");
+        }
+        
+        // Update progress message
+        setVideoProgress(`Processing... (${Math.min(attempts * 5, 95)}%)`);
+      } catch (error) {
+        console.error("Polling error:", error);
+        throw error;
+      }
+    }
+    
+    throw new Error("Video generation timed out");
+  };
+
+  const handleGenerateVideo = async () => {
+    if (!videoImage) {
+      toast({ title: "No image", description: "Please upload a photo first", variant: "destructive" });
+      return;
+    }
+    if (!hasEnoughGems("generate-video")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("generate-video")} gems for video generation`, variant: "destructive" });
+      return;
+    }
+    
+    const gemResult = await deductGems("generate-video");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+    
+    setIsGeneratingVideo(true);
+    setVideoResult(null);
+    setVideoProgress("Starting video generation...");
+    
+    try {
+      // Convert base64 to URL if needed (Replicate requires URLs)
+      let imageUrl = videoImage;
+      if (videoImage.startsWith("data:")) {
+        // Upload to temporary storage or use as-is if Replicate accepts base64
+        // For now, we'll pass it directly - the edge function can handle conversion
+        imageUrl = videoImage;
+      }
+      
+      const { data, error } = await supabase.functions.invoke("generate-video", {
+        body: { 
+          imageUrl: imageUrl,
+          preset: selectedVideoPreset,
+          customPrompt: videoCustomPrompt.trim() || null,
+        },
+      });
+      
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Generation Failed", description: data.error, variant: "destructive" });
+        return;
+      }
+      
+      // Start polling for result
+      setVideoProgress("Video is being generated... This may take 2-3 minutes.");
+      
+      if (data.id) {
+        const videoUrl = await pollVideoStatus(data.id);
+        if (videoUrl) {
+          setVideoResult(videoUrl);
+          await logGeneration("Videography Studio", [], [videoUrl]);
+          toast({ title: "Video Generated!", description: "Your cinematic video is ready" });
+        }
+      } else if (data.output) {
+        // Direct result
+        setVideoResult(data.output);
+        await logGeneration("Videography Studio", [], [data.output]);
+        toast({ title: "Video Generated!", description: "Your cinematic video is ready" });
+      }
+    } catch (error: any) {
+      toast({ title: "Generation Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsGeneratingVideo(false);
+      setVideoProgress("");
+    }
+  };
+
+  const handleDownloadVideo = () => {
+    if (!videoResult) return;
+    const link = document.createElement("a");
+    link.href = videoResult;
+    link.download = `videography-${selectedVideoPreset}-${Date.now()}.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleResetVideo = () => {
+    setVideoResult(null);
+    setVideoCustomPrompt("");
+    setSelectedVideoPreset("elegant");
   };
 
   // Preset options
@@ -1878,6 +2021,138 @@ const Dashboard = () => {
               isProcessing={isTransformingCinematic}
               resetLabel="Try Another Style"
             />
+          )}
+        </div>
+      </ToolSection>
+
+      {/* Videography Studio Section */}
+      <ToolSection
+        id="videography-studio"
+        title="AI Videography"
+        subtitle="Studio"
+        description="Transform your photos into ultra-realistic 5-second cinematic videos"
+      >
+        <div className="space-y-4 sm:space-y-6">
+          {/* Image Upload */}
+          <div className="max-w-md mx-auto">
+            <ImageUploader
+              id="video-image-upload"
+              image={videoImage}
+              onUpload={handleVideoImageUpload}
+              onRemove={() => { setVideoImage(null); setVideoResult(null); }}
+              label="Upload Photo"
+              description="Photo of person / influencer"
+              aspectRatio="portrait"
+            />
+          </div>
+
+          {videoImage && !videoResult && (
+            <div className="space-y-6">
+              {/* Preset Selection */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-foreground text-center">
+                  Select Video Style
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {VIDEO_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => setSelectedVideoPreset(preset.id)}
+                      disabled={isGeneratingVideo}
+                      className={`relative rounded-xl border text-left transition-all duration-300 p-4 ${
+                        selectedVideoPreset === preset.id
+                          ? "border-gold/50 bg-gold/10 text-cream shadow-gold"
+                          : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30 hover:bg-charcoal"
+                      } ${isGeneratingVideo ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <span className="text-2xl">{preset.emoji}</span>
+                        <div>
+                          <p className="text-xs font-medium leading-tight">{preset.name}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">{preset.description}</p>
+                        </div>
+                      </div>
+                      {selectedVideoPreset === preset.id && (
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Prompt */}
+              <div className="max-w-2xl mx-auto space-y-2">
+                <label className="block text-sm font-medium text-foreground text-center">
+                  Custom Prompt (Optional)
+                </label>
+                <Textarea
+                  value={videoCustomPrompt}
+                  onChange={(e) => setVideoCustomPrompt(e.target.value)}
+                  placeholder="Add any additional details... (e.g., 'soft wind in hair', 'gentle smile')"
+                  className="min-h-[80px] bg-secondary/30 border-border/50 text-sm"
+                  disabled={isGeneratingVideo}
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  Your custom prompt will be combined with the selected style while maintaining realism
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Generate Button */}
+          {videoImage && !videoResult && (
+            <div className="flex flex-col items-center gap-2">
+              <LoadingButton
+                onClick={handleGenerateVideo}
+                isLoading={isGeneratingVideo}
+                loadingText={videoProgress || "Generating..."}
+                disabled={!videoImage || !selectedVideoPreset}
+                size="lg"
+                className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate Video
+              </LoadingButton>
+              <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+                <Diamond className="w-3.5 h-3.5 text-purple-400" />
+                <span>Costs {getGemCost("generate-video")} gems</span>
+              </div>
+              {isGeneratingVideo && (
+                <p className="text-xs text-muted-foreground mt-2 text-center max-w-md">
+                  Video generation takes 2-3 minutes. Please wait while we create your cinematic video.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Video Result */}
+          {videoResult && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-center">Your Cinematic Video</h3>
+              <div className="max-w-lg mx-auto rounded-xl overflow-hidden border border-gold/20">
+                <video 
+                  src={videoResult} 
+                  controls 
+                  autoPlay 
+                  loop 
+                  muted
+                  className="w-full aspect-[9/16] object-cover bg-charcoal"
+                />
+              </div>
+              <div className="flex justify-center gap-3 flex-wrap">
+                <Button onClick={handleDownloadVideo} variant="outline" size="lg">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Video
+                </Button>
+                <Button onClick={handleGenerateVideo} variant="outline" size="lg" disabled={isGeneratingVideo}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Regenerate
+                </Button>
+                <Button onClick={handleResetVideo} variant="ghost" size="lg">
+                  Start Over
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </ToolSection>
