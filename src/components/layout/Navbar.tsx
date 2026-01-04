@@ -62,22 +62,22 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18 lg:h-22 py-3 sm:py-4">
+          <div className="flex items-center justify-between h-16 sm:h-18 lg:h-22 py-3 sm:py-4 gap-4">
             {/* Logo - Fashion Serif */}
             <button 
               onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-2 sm:gap-3 group"
+              className="flex items-center gap-2 sm:gap-3 group shrink-0"
             >
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg gold-icon flex items-center justify-center group-hover:animate-pulse-glow transition-all duration-300">
                 <Sparkles className="w-4 h-4 text-gold" />
               </div>
-              <span className="font-serif text-lg sm:text-xl lg:text-2xl font-semibold text-cream tracking-tight group-hover:text-gold transition-colors duration-300">
+              <span className="font-serif text-lg sm:text-xl lg:text-2xl font-semibold text-cream tracking-tight group-hover:text-gold transition-colors duration-300 whitespace-nowrap">
                 {brandName}
               </span>
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
+            <nav className="hidden lg:flex items-center gap-3 xl:gap-5 shrink-0">
               <button 
                 onClick={() => onNavigate("features")}
                 className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
