@@ -241,57 +241,57 @@ const Pricing = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
         {/* Hero */}
-        <div className="text-center mb-10 sm:mb-16">
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-cream mb-3 sm:mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-cream mb-2 sm:mb-3 px-2">
             Power Your <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Creative Flow</span>
           </h1>
-          <p className="text-cream/60 text-base sm:text-lg max-w-2xl mx-auto">Get Gems to unlock all AI features. Pay via bKash and get gems added after quick verification.</p>
+          <p className="text-cream/60 text-sm sm:text-base max-w-xl sm:max-w-2xl mx-auto px-2">Get Gems to unlock all AI features. Pay via bKash and get gems added after quick verification.</p>
         </div>
 
         {/* Gem Cost Info */}
-        <div className="mb-8 sm:mb-12 p-4 sm:p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl sm:rounded-2xl border border-purple-500/20">
-          <h3 className="text-base sm:text-lg font-serif text-cream mb-3 sm:mb-4 flex items-center gap-2"><Diamond className="w-4 sm:w-5 h-4 sm:h-5 text-purple-400" />Gem Costs by Feature</h3>
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="mb-6 sm:mb-10 p-3 sm:p-5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl sm:rounded-2xl border border-purple-500/20">
+          <h3 className="text-sm sm:text-base font-serif text-cream mb-2 sm:mb-3 flex items-center gap-1.5 sm:gap-2"><Diamond className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-purple-400" />Gem Costs by Feature</h3>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
             {Object.entries(FEATURE_CATEGORIES).map(([key, cat]) => (
-              <div key={key} className="bg-background/50 rounded-lg sm:rounded-xl p-2.5 sm:p-4">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                  <span className="text-lg sm:text-2xl font-bold text-purple-400">{cat.cost}</span>
-                  <span className="text-cream/60 text-[10px] sm:text-sm">Gems</span>
+              <div key={key} className="bg-background/50 rounded-lg sm:rounded-xl p-2 sm:p-3">
+                <div className="flex items-center gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
+                  <span className="text-base sm:text-xl font-bold text-purple-400">{cat.cost}</span>
+                  <span className="text-cream/60 text-[9px] sm:text-xs">Gems</span>
                 </div>
-                <p className="text-[10px] sm:text-sm text-cream/70 line-clamp-2">{cat.label}</p>
+                <p className="text-[9px] sm:text-xs text-cream/70 line-clamp-2 leading-tight">{cat.label}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Subscription Plans */}
-        <h2 className="font-serif text-2xl text-cream mb-6">Subscription Plans</h2>
+        <h2 className="font-serif text-xl sm:text-2xl text-cream mb-4 sm:mb-6">Subscription Plans</h2>
         {pricingLoading ? (
-          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+          <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-purple-400" /></div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
             {subscriptions.map((plan, idx) => (
-              <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 rounded-2xl ${idx === 1 ? "border-purple-500 shadow-lg shadow-purple-500/20 ring-2 ring-purple-500/30" : "hover:border-purple-500/30"}`}>
-                {idx === 1 && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-1">BEST VALUE</Badge></div>}
-                <CardHeader className="text-center pb-2 pt-8">
-                  <CardTitle className="font-serif text-2xl text-cream flex items-center justify-center gap-2">{idx === 0 ? <Zap className="w-5 h-5 text-yellow-400" /> : <Crown className="w-5 h-5 text-purple-400" />}{plan.package_name}</CardTitle>
+              <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 rounded-xl sm:rounded-2xl ${idx === 1 ? "border-purple-500 shadow-lg shadow-purple-500/20 ring-2 ring-purple-500/30" : "hover:border-purple-500/30"}`}>
+                {idx === 1 && <div className="absolute top-0 right-0"><Badge className="rounded-none rounded-bl-lg text-[10px] sm:text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-2.5 sm:px-3 py-0.5 sm:py-1">BEST VALUE</Badge></div>}
+                <CardHeader className="text-center pb-1 pt-5 sm:pt-6">
+                  <CardTitle className="font-serif text-lg sm:text-xl text-cream flex items-center justify-center gap-1.5">{idx === 0 ? <Zap className="w-4 h-4 text-yellow-400" /> : <Crown className="w-4 h-4 text-purple-400" />}{plan.package_name}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-5 p-6">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-5">
                   <div className="text-center">
-                    <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">৳{plan.price_bdt}</span>
-                    <p className="text-cream/70 mt-2 flex items-center justify-center gap-2"><Diamond className="w-4 h-4 text-purple-400" />{plan.gems} Gems</p>
+                    <span className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">৳{plan.price_bdt}</span>
+                    <p className="text-cream/70 mt-1.5 flex items-center justify-center gap-1.5 text-sm"><Diamond className="w-3.5 h-3.5 text-purple-400" />{plan.gems} Gems</p>
                   </div>
-                  <div className="bg-background/50 rounded-xl p-4 space-y-3">
-                    <p className="text-sm font-medium text-cream/80 flex items-center gap-2"><span className="text-pink-500">bKash</span> Manual Payment</p>
-                    <div className="flex items-center justify-between bg-card/50 rounded-xl p-3 border border-purple-500/10">
-                      <span className="font-mono text-lg text-purple-400">{BKASH_NUMBER}</span>
-                      <Button size="icon" variant="ghost" onClick={copyToClipboard} className="h-8 w-8 text-cream/60 hover:text-purple-400">{copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}</Button>
+                  <div className="bg-background/50 rounded-lg sm:rounded-xl p-3 space-y-2">
+                    <p className="text-xs sm:text-sm font-medium text-cream/80 flex items-center gap-1.5"><span className="text-pink-500">bKash</span> Manual Payment</p>
+                    <div className="flex items-center justify-between bg-card/50 rounded-lg p-2 sm:p-2.5 border border-purple-500/10">
+                      <span className="font-mono text-sm sm:text-base text-purple-400">{BKASH_NUMBER}</span>
+                      <Button size="icon" variant="ghost" onClick={copyToClipboard} className="h-7 w-7 sm:h-8 sm:w-8 text-cream/60 hover:text-purple-400 no-min-touch">{copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}</Button>
                     </div>
                   </div>
-                  <Button onClick={() => handlePackageSelect({ name: plan.package_name, gems: plan.gems, price: plan.price_bdt })} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold">
-                    <MessageCircle className="w-4 h-4 mr-2" />Get {plan.package_name}
+                  <Button onClick={() => handlePackageSelect({ name: plan.package_name, gems: plan.gems, price: plan.price_bdt })} className="w-full h-10 sm:h-11 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-sm">
+                    <MessageCircle className="w-3.5 h-3.5 mr-1.5" />Get {plan.package_name}
                   </Button>
                 </CardContent>
               </Card>
@@ -299,45 +299,45 @@ const Pricing = () => {
           </div>
         )}
 
-        <h2 className="font-serif text-2xl text-cream mb-6">Manual Power-Ups</h2>
+        <h2 className="font-serif text-xl sm:text-2xl text-cream mb-4 sm:mb-6">Manual Power-Ups</h2>
         {pricingLoading ? (
-          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+          <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-purple-400" /></div>
         ) : topups.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
             {topups.map((pkg) => (
-              <Card key={pkg.id} className="relative overflow-hidden transition-all duration-300 rounded-2xl hover:border-purple-500/30">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-serif text-lg sm:text-xl text-cream">{pkg.package_name}</h3>
-                    <Diamond className="w-5 h-5 text-purple-400" />
+              <Card key={pkg.id} className="relative overflow-hidden transition-all duration-300 rounded-xl sm:rounded-2xl hover:border-purple-500/30">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <h3 className="font-serif text-sm sm:text-base text-cream truncate pr-1">{pkg.package_name}</h3>
+                    <Diamond className="w-4 h-4 text-purple-400 flex-shrink-0" />
                   </div>
-                  <div className="mb-4">
-                    <span className="text-2xl sm:text-3xl font-bold text-purple-400">৳{pkg.price_bdt}</span>
-                    <p className="text-cream/60 text-sm flex items-center gap-1 mt-1"><Diamond className="w-3 h-3" />{pkg.gems} Gems</p>
+                  <div className="mb-2 sm:mb-3">
+                    <span className="text-lg sm:text-2xl font-bold text-purple-400">৳{pkg.price_bdt}</span>
+                    <p className="text-cream/60 text-xs flex items-center gap-0.5 mt-0.5"><Diamond className="w-2.5 h-2.5" />{pkg.gems} Gems</p>
                   </div>
-                  <Button onClick={() => handlePackageSelect({ name: pkg.package_name, gems: pkg.gems, price: pkg.price_bdt })} variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
-                    <Sparkles className="w-4 h-4 mr-2" />Top-up Now
+                  <Button onClick={() => handlePackageSelect({ name: pkg.package_name, gems: pkg.gems, price: pkg.price_bdt })} variant="outline" size="sm" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10 h-9 sm:h-10 text-xs sm:text-sm">
+                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" />Top-up
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <p className="text-cream/50 text-center py-6 mb-8">No top-up packages available at the moment.</p>
+          <p className="text-cream/50 text-center py-4 mb-6 text-sm">No top-up packages available at the moment.</p>
         )}
 
         {/* Enterprise Option */}
-        <Card className="mb-12 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30 rounded-2xl overflow-hidden">
-          <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-purple-500/20">
-                  <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
+        <Card className="mb-8 sm:mb-10 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30 rounded-xl sm:rounded-2xl overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 sm:p-2.5 rounded-lg bg-purple-500/20 flex-shrink-0">
+                  <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-xl sm:text-2xl text-cream mb-1">Enterprise Plan</h3>
-                  <p className="text-cream/60 text-sm sm:text-base">Need a custom package for your agency or studio? Let's talk!</p>
-                  <p className="text-purple-400/80 text-xs sm:text-sm mt-2">✓ Custom gem volumes  ✓ Priority support  ✓ Bulk discounts</p>
+                  <h3 className="font-serif text-lg sm:text-xl text-cream mb-0.5">Enterprise Plan</h3>
+                  <p className="text-cream/60 text-xs sm:text-sm">Custom package for agencies & studios</p>
+                  <p className="text-purple-400/80 text-[10px] sm:text-xs mt-1">✓ Custom volumes  ✓ Priority support  ✓ Bulk discounts</p>
                 </div>
               </div>
               <Button 
@@ -349,9 +349,10 @@ const Pricing = () => {
                   }
                   setShowEnterpriseChat(true);
                 }} 
-                className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6"
+                size="sm"
+                className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-4 h-9 sm:h-10 text-sm"
               >
-                <MessageCircle className="w-4 h-4 mr-2" />Contact Us
+                <MessageCircle className="w-3.5 h-3.5 mr-1.5" />Contact Us
               </Button>
             </div>
           </CardContent>
