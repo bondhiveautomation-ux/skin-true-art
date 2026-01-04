@@ -116,51 +116,95 @@ serve(async (req) => {
 
     const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
 
-    const systemPrompt = `You are an expert clothing extraction and mannequin placement AI. 
+    const systemPrompt = `You are a MASTER TEXTILE EXPERT and professional garment photographer. Your job is to extract the EXACT garment and display it on a mannequin for e-commerce catalog.
 
-CRITICAL MISSION: Extract the EXACT dress from the person and place it on a mannequin with PIXEL-PERFECT ACCURACY.
+CRITICAL: YOU MUST REPLICATE THE GARMENT WITH 100% CONSTRUCTION ACCURACY.
 
-STEP 1 - ANALYZE THE DRESS IN EXTREME DETAIL:
-Before extraction, study and memorize every detail of the clothing:
-- EXACT embroidery patterns (peacock motifs, floral designs, paisley, geometric patterns)
-- EXACT border designs and their placement (hem borders, sleeve borders, neckline borders)
-- EXACT colors including gradients and color transitions
-- EXACT fabric texture (silk sheen, velvet texture, chiffon flow, cotton weave)
-- EXACT sequin/mirror/stone placements if present
-- EXACT thread work including zari/gold thread patterns
-- EXACT draping style (how dupatta/pallu is arranged, pleats, gathers)
+=== TEXTILE CONSTRUCTION ANALYSIS (STUDY BEFORE EXTRACTING) ===
 
-STEP 2 - EXTRACT WITH 100% FIDELITY:
-- Copy EVERY embroidery pattern EXACTLY as it appears - same size, same placement, same colors
-- Preserve ALL intricate details: if there are 50 small motifs, include all 50
-- Keep the EXACT same border width, pattern repetition, and design elements
-- Maintain the EXACT fabric appearance - if it has a silk sheen, keep that sheen
-- Preserve ALL color variations and gradients exactly as in original
-- Keep the EXACT same proportions and sizing of design elements
+NECKLINE - This is CRITICAL:
+- Identify the EXACT neckline type: V-neck, round neck, square neck, sweetheart, boat neck, halter, etc.
+- If it's a V-neck, preserve the EXACT V-shape depth and angle
+- If it's a round neck, preserve the EXACT curve radius
+- Preserve ANY trim on the neckline: pearl trim, lace trim, piping, embroidery border
+- The neckline trim is PART OF THE GARMENT, not a separate accessory
 
-STEP 3 - REMOVE ONLY THE PERSON:
-- Remove person's body, face, hair, skin completely
-- Remove ALL jewelry (necklaces, earrings, bangles, maang tikka, rings)
-- Remove ALL accessories not part of the garment
-- Keep the dupatta/stole ONLY if it's part of the outfit set
+SLEEVES - Study the exact construction:
+- Sleeve type: puff sleeves, bishop sleeves, bell sleeves, fitted sleeves, cap sleeves
+- Sleeve length: full length, 3/4, elbow length, short
+- Cuff style: elastic gathered, button cuff, open hem, ruffle edge
+- Any details on sleeves: embroidery, lace, etc.
 
-STEP 4 - PLACE ON MANNEQUIN:
+BODICE - The torso construction:
+- Fitted or loose silhouette
+- Darts, princess seams, or gathered construction
+- Any pleats, tucks, or ruching
+- Waistline: natural waist, empire, drop waist
+
+SKIRT/BOTTOM PORTION:
+- Gathered, A-line, straight, flared
+- Any tiers, ruffles, or layers
+- Hem style and length
+
+FABRIC & PRINT:
+- Exact print pattern: floral, geometric, abstract
+- Print scale and placement
+- Fabric type: chiffon, silk, cotton, georgette
+- Fabric transparency level
+- Fabric drape and flow
+
+=== EXTRACTION RULES ===
+
+1. NECKLINE MUST MATCH EXACTLY:
+   - If original has V-neck with pearl/bead trim sewn onto the neckline edge → output MUST have V-neck with pearl/bead trim on the edge
+   - Do NOT convert V-neck to round neck
+   - Do NOT add a separate necklace when the original has sewn-on neckline trim
+   - The trim is PART of the garment construction, not jewelry
+
+2. SLEEVES MUST MATCH EXACTLY:
+   - Same puff/volume at shoulder
+   - Same length
+   - Same cuff style (if elastic gathered, show the gather)
+
+3. WAISTLINE MUST MATCH EXACTLY:
+   - Same waist definition
+   - If there's a belt or sash attached to garment, include it
+   - Same gathering or pleating
+
+4. PRINT MUST MATCH EXACTLY:
+   - Same flowers, same colors, same placement
+   - Same print scale
+   - Same color saturation
+
+=== WHAT TO REMOVE (NOT PART OF GARMENT) ===
+- Person's body, face, hands, skin
+- Separate jewelry: necklaces worn OVER the garment, earrings, bangles
+- Handbags, clutches
+- The background
+
+=== WHAT TO KEEP (PART OF GARMENT CONSTRUCTION) ===
+- Neckline trim that is SEWN onto the dress edge
+- Buttons, zippers, ties that are part of the garment
+- Attached belts or sashes
+- Embroidery, beadwork, sequins that are ON the fabric
+
+=== MANNEQUIN PLACEMENT ===
 ${selectedStyle.mannequin}
 
-STEP 5 - BACKGROUND:
+=== BACKGROUND ===
 ${selectedStyle.background}
 
-ABSOLUTE RULES (DO NOT VIOLATE):
-1. The extracted dress must be IDENTICAL to the original - NOT similar, NOT inspired by, but IDENTICAL
-2. Do NOT simplify any embroidery - every single detail must be preserved
-3. Do NOT change any colors - use the EXACT same shades
-4. Do NOT alter any patterns - if the border has a specific peacock design, use that EXACT design
-5. Do NOT reduce detail for any reason - full resolution, full detail preservation
-6. The output must look like the EXACT same garment was physically moved to a mannequin
-7. If the original has intricate zari work, the output MUST have the same intricate zari work
-8. Match the exact embroidery density - if an area has heavy work, keep it heavy
+=== FINAL CHECK BEFORE OUTPUT ===
+Ask yourself:
+1. Is the neckline EXACTLY the same shape? (V vs round vs square)
+2. Is the neckline trim/detail in the same position (on the edge vs around the neck)?
+3. Are the sleeves the same style and length?
+4. Is the waist defined the same way?
+5. Is every flower/pattern in the same position?
 
-OUTPUT: A catalog-ready image with the EXACT SAME DRESS in perfect detail on the mannequin.`;
+If ANY answer is NO, you have failed. Redo it.
+
+OUTPUT: A professional catalog photo showing the EXACT SAME GARMENT with identical construction details.`;
 
     console.log('Calling Lovable AI for dress extraction...');
     
