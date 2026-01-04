@@ -215,6 +215,104 @@ const Admin = () => {
     return { label: `${days}d left`, color: 'text-green-500', urgent: false };
   };
 
+  // Feature descriptions for admin understanding
+  const FEATURE_DESCRIPTIONS: Record<string, { 
+    description: string; 
+    inputLabels: string[];
+    outputLabel: string;
+  }> = {
+    "Character Generator": {
+      description: "Creates a photorealistic image of a character in a new scene. Uses multiple reference photos to lock the character's identity, then places them into a custom background or with a product.",
+      inputLabels: ["Main Character", "Left Profile", "Right Profile", "Background/Product"],
+      outputLabel: "Generated Scene"
+    },
+    "Face Swap": {
+      description: "Swaps the face from one image onto another person's photo while maintaining natural lighting and proportions.",
+      inputLabels: ["Source Face", "Target Photo"],
+      outputLabel: "Swapped Result"
+    },
+    "Dress Change": {
+      description: "Changes the outfit on a person by replacing their current clothing with a new dress/outfit.",
+      inputLabels: ["Person Photo", "New Dress"],
+      outputLabel: "New Outfit"
+    },
+    "Pose Transfer": {
+      description: "Transfers the pose from a reference image onto your character while preserving their identity.",
+      inputLabels: ["Character", "Pose Reference"],
+      outputLabel: "New Pose"
+    },
+    "Full Look Transfer": {
+      description: "Transfers the complete look (outfit, styling) from a reference image onto your character.",
+      inputLabels: ["Character", "Style Reference"],
+      outputLabel: "New Look"
+    },
+    "Apply Makeup": {
+      description: "Applies makeup styling from a reference to a portrait while maintaining natural appearance.",
+      inputLabels: ["Portrait", "Makeup Reference"],
+      outputLabel: "With Makeup"
+    },
+    "Apply Branding": {
+      description: "Adds branding elements like logos or text overlays to product/marketing images.",
+      inputLabels: ["Product Image", "Brand Assets"],
+      outputLabel: "Branded Image"
+    },
+    "Enhance Photo": {
+      description: "Improves photo quality by enhancing resolution, colors, and details.",
+      inputLabels: ["Original Photo"],
+      outputLabel: "Enhanced"
+    },
+    "Cinematic Transform": {
+      description: "Applies cinematic color grading and film-like visual effects to photos.",
+      inputLabels: ["Original Photo"],
+      outputLabel: "Cinematic"
+    },
+    "Remove Background": {
+      description: "Removes the background from a photo, isolating the main subject.",
+      inputLabels: ["Original Photo"],
+      outputLabel: "No Background"
+    },
+    "Extract to Dummy": {
+      description: "Extracts a dress/outfit from a photo and places it on a mannequin/dummy for catalog display.",
+      inputLabels: ["Outfit Photo"],
+      outputLabel: "On Dummy"
+    },
+  };
+
+  const getInputImageLabel = (featureName: string, index: number, totalInputs: number): string => {
+    const feature = FEATURE_DESCRIPTIONS[featureName];
+    if (feature && feature.inputLabels[index]) {
+      return feature.inputLabels[index];
+    }
+    return `Input ${index + 1}`;
+  };
+
+  const FeatureExplanation = ({ featureName, inputCount }: { featureName: string; inputCount: number }) => {
+    const feature = FEATURE_DESCRIPTIONS[featureName];
+    if (!feature) {
+      return (
+        <div className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">{featureName}</span>: {inputCount} input(s) → 1 output
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-2">
+        <div className="flex items-start gap-2">
+          <span className="font-semibold text-foreground">{featureName}</span>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-blue-400">Inputs:</span>
+          <span className="text-muted-foreground">{feature.inputLabels.slice(0, inputCount).join(" → ")}</span>
+          <span className="text-green-400 ml-2">Output:</span>
+          <span className="text-muted-foreground">{feature.outputLabel}</span>
+        </div>
+      </div>
+    );
+  };
+
+
   // Get users with expiring/expired subscriptions
   const expiringUsers = users.filter(u => {
     const days = getDaysUntilExpiry(u.subscription_expires_at);
@@ -972,6 +1070,11 @@ const Admin = () => {
                           {isExpanded && hasImages && (
                             <TableRow key={`${h.id}-images`}>
                               <TableCell colSpan={7} className="bg-accent/20 p-4">
+                                {/* Feature explanation */}
+                                <div className="mb-4 p-3 rounded-lg bg-card/50 border border-gold/10">
+                                  <FeatureExplanation featureName={h.feature_name} inputCount={h.input_images.length} />
+                                </div>
+                                
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                   {/* Input Images */}
                                   <div>
@@ -981,9 +1084,17 @@ const Admin = () => {
                                     </h4>
                                     {h.input_images.length > 0 ? (
                                       <div className="flex flex-wrap gap-2">
-                                        {h.input_images.map((img, idx) => (
-                                          <ImageThumbnail key={idx} src={img} alt={`Input ${idx + 1}`} />
-                                        ))}
+                                        {h.input_images.map((img, idx) => {
+                                          const label = getInputImageLabel(h.feature_name, idx, h.input_images.length);
+                                          return (
+                                            <div key={idx} className="flex flex-col items-center gap-1">
+                                              <ImageThumbnail src={img} alt={label} />
+                                              <span className="text-[10px] text-muted-foreground text-center max-w-[60px] truncate" title={label}>
+                                                {label}
+                                              </span>
+                                            </div>
+                                          );
+                                        })}
                                       </div>
                                     ) : (
                                       <p className="text-sm text-muted-foreground">No input images recorded</p>
