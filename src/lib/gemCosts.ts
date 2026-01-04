@@ -9,11 +9,11 @@ export const GEM_COSTS = {
   "face-swap": 15,
   "cinematic-transform": 15,
   
-  // Studio Utility Features - 6 Gems
-  "enhance-photo": 6,
-  "apply-branding": 6,
-  "extract-dress-to-dummy": 6,
-  "remove-people-from-image": 6,
+  // Studio Utility Features - 12 Gems (updated from 6 for profitability)
+  "enhance-photo": 12,
+  "apply-branding": 12,
+  "extract-dress-to-dummy": 12,
+  "remove-people-from-image": 12,
   
   // Quick Tools - 1 Gem
   "generate-caption": 1,
@@ -35,7 +35,7 @@ export const FEATURE_CATEGORIES = {
   },
   "studio-utility": {
     label: "Studio Utility Features", 
-    cost: 6,
+    cost: 12,
     features: ["enhance-photo", "apply-branding", "extract-dress-to-dummy", "remove-people-from-image"],
   },
   "quick-tools": {
@@ -45,24 +45,44 @@ export const FEATURE_CATEGORIES = {
   },
 } as const;
 
-// Pricing tiers
+// Pricing tiers (updated for profitability)
 export const GEM_PRICING = {
   subscriptions: [
     {
-      id: "weekly-spark",
-      name: "Weekly Spark",
-      price: 149,
-      gems: 250,
+      id: "trial",
+      name: "Trial Pack",
+      price: 49,
+      gems: 50,
       validDays: 7,
-      description: "Perfect for trying out all features",
+      description: "Try all features",
       badge: null as string | null,
+      highlighted: false,
+    },
+    {
+      id: "starter",
+      name: "Starter Pack",
+      price: 149,
+      gems: 200,
+      validDays: 14,
+      description: "For casual users",
+      badge: null as string | null,
+      highlighted: false,
+    },
+    {
+      id: "weekly-pro",
+      name: "Weekly Pro",
+      price: 299,
+      gems: 500,
+      validDays: 7,
+      description: "For regular users",
+      badge: "POPULAR" as string | null,
       highlighted: false,
     },
     {
       id: "monthly-elite", 
       name: "Monthly Elite",
-      price: 499,
-      gems: 1125,
+      price: 799,
+      gems: 1500,
       validDays: 30,
       description: "Best value for power users",
       badge: "BEST VALUE" as string | null,
@@ -71,20 +91,12 @@ export const GEM_PRICING = {
   ],
   topups: [
     {
-      id: "micro",
-      name: "Micro Power-Up",
-      price: 50,
-      gems: 100,
-      description: "Quick boost for small projects",
-      badge: null as string | null,
-    },
-    {
-      id: "pro",
-      name: "Pro Power-Up", 
-      price: 100,
-      gems: 225,
-      description: "More gems, better value",
-      badge: "POPULAR" as string | null,
+      id: "studio",
+      name: "Studio Pack", 
+      price: 1999,
+      gems: 5000,
+      description: "For agencies & studios",
+      badge: "STUDIO" as string | null,
     },
   ],
 };
