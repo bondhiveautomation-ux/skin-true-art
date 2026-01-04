@@ -139,17 +139,19 @@ serve(async (req) => {
       finalPrompt = `${PRESET_PROMPTS[preset]} Additional context: ${customPrompt.trim()}. Maintain all realism and quality rules.`;
     }
 
-    console.log("Generating video with Luma Ray (Dream Machine)")
+    console.log("Generating video with Kling 1.6 Pro")
     console.log("Preset:", preset)
     console.log("Custom prompt:", customPrompt || "None")
 
-    // Create prediction with Luma Ray (Dream Machine) - supports image-to-video
+    // Create prediction with Kling 1.6 Pro - image-to-video
     const prediction = await replicate.predictions.create({
-      model: "luma/ray",
+      model: "kwaivgi/kling-v1.6-pro",
       input: {
         prompt: finalPrompt,
-        start_image: finalImageUrl,
+        image: finalImageUrl,
+        duration: 5,
         aspect_ratio: "9:16",
+        negative_prompt: "blur, distortion, low quality, face distortion, unnatural movement, fast motion, zoom, shake",
       }
     })
 
