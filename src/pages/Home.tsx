@@ -1,17 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useContent } from "@/hooks/useSiteContent";
 import { 
   Sparkles, 
   MessageCircle, 
   ArrowRight,
-  Image,
-  Shirt,
-  Users,
   Palette,
   Camera,
-  Type,
   Shield,
-  Film,
+  Users,
   Target,
   RefreshCw,
   Zap,
@@ -19,82 +16,116 @@ import {
 } from "lucide-react";
 
 const WHATSAPP_NUMBER = "8801234567890"; // Replace with actual WhatsApp number
-const WHATSAPP_MESSAGE = encodeURIComponent("Hi, I'd like to request access to Brandify.");
-
-const FEATURE_GROUPS = [
-  {
-    title: "Identity & Character Control",
-    description: "Generate consistent character images and maintain visual identity across all content.",
-    tools: ["Character Generator", "Pose Transfer", "Face Swap"]
-  },
-  {
-    title: "Fashion & Look Transformation",
-    description: "Transform outfits, apply professional makeup, and create stunning fashion content.",
-    tools: ["Dress Change", "Makeup Studio", "Full Look Transfer", "Dress Extractor"]
-  },
-  {
-    title: "Professional Content Creation",
-    description: "Create DSLR-quality photos and cinematic visuals for your brand.",
-    tools: ["Photography Studio", "Cinematic Studio", "Background Saver"]
-  },
-  {
-    title: "Branding & Marketing",
-    description: "Generate captions, apply branding, and extract prompts for consistent marketing.",
-    tools: ["Caption Studio", "Branding Studio", "Prompt Extractor"]
-  }
-];
-
-const AUDIENCES = [
-  {
-    icon: Palette,
-    title: "Makeup Artists",
-    benefit: "Showcase your artistry with AI-powered look transfers and character consistency."
-  },
-  {
-    icon: Camera,
-    title: "Fashion Creators",
-    benefit: "Transform outfits and create stunning fashion content in seconds."
-  },
-  {
-    icon: Shield,
-    title: "Beauty Brands",
-    benefit: "Maintain brand consistency across all visual content and campaigns."
-  },
-  {
-    icon: Users,
-    title: "Influencers",
-    benefit: "Create professional-grade content that stands out in crowded feeds."
-  }
-];
-
-const VALUE_PILLARS = [
-  {
-    icon: Target,
-    title: "Precision",
-    description: "Fine-tuned AI for accurate, high-quality results."
-  },
-  {
-    icon: RefreshCw,
-    title: "Consistency",
-    description: "Maintain identity across all generated content."
-  },
-  {
-    icon: Zap,
-    title: "Creator-First",
-    description: "Built for professional creative workflows."
-  },
-  {
-    icon: Award,
-    title: "Professional Results",
-    description: "Industry-standard output for commercial use."
-  }
-];
 
 const Home = () => {
   const navigate = useNavigate();
+  const { content: homeContent } = useContent("home");
+  const { content: headerContent } = useContent("header");
+  const { content: footerContent } = useContent("footer");
+
+  // Home page content with defaults
+  const brandName = headerContent.brand_name || "BondHive";
+  const whatsappMessage = encodeURIComponent(homeContent.whatsapp_message || "Hi, I'd like to request access to BondHive Studio.");
+  
+  // Hero section
+  const heroBadge = homeContent.hero_badge || "Private Access Platform";
+  const heroHeadline1 = homeContent.hero_headline_1 || "Your Personal AI Studio for";
+  const heroHeadline2 = homeContent.hero_headline_2 || "Beauty, Fashion & Content Creation";
+  const heroSubheadline = homeContent.hero_subheadline || "One platform. Multiple professional AI studios — built for makeup artists, creators, and modern brands.";
+  const heroCtaSignin = homeContent.hero_cta_signin || "Sign In";
+  const heroCtaAccess = homeContent.hero_cta_access || "Request Access";
+  const heroCtaLearnMore = homeContent.hero_cta_learn || "Learn How BondHive Studio Works";
+  
+  // Feature groups section
+  const featuresBadge = homeContent.features_badge || "The Studio Collection";
+  const featuresHeadline1 = homeContent.features_headline_1 || "Professional AI Tools,";
+  const featuresHeadline2 = homeContent.features_headline_2 || "One Platform";
+  const featuresSubheadline = homeContent.features_subheadline || "Everything you need to create stunning content, organized by workflow.";
+  
+  // Feature groups
+  const featureGroups = [
+    {
+      title: homeContent.feature_group_1_title || "Identity & Character Control",
+      description: homeContent.feature_group_1_desc || "Generate consistent character images and maintain visual identity across all content.",
+      tools: (homeContent.feature_group_1_tools || "Character Generator, Pose Transfer, Face Swap").split(", ")
+    },
+    {
+      title: homeContent.feature_group_2_title || "Fashion & Look Transformation",
+      description: homeContent.feature_group_2_desc || "Transform outfits, apply professional makeup, and create stunning fashion content.",
+      tools: (homeContent.feature_group_2_tools || "Dress Change, Makeup Studio, Full Look Transfer, Dress Extractor").split(", ")
+    },
+    {
+      title: homeContent.feature_group_3_title || "Professional Content Creation",
+      description: homeContent.feature_group_3_desc || "Create DSLR-quality photos and cinematic visuals for your brand.",
+      tools: (homeContent.feature_group_3_tools || "Photography Studio, Cinematic Studio, Background Saver").split(", ")
+    },
+    {
+      title: homeContent.feature_group_4_title || "Branding & Marketing",
+      description: homeContent.feature_group_4_desc || "Generate captions, apply branding, and extract prompts for consistent marketing.",
+      tools: (homeContent.feature_group_4_tools || "Caption Studio, Branding Studio, Prompt Extractor").split(", ")
+    }
+  ];
+  
+  // Audiences section
+  const audiencesBadge = homeContent.audiences_badge || "Built For Creators";
+  const audiencesHeadline = homeContent.audiences_headline || "Who Uses";
+  const audiences = [
+    {
+      icon: Palette,
+      title: homeContent.audience_1_title || "Makeup Artists",
+      benefit: homeContent.audience_1_benefit || "Showcase your artistry with AI-powered look transfers and character consistency."
+    },
+    {
+      icon: Camera,
+      title: homeContent.audience_2_title || "Fashion Creators",
+      benefit: homeContent.audience_2_benefit || "Transform outfits and create stunning fashion content in seconds."
+    },
+    {
+      icon: Shield,
+      title: homeContent.audience_3_title || "Beauty Brands",
+      benefit: homeContent.audience_3_benefit || "Maintain brand consistency across all visual content and campaigns."
+    },
+    {
+      icon: Users,
+      title: homeContent.audience_4_title || "Influencers",
+      benefit: homeContent.audience_4_benefit || "Create professional-grade content that stands out in crowded feeds."
+    }
+  ];
+  
+  // Value pillars section
+  const valueBadge = homeContent.value_badge || "Our Promise";
+  const valueHeadline = homeContent.value_headline || "Why";
+  const valuePillars = [
+    {
+      icon: Target,
+      title: homeContent.value_1_title || "Precision",
+      description: homeContent.value_1_desc || "Fine-tuned AI for accurate, high-quality results."
+    },
+    {
+      icon: RefreshCw,
+      title: homeContent.value_2_title || "Consistency",
+      description: homeContent.value_2_desc || "Maintain identity across all generated content."
+    },
+    {
+      icon: Zap,
+      title: homeContent.value_3_title || "Creator-First",
+      description: homeContent.value_3_desc || "Built for professional creative workflows."
+    },
+    {
+      icon: Award,
+      title: homeContent.value_4_title || "Professional Results",
+      description: homeContent.value_4_desc || "Industry-standard output for commercial use."
+    }
+  ];
+  
+  // Footer content
+  const footerBrandName = footerContent.brand_name || "BondHive";
+  const footerTagline = footerContent.tagline || "Private access platform";
+  const footerCopyright = (footerContent.copyright || "© {year} BondHive Studio. All rights reserved.")
+    .replace("{year}", new Date().getFullYear().toString());
 
   const handleWhatsAppClick = () => {
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`, "_blank");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`, "_blank");
   };
 
   return (
@@ -117,7 +148,7 @@ const Home = () => {
                 <Sparkles className="w-4 h-4 text-gold" />
               </div>
               <span className="font-serif text-lg sm:text-xl lg:text-2xl font-semibold text-cream tracking-tight">
-                Brandify
+                {brandName}
               </span>
             </div>
 
@@ -140,7 +171,7 @@ const Home = () => {
                 variant="ghost"
                 className="text-sm font-medium text-cream/70 hover:text-gold hover:bg-gold/5"
               >
-                Sign In
+                {heroCtaSignin}
               </Button>
               <Button
                 onClick={handleWhatsAppClick}
@@ -149,7 +180,7 @@ const Home = () => {
                 className="btn-glow"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
-                Request Access
+                {heroCtaAccess}
               </Button>
             </nav>
 
@@ -161,7 +192,7 @@ const Home = () => {
                 size="sm"
                 className="text-cream/70 hover:text-gold"
               >
-                Sign In
+                {heroCtaSignin}
               </Button>
               <Button
                 onClick={handleWhatsAppClick}
@@ -181,18 +212,18 @@ const Home = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-8 backdrop-blur-sm">
             <Sparkles className="w-3.5 h-3.5 text-gold" />
-            <span className="text-xs font-semibold text-gold uppercase tracking-widest">Private Access Platform</span>
+            <span className="text-xs font-semibold text-gold uppercase tracking-widest">{heroBadge}</span>
           </div>
 
           {/* Headline */}
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-cream leading-[1.1] tracking-tight mb-6">
-            Your Personal AI Studio for{" "}
-            <span className="gradient-text">Beauty, Fashion & Content Creation</span>
+            {heroHeadline1}{" "}
+            <span className="gradient-text">{heroHeadline2}</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-cream/50 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
-            One platform. Multiple professional AI studios — built for makeup artists, creators, and modern brands.
+            {heroSubheadline}
           </p>
 
           {/* CTA Buttons */}
@@ -203,7 +234,7 @@ const Home = () => {
               size="xl"
               className="btn-glow w-full sm:w-auto"
             >
-              Sign In
+              {heroCtaSignin}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button
@@ -213,7 +244,7 @@ const Home = () => {
               className="w-full sm:w-auto"
             >
               <MessageCircle className="w-5 h-5 mr-2" />
-              Request Access
+              {heroCtaAccess}
             </Button>
           </div>
 
@@ -222,7 +253,7 @@ const Home = () => {
             onClick={() => navigate("/info")}
             className="inline-flex items-center gap-2 text-sm text-gold/70 hover:text-gold transition-colors duration-300"
           >
-            Learn How Brandify Works
+            {heroCtaLearnMore}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -236,20 +267,20 @@ const Home = () => {
           {/* Section Header */}
           <div className="text-center mb-16 sm:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-6 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-gold uppercase tracking-widest">The Studio Collection</span>
+              <span className="text-xs font-semibold text-gold uppercase tracking-widest">{featuresBadge}</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight mb-4">
-              Professional AI Tools,{" "}
-              <span className="gradient-text">One Platform</span>
+              {featuresHeadline1}{" "}
+              <span className="gradient-text">{featuresHeadline2}</span>
             </h2>
             <p className="text-base sm:text-lg text-cream/50 max-w-xl mx-auto font-light">
-              Everything you need to create stunning content, organized by workflow.
+              {featuresSubheadline}
             </p>
           </div>
 
           {/* Feature Groups Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {FEATURE_GROUPS.map((group, index) => (
+            {featureGroups.map((group) => (
               <div
                 key={group.title}
                 className="group p-6 sm:p-8 rounded-2xl bg-card/30 border border-gold/10 backdrop-blur-sm hover:border-gold/25 transition-all duration-500"
@@ -282,16 +313,16 @@ const Home = () => {
           {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-6 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-gold uppercase tracking-widest">Built For Creators</span>
+              <span className="text-xs font-semibold text-gold uppercase tracking-widest">{audiencesBadge}</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight">
-              Who Uses <span className="gradient-text">Brandify</span>
+              {audiencesHeadline} <span className="gradient-text">BondHive Studio</span>
             </h2>
           </div>
 
           {/* Audience Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {AUDIENCES.map((audience) => (
+            {audiences.map((audience) => (
               <div
                 key={audience.title}
                 className="group p-6 rounded-2xl bg-card/20 border border-gold/10 text-center hover:border-gold/25 transition-all duration-500"
@@ -311,7 +342,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Why Brandify Section */}
+      {/* Why BondHive Section */}
       <section className="relative py-20 sm:py-32 px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-charcoal-deep to-transparent" />
         
@@ -319,16 +350,16 @@ const Home = () => {
           {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-6 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-gold uppercase tracking-widest">Our Promise</span>
+              <span className="text-xs font-semibold text-gold uppercase tracking-widest">{valueBadge}</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight">
-              Why <span className="gradient-text">Brandify</span>
+              {valueHeadline} <span className="gradient-text">BondHive Studio</span>
             </h2>
           </div>
 
           {/* Value Pillars */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10">
-            {VALUE_PILLARS.map((pillar) => (
+            {valuePillars.map((pillar) => (
               <div
                 key={pillar.title}
                 className="text-center group"
@@ -359,11 +390,11 @@ const Home = () => {
                   <Sparkles className="w-3.5 h-3.5 text-gold" />
                 </div>
                 <span className="font-serif text-lg font-semibold text-cream">
-                  Brandify
+                  {footerBrandName}
                 </span>
               </div>
               <p className="text-xs text-cream/40">
-                Private access platform
+                {footerTagline}
               </p>
             </div>
 
@@ -387,7 +418,7 @@ const Home = () => {
           {/* Copyright */}
           <div className="mt-8 pt-8 border-t border-gold/10 text-center">
             <p className="text-[10px] text-cream/25 tracking-wider uppercase">
-              © {new Date().getFullYear()} Brandify. All rights reserved.
+              {footerCopyright}
             </p>
           </div>
         </div>

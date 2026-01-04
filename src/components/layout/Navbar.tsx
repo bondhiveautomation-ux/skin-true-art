@@ -40,7 +40,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
   const { content } = useContent("header");
 
   // Default values
-  const brandName = content.brand_name || "Brandify";
+  const brandName = content.brand_name || "BondHive";
   const navFeatures = content.nav_features || "Features";
   const navProcess = content.nav_process || "Process";
   const navStudio = content.nav_studio || "Studio";
@@ -104,7 +104,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                   </a>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Watch the full Brandify tutorial</p>
+                  <p>Watch the full BondHive Studio tutorial</p>
                 </TooltipContent>
               </Tooltip>
               <DropdownMenu>

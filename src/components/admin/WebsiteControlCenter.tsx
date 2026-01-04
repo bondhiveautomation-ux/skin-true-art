@@ -19,7 +19,11 @@ import {
   Grid3X3,
   ListOrdered,
   MessageSquare,
-  FileText
+  FileText,
+  Home,
+  Users,
+  Target,
+  BookOpen
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -347,31 +351,31 @@ export const WebsiteControlCenter = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="hero" className="space-y-6">
+      <Tabs defaultValue="home-hero" className="space-y-6">
         <TabsList className="bg-charcoal border border-gold/15 p-1 flex flex-wrap gap-1 h-auto">
-          <TabsTrigger value="hero" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Hero
+          <TabsTrigger value="home-hero" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
+            <Home className="w-3 h-3 mr-1" />
+            Home Hero
+          </TabsTrigger>
+          <TabsTrigger value="home-features" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
+            <Grid3X3 className="w-3 h-3 mr-1" />
+            Features
+          </TabsTrigger>
+          <TabsTrigger value="home-audiences" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
+            <Users className="w-3 h-3 mr-1" />
+            Audiences
+          </TabsTrigger>
+          <TabsTrigger value="home-value" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
+            <Target className="w-3 h-3 mr-1" />
+            Value Props
+          </TabsTrigger>
+          <TabsTrigger value="info-page" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
+            <BookOpen className="w-3 h-3 mr-1" />
+            Info Page
           </TabsTrigger>
           <TabsTrigger value="header" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
             <Layout className="w-3 h-3 mr-1" />
             Header
-          </TabsTrigger>
-          <TabsTrigger value="features" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
-            <Grid3X3 className="w-3 h-3 mr-1" />
-            Features
-          </TabsTrigger>
-          <TabsTrigger value="how-it-works" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
-            <ListOrdered className="w-3 h-3 mr-1" />
-            Process
-          </TabsTrigger>
-          <TabsTrigger value="value" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
-            <Type className="w-3 h-3 mr-1" />
-            Promise
-          </TabsTrigger>
-          <TabsTrigger value="cta" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
-            <MessageSquare className="w-3 h-3 mr-1" />
-            CTA
           </TabsTrigger>
           <TabsTrigger value="footer" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal-deep text-cream/60 text-xs">
             <FileText className="w-3 h-3 mr-1" />
@@ -379,25 +383,178 @@ export const WebsiteControlCenter = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="hero">
+        {/* Home Hero Section */}
+        <TabsContent value="home-hero">
           <SectionEditor
-            title="Hero Section"
-            description="Main landing area with headlines and CTAs"
-            icon={<Sparkles className="w-5 h-5 text-gold" />}
-            sectionKey="hero"
+            title="Home Page Hero"
+            description="Main hero section on the public home page"
+            icon={<Home className="w-5 h-5 text-gold" />}
+            sectionKey="home"
             showVisibilityToggle={false}
             fields={[
-              { key: "badge_text", label: "Badge Text", placeholder: "e.g., AI Fashion & Beauty Studio" },
-              { key: "headline_1", label: "Headline Line 1", placeholder: "e.g., Where Fashion" },
-              { key: "headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., Meets AI" },
-              { key: "subheadline", label: "Subheadline", multiline: true, placeholder: "Brief description..." },
-              { key: "cta_primary", label: "Primary Button Text", placeholder: "e.g., Enter Studio" },
-              { key: "cta_secondary", label: "Secondary Button Text", placeholder: "e.g., Explore Features" },
-              { key: "trust_text", label: "Trust Text", placeholder: "e.g., Trusted by creators worldwide" },
+              { key: "hero_badge", label: "Badge Text", placeholder: "e.g., Private Access Platform" },
+              { key: "hero_headline_1", label: "Headline Line 1", placeholder: "e.g., Your Personal AI Studio for" },
+              { key: "hero_headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., Beauty, Fashion & Content Creation" },
+              { key: "hero_subheadline", label: "Subheadline", multiline: true, placeholder: "Brief description..." },
+              { key: "hero_cta_signin", label: "Sign In Button Text", placeholder: "e.g., Sign In" },
+              { key: "hero_cta_access", label: "Request Access Button Text", placeholder: "e.g., Request Access" },
+              { key: "hero_cta_learn", label: "Learn More Link Text", placeholder: "e.g., Learn How BondHive Studio Works" },
+              { key: "whatsapp_message", label: "WhatsApp Pre-fill Message", placeholder: "e.g., Hi, I'd like to request access..." },
             ]}
           />
         </TabsContent>
 
+        {/* Home Features Section */}
+        <TabsContent value="home-features">
+          <div className="space-y-6">
+            <SectionEditor
+              title="Features Section Header"
+              description="Section title and introduction for feature groups"
+              icon={<Grid3X3 className="w-5 h-5 text-gold" />}
+              sectionKey="home"
+              showVisibilityToggle={false}
+              fields={[
+                { key: "features_badge", label: "Badge Text", placeholder: "e.g., The Studio Collection" },
+                { key: "features_headline_1", label: "Headline Line 1", placeholder: "e.g., Professional AI Tools," },
+                { key: "features_headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., One Platform" },
+                { key: "features_subheadline", label: "Subheadline", multiline: true },
+              ]}
+            />
+            
+            <Card className="bg-charcoal border-gold/15">
+              <CardHeader>
+                <CardTitle className="text-cream text-lg font-serif">Feature Groups</CardTitle>
+                <CardDescription className="text-cream/40">
+                  Edit the 4 feature group cards shown on the home page
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {[1, 2, 3, 4].map((num) => (
+                  <SectionEditor
+                    key={num}
+                    title={`Feature Group ${num}`}
+                    description={`Group ${num} title, description, and tools`}
+                    icon={<Grid3X3 className="w-5 h-5 text-gold" />}
+                    sectionKey="home"
+                    showVisibilityToggle={false}
+                    fields={[
+                      { key: `feature_group_${num}_title`, label: "Group Title", placeholder: "e.g., Identity & Character Control" },
+                      { key: `feature_group_${num}_desc`, label: "Group Description", multiline: true },
+                      { key: `feature_group_${num}_tools`, label: "Tools (comma-separated)", placeholder: "e.g., Character Generator, Pose Transfer" },
+                    ]}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Audiences Section */}
+        <TabsContent value="home-audiences">
+          <div className="space-y-6">
+            <SectionEditor
+              title="Audiences Section Header"
+              description="Who uses section header"
+              icon={<Users className="w-5 h-5 text-gold" />}
+              sectionKey="home"
+              showVisibilityToggle={false}
+              fields={[
+                { key: "audiences_badge", label: "Badge Text", placeholder: "e.g., Built For Creators" },
+                { key: "audiences_headline", label: "Headline", placeholder: "e.g., Who Uses" },
+              ]}
+            />
+            
+            <Card className="bg-charcoal border-gold/15">
+              <CardHeader>
+                <CardTitle className="text-cream text-lg font-serif">Audience Cards</CardTitle>
+                <CardDescription className="text-cream/40">
+                  Edit the 4 audience cards (Makeup Artists, Fashion Creators, etc.)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {[1, 2, 3, 4].map((num) => (
+                  <SectionEditor
+                    key={num}
+                    title={`Audience ${num}`}
+                    description={`Audience card ${num}`}
+                    icon={<Users className="w-5 h-5 text-gold" />}
+                    sectionKey="home"
+                    showVisibilityToggle={false}
+                    fields={[
+                      { key: `audience_${num}_title`, label: "Title", placeholder: "e.g., Makeup Artists" },
+                      { key: `audience_${num}_benefit`, label: "Benefit Statement", multiline: true },
+                    ]}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Value Props Section */}
+        <TabsContent value="home-value">
+          <div className="space-y-6">
+            <SectionEditor
+              title="Value Section Header"
+              description="Why BondHive section header"
+              icon={<Target className="w-5 h-5 text-gold" />}
+              sectionKey="home"
+              showVisibilityToggle={false}
+              fields={[
+                { key: "value_badge", label: "Badge Text", placeholder: "e.g., Our Promise" },
+                { key: "value_headline", label: "Headline", placeholder: "e.g., Why" },
+              ]}
+            />
+            
+            <Card className="bg-charcoal border-gold/15">
+              <CardHeader>
+                <CardTitle className="text-cream text-lg font-serif">Value Pillars</CardTitle>
+                <CardDescription className="text-cream/40">
+                  Edit the 4 value proposition pillars (Precision, Consistency, etc.)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {[1, 2, 3, 4].map((num) => (
+                  <SectionEditor
+                    key={num}
+                    title={`Value Pillar ${num}`}
+                    description={`Value prop ${num}`}
+                    icon={<Target className="w-5 h-5 text-gold" />}
+                    sectionKey="home"
+                    showVisibilityToggle={false}
+                    fields={[
+                      { key: `value_${num}_title`, label: "Title", placeholder: "e.g., Precision" },
+                      { key: `value_${num}_desc`, label: "Description", multiline: true },
+                    ]}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Info Page Section */}
+        <TabsContent value="info-page">
+          <SectionEditor
+            title="Info/Knowledge Hub Page"
+            description="Content for the /info page"
+            icon={<BookOpen className="w-5 h-5 text-gold" />}
+            sectionKey="info"
+            showVisibilityToggle={false}
+            fields={[
+              { key: "page_badge", label: "Page Badge", placeholder: "e.g., Knowledge Hub" },
+              { key: "page_title_1", label: "Title Part 1", placeholder: "e.g., BondHive Studio" },
+              { key: "page_title_2", label: "Title Part 2 (Gradient)", placeholder: "e.g., Knowledge Hub" },
+              { key: "page_subtitle", label: "Subtitle", multiline: true },
+              { key: "coming_soon_text", label: "Coming Soon Text", placeholder: "e.g., More articles coming soon..." },
+              { key: "whatsapp_message", label: "WhatsApp Pre-fill Message", placeholder: "e.g., Hi, I'd like to request access..." },
+              { key: "footer_tagline", label: "Footer Tagline", placeholder: "e.g., Private access platform" },
+              { key: "footer_copyright", label: "Footer Copyright", placeholder: "Use {year} for current year" },
+            ]}
+          />
+        </TabsContent>
+
+        {/* Header Section */}
         <TabsContent value="header">
           <SectionEditor
             title="Header & Navigation"
@@ -406,7 +563,7 @@ export const WebsiteControlCenter = () => {
             sectionKey="header"
             showVisibilityToggle={false}
             fields={[
-              { key: "brand_name", label: "Brand Name", placeholder: "e.g., Influencer Tool" },
+              { key: "brand_name", label: "Brand Name (Logo)", placeholder: "e.g., BondHive" },
               { key: "nav_features", label: "Features Nav Label", placeholder: "e.g., Features" },
               { key: "nav_process", label: "Process Nav Label", placeholder: "e.g., Process" },
               { key: "nav_studio", label: "Studio Nav Label", placeholder: "e.g., Studio" },
@@ -415,97 +572,7 @@ export const WebsiteControlCenter = () => {
           />
         </TabsContent>
 
-        <TabsContent value="features">
-          <div className="space-y-6">
-            <SectionEditor
-              title="Features Section Header"
-              description="Section title and introduction"
-              icon={<Grid3X3 className="w-5 h-5 text-gold" />}
-              sectionKey="features"
-              fields={[
-                { key: "badge_text", label: "Badge Text", placeholder: "e.g., The Collection" },
-                { key: "headline_1", label: "Headline Line 1", placeholder: "e.g., AI-Powered" },
-                { key: "headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., Creative Tools" },
-                { key: "subheadline", label: "Subheadline", multiline: true },
-              ]}
-            />
-            
-            <Card className="bg-charcoal border-gold/15">
-              <CardHeader>
-                <CardTitle className="text-cream text-lg font-serif">Feature Cards</CardTitle>
-                <CardDescription className="text-cream/40">
-                  Edit individual feature names, descriptions, and visibility
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                  <FeatureEditor key={num} featureNumber={num} />
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="how-it-works">
-          <SectionEditor
-            title="How It Works Section"
-            description="Process steps and descriptions"
-            icon={<ListOrdered className="w-5 h-5 text-gold" />}
-            sectionKey="how_it_works"
-            fields={[
-              { key: "badge_text", label: "Badge Text", placeholder: "e.g., The Process" },
-              { key: "headline_1", label: "Headline Line 1", placeholder: "e.g., Effortless" },
-              { key: "headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., Elegance" },
-              { key: "subheadline", label: "Subheadline", multiline: true },
-              { key: "step_1_title", label: "Step 1 Title" },
-              { key: "step_1_description", label: "Step 1 Description", multiline: true },
-              { key: "step_2_title", label: "Step 2 Title" },
-              { key: "step_2_description", label: "Step 2 Description", multiline: true },
-              { key: "step_3_title", label: "Step 3 Title" },
-              { key: "step_3_description", label: "Step 3 Description", multiline: true },
-            ]}
-          />
-        </TabsContent>
-
-        <TabsContent value="value">
-          <SectionEditor
-            title="Our Promise Section"
-            description="Value proposition and trust elements"
-            icon={<Type className="w-5 h-5 text-gold" />}
-            sectionKey="value"
-            fields={[
-              { key: "badge_text", label: "Badge Text", placeholder: "e.g., Our Promise" },
-              { key: "headline_1", label: "Headline Line 1", placeholder: "e.g., Built for" },
-              { key: "headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., Excellence" },
-              { key: "subheadline", label: "Subheadline", multiline: true },
-              { key: "item_1_title", label: "Value 1 Title" },
-              { key: "item_1_description", label: "Value 1 Description", multiline: true },
-              { key: "item_2_title", label: "Value 2 Title" },
-              { key: "item_2_description", label: "Value 2 Description", multiline: true },
-              { key: "item_3_title", label: "Value 3 Title" },
-              { key: "item_3_description", label: "Value 3 Description", multiline: true },
-              { key: "item_4_title", label: "Value 4 Title" },
-              { key: "item_4_description", label: "Value 4 Description", multiline: true },
-            ]}
-          />
-        </TabsContent>
-
-        <TabsContent value="cta">
-          <SectionEditor
-            title="Call to Action Section"
-            description="Final conversion area"
-            icon={<MessageSquare className="w-5 h-5 text-gold" />}
-            sectionKey="cta"
-            fields={[
-              { key: "headline_1", label: "Headline Line 1", placeholder: "e.g., Ready to" },
-              { key: "headline_2", label: "Headline Line 2 (Gradient)", placeholder: "e.g., Transform" },
-              { key: "subheadline", label: "Subheadline", multiline: true },
-              { key: "button_text", label: "Button Text", placeholder: "e.g., Begin Your Journey" },
-              { key: "trust_text", label: "Trust Text", placeholder: "e.g., No commitment required" },
-            ]}
-          />
-        </TabsContent>
-
+        {/* Footer Section */}
         <TabsContent value="footer">
           <SectionEditor
             title="Footer Section"
@@ -514,8 +581,8 @@ export const WebsiteControlCenter = () => {
             sectionKey="footer"
             showVisibilityToggle={false}
             fields={[
-              { key: "brand_name", label: "Brand Name", placeholder: "e.g., Influencer Tool" },
-              { key: "tagline", label: "Tagline", placeholder: "e.g., AI-powered tools for creators" },
+              { key: "brand_name", label: "Brand Name", placeholder: "e.g., BondHive" },
+              { key: "tagline", label: "Tagline", placeholder: "e.g., Your personal AI studio for beauty & content" },
               { key: "copyright", label: "Copyright Text", placeholder: "Use {year} for current year" },
               { key: "link_privacy", label: "Privacy Link Text", placeholder: "e.g., Privacy" },
               { key: "link_terms", label: "Terms Link Text", placeholder: "e.g., Terms" },

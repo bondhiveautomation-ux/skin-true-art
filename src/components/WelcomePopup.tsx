@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Diamond, Sparkles, Gift, ArrowRight } from "lucide-react";
 
-const WELCOME_SHOWN_KEY = "brandify_welcome_shown";
+const WELCOME_SHOWN_KEY = "bondhive_welcome_shown";
 
 export const WelcomePopup = () => {
   const { user } = useAuth();
@@ -52,7 +52,7 @@ export const WelcomePopup = () => {
             <Gift className="w-8 h-8 text-white" />
           </div>
           <DialogTitle className="font-serif text-2xl text-center">
-            Welcome to <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Brandify!</span>
+            Welcome to <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">BondHive Studio!</span>
           </DialogTitle>
           <DialogDescription className="text-center text-base">
             You're all set to start creating amazing content
