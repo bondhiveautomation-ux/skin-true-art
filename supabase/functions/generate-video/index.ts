@@ -148,7 +148,7 @@ serve(async (req) => {
       model: "kwaivgi/kling-v1.6-pro",
       input: {
         prompt: finalPrompt,
-        image: finalImageUrl,
+        start_image: finalImageUrl,
         duration: 5,
         aspect_ratio: "9:16",
         negative_prompt: "blur, distortion, low quality, face distortion, unnatural movement, fast motion, zoom, shake",
