@@ -1,5 +1,8 @@
 // Gem costs per feature category
 export const GEM_COSTS = {
+  // Premium Features - 20 Gems (Video generation)
+  "generate-video": 20,
+  
   // High-Impact Features - 15 Gems
   "dress-change": 15,
   "apply-makeup": 15,
@@ -28,6 +31,11 @@ export const getGemCost = (featureName: string): number => {
 };
 
 export const FEATURE_CATEGORIES = {
+  "premium": {
+    label: "Premium Features",
+    cost: 20,
+    features: ["generate-video"],
+  },
   "high-impact": {
     label: "High-Impact Features",
     cost: 15,
