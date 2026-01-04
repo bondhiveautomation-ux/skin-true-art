@@ -34,7 +34,8 @@ import {
   Calendar,
   Clock,
   AlertTriangle,
-  X
+  X,
+  FileText
 } from "lucide-react";
 import {
   Table,
@@ -75,6 +76,7 @@ import { LeadsInbox } from "@/components/admin/LeadsInbox";
 import { PricingManager } from "@/components/admin/PricingManager";
 import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
+import { ArticlesManager } from "@/components/admin/ArticlesManager";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -468,6 +470,10 @@ const Admin = () => {
               <TabsTrigger value="website-cms" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Settings2 className="w-3 h-3 sm:w-4 sm:h-4" />
                 CMS
+              </TabsTrigger>
+              <TabsTrigger value="articles" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+                Articles
               </TabsTrigger>
               <TabsTrigger value="class-leads" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1022,6 +1028,10 @@ const Admin = () => {
 
           <TabsContent value="website-cms">
             <WebsiteControlCenter />
+          </TabsContent>
+
+          <TabsContent value="articles">
+            <ArticlesManager />
           </TabsContent>
 
           <TabsContent value="class-leads">

@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      articles: {
+        Row: {
+          category: string
+          content: string | null
+          created_at: string
+          display_order: number
+          excerpt: string
+          icon: string | null
+          id: string
+          is_published: boolean
+          read_time: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          display_order?: number
+          excerpt: string
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          read_time?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          display_order?: number
+          excerpt?: string
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          read_time?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string

@@ -328,7 +328,7 @@ const Auth = () => {
             <div className="w-12 h-12 rounded-xl gold-icon flex items-center justify-center animate-pulse-glow">
               <Sparkles className="w-6 h-6 text-gold" />
             </div>
-            <span className="font-serif text-2xl font-semibold text-cream">Brandify</span>
+            <span className="font-serif text-2xl font-semibold text-cream">BondHive</span>
           </div>
 
           {/* Headline */}
@@ -339,7 +339,7 @@ const Auth = () => {
 
           {/* Subtext */}
           <p className="text-lg text-cream/60 leading-relaxed mb-10">
-            Create, enhance, and brand your content with Brandify — built for Bangladeshi sellers, influencers, and makeup artists.
+            Create, enhance, and brand your content with BondHive Studio — built for makeup artists, fashion creators, and modern brands.
           </p>
 
           {/* Feature Bullets */}
@@ -373,7 +373,7 @@ const Auth = () => {
                 <div className="w-9 h-9 rounded-lg gold-icon flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-gold" />
                 </div>
-                <span className="font-serif text-lg font-semibold text-cream">Brandify</span>
+                <span className="font-serif text-lg font-semibold text-cream">BondHive</span>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
                 <Gift className="w-3.5 h-3.5 text-green-400" />

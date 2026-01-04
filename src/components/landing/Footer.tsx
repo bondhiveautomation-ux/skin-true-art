@@ -5,9 +5,9 @@ export const Footer = () => {
   const { content } = useContent("footer");
 
   // Defaults
-  const brandName = content.brand_name || "Brandify";
-  const tagline = content.tagline || "Your all-in-one content & branding studio";
-  const copyright = (content.copyright || "© {year} Brandify. Crafted with elegance. All rights reserved.")
+  const brandName = content.brand_name || "BondHive";
+  const tagline = content.tagline || "Your personal AI studio for beauty & content";
+  const copyright = (content.copyright || "© {year} BondHive Studio. Crafted with elegance. All rights reserved.")
     .replace("{year}", new Date().getFullYear().toString());
   const linkPrivacy = content.link_privacy || "Privacy";
   const linkTerms = content.link_terms || "Terms";
