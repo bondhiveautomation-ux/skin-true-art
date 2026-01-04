@@ -147,35 +147,39 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
             </nav>
 
             {/* Desktop User section */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-3 xl:gap-4 ml-4">
               {isAdmin && (
                 <Button
                   onClick={() => navigate("/admin")}
                   variant="luxury"
                   size="sm"
+                  className="shrink-0"
                 >
                   <Shield className="w-4 h-4 mr-1.5" />
                   Admin
                 </Button>
               )}
               {credits !== null && credits !== undefined && (
-                <GemBalance gems={credits} size="md" />
+                <div className="shrink-0">
+                  <GemBalance gems={credits} size="md" />
+                </div>
               )}
               {userEmail && (
-                <>
+                <div className="flex items-center gap-2 shrink-0">
                   <UserInbox />
-                  <span className="hidden lg:block text-sm text-cream/50 truncate max-w-[150px]">
+                  <span className="text-sm text-cream/50 truncate max-w-[120px] xl:max-w-[150px]">
                     {userEmail}
                   </span>
-                </>
+                </div>
               )}
               {onSignOut ? (
                 <Button 
                   onClick={onSignOut}
                   variant="ghost"
-                  className="text-sm font-medium text-cream/60 hover:text-gold hover:bg-gold/5"
+                  size="sm"
+                  className="text-sm font-medium text-cream/60 hover:text-gold hover:bg-gold/5 shrink-0"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-4 h-4 mr-1.5" />
                   Sign Out
                 </Button>
               ) : (
@@ -183,7 +187,7 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                   onClick={() => onNavigate("tools")}
                   variant="gold"
                   size="default"
-                  className="btn-glow"
+                  className="btn-glow shrink-0"
                 >
                   {ctaGetStarted}
                 </Button>
