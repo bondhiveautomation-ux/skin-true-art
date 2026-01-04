@@ -139,17 +139,16 @@ serve(async (req) => {
       finalPrompt = `${PRESET_PROMPTS[preset]} Additional context: ${customPrompt.trim()}. Maintain all realism and quality rules.`;
     }
 
-    console.log("Generating video with Luma Ray2")
+    console.log("Generating video with Luma Ray (Dream Machine)")
     console.log("Preset:", preset)
     console.log("Custom prompt:", customPrompt || "None")
 
-    // Create prediction with Luma Ray2
+    // Create prediction with Luma Ray (Dream Machine) - supports image-to-video
     const prediction = await replicate.predictions.create({
-      model: "luma/ray2",
+      model: "luma/ray",
       input: {
         prompt: finalPrompt,
-        start_image_url: finalImageUrl,
-        duration: 5,
+        start_image: finalImageUrl,
         aspect_ratio: "9:16",
       }
     })
