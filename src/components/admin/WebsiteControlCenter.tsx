@@ -564,6 +564,7 @@ export const WebsiteControlCenter = () => {
             showVisibilityToggle={false}
             fields={[
               { key: "brand_name", label: "Brand Name (Logo)", placeholder: "e.g., BondHive" },
+              { key: "whatsapp_number", label: "WhatsApp Number (Request Access)", placeholder: "e.g., 8801234567890" },
               { key: "nav_features", label: "Features Nav Label", placeholder: "e.g., Features" },
               { key: "nav_process", label: "Process Nav Label", placeholder: "e.g., Process" },
               { key: "nav_studio", label: "Studio Nav Label", placeholder: "e.g., Studio" },

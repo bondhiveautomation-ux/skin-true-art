@@ -15,8 +15,6 @@ import {
   Award
 } from "lucide-react";
 
-const WHATSAPP_NUMBER = "8801234567890"; // Replace with actual WhatsApp number
-
 const Home = () => {
   const navigate = useNavigate();
   const { content: homeContent } = useContent("home");
@@ -25,6 +23,7 @@ const Home = () => {
 
   // Home page content with defaults
   const brandName = headerContent.brand_name || "BondHive";
+  const whatsappNumber = headerContent.whatsapp_number || "8801234567890";
   const whatsappMessage = encodeURIComponent(homeContent.whatsapp_message || "Hi, I'd like to request access to BondHive Studio.");
   
   // Hero section
@@ -125,7 +124,7 @@ const Home = () => {
     .replace("{year}", new Date().getFullYear().toString());
 
   const handleWhatsAppClick = () => {
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`, "_blank");
+    window.open(`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`, "_blank");
   };
 
   return (
