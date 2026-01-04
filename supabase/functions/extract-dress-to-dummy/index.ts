@@ -116,95 +116,81 @@ serve(async (req) => {
 
     const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
 
-    const systemPrompt = `You are a MASTER TEXTILE EXPERT and professional garment photographer. Your job is to extract the EXACT garment and display it on a mannequin for e-commerce catalog.
+    const systemPrompt = `You are a MASTER TEXTILE EXPERT extracting garments for e-commerce catalogs.
 
-CRITICAL: YOU MUST REPLICATE THE GARMENT WITH 100% CONSTRUCTION ACCURACY.
+=== CRITICAL RULE: PROPS vs GARMENT ===
 
-=== TEXTILE CONSTRUCTION ANALYSIS (STUDY BEFORE EXTRACTING) ===
+Product photos often include STYLING PROPS placed on/near the dress. These are NOT part of the garment:
 
-NECKLINE - This is CRITICAL:
-- Identify the EXACT neckline type: V-neck, round neck, square neck, sweetheart, boat neck, halter, etc.
-- If it's a V-neck, preserve the EXACT V-shape depth and angle
-- If it's a round neck, preserve the EXACT curve radius
-- Preserve ANY trim on the neckline: pearl trim, lace trim, piping, embroidery border
-- The neckline trim is PART OF THE GARMENT, not a separate accessory
+REMOVE (Props placed for photoshoot styling):
+- Jewelry laying ON TOP of the dress (pearl necklaces, bracelets placed on fabric)
+- Decorative items placed nearby (flowers, ribbons, bows used for styling)
+- Accessories resting on the garment that would fall off if you picked up the dress
+- Belts placed on top (not sewn to waistband)
+- Any item that is RESTING ON the fabric, not attached to it
 
-SLEEVES - Study the exact construction:
-- Sleeve type: puff sleeves, bishop sleeves, bell sleeves, fitted sleeves, cap sleeves
-- Sleeve length: full length, 3/4, elbow length, short
-- Cuff style: elastic gathered, button cuff, open hem, ruffle edge
-- Any details on sleeves: embroidery, lace, etc.
+KEEP (Actually part of the garment construction):
+- Buttons, zippers that are functional closures
+- Trim that is SEWN into the seam line
+- Built-in elements stitched to the garment
+- Embroidery/beadwork STITCHED INTO the fabric
 
-BODICE - The torso construction:
-- Fitted or loose silhouette
-- Darts, princess seams, or gathered construction
-- Any pleats, tucks, or ruching
-- Waistline: natural waist, empire, drop waist
+=== TEST: Is it part of the garment? ===
+"If I picked up this dress and shook it, would this item fall off?"
+- YES → It's a prop/accessory, REMOVE IT
+- NO → It's sewn to the garment, KEEP IT
 
-SKIRT/BOTTOM PORTION:
-- Gathered, A-line, straight, flared
-- Any tiers, ruffles, or layers
-- Hem style and length
+=== ANALYZE THE ACTUAL GARMENT ===
+
+NECKLINE (look at the FABRIC EDGE only):
+- What shape is the actual fabric edge? V-neck, round, square, sweetheart?
+- Is there any trim SEWN INTO the edge seam? (not jewelry laying on top)
+- Do NOT add trim/pearls/beads unless they are clearly stitched to the edge
+
+SLEEVES:
+- Exact type: puff, bishop, bell, fitted, cap
+- Exact length: full, 3/4, short
+- Cuff style: elastic gathered, open, button
+
+BODICE & WAIST:
+- Fitted or loose
+- Natural waist, empire, or drop waist
+- Any SEWN-IN details
+
+SKIRT:
+- Style: gathered, A-line, tiered
+- Only include tiers if clearly visible in original
+- Do NOT add tiers/ruffles that aren't there
 
 FABRIC & PRINT:
-- Exact print pattern: floral, geometric, abstract
-- Print scale and placement
-- Fabric type: chiffon, silk, cotton, georgette
-- Fabric transparency level
-- Fabric drape and flow
+- Exact print pattern and colors
+- Exact print scale
+- Fabric drape
 
-=== EXTRACTION RULES ===
+=== OUTPUT REQUIREMENTS ===
 
-1. NECKLINE MUST MATCH EXACTLY:
-   - If original has V-neck with pearl/bead trim sewn onto the neckline edge → output MUST have V-neck with pearl/bead trim on the edge
-   - Do NOT convert V-neck to round neck
-   - Do NOT add a separate necklace when the original has sewn-on neckline trim
-   - The trim is PART of the garment construction, not jewelry
+Extract ONLY what is physically sewn to the garment:
+- NO added pearl trim (unless sewn to original)
+- NO added ruffles/tiers (unless in original)  
+- NO added embellishments
+- SAME neckline shape as original fabric edge
+- SAME sleeve style as original
+- SAME skirt style as original
 
-2. SLEEVES MUST MATCH EXACTLY:
-   - Same puff/volume at shoulder
-   - Same length
-   - Same cuff style (if elastic gathered, show the gather)
-
-3. WAISTLINE MUST MATCH EXACTLY:
-   - Same waist definition
-   - If there's a belt or sash attached to garment, include it
-   - Same gathering or pleating
-
-4. PRINT MUST MATCH EXACTLY:
-   - Same flowers, same colors, same placement
-   - Same print scale
-   - Same color saturation
-
-=== WHAT TO REMOVE (NOT PART OF GARMENT) ===
-- Person's body, face, hands, skin
-- Separate jewelry: necklaces worn OVER the garment, earrings, bangles
-- Handbags, clutches
-- The background
-
-=== WHAT TO KEEP (PART OF GARMENT CONSTRUCTION) ===
-- Neckline trim that is SEWN onto the dress edge
-- Buttons, zippers, ties that are part of the garment
-- Attached belts or sashes
-- Embroidery, beadwork, sequins that are ON the fabric
-
-=== MANNEQUIN PLACEMENT ===
+=== MANNEQUIN ===
 ${selectedStyle.mannequin}
 
 === BACKGROUND ===
 ${selectedStyle.background}
 
-=== FINAL CHECK BEFORE OUTPUT ===
-Ask yourself:
-1. Is the neckline EXACTLY the same shape? (V vs round vs square)
-2. Is the neckline trim/detail in the same position (on the edge vs around the neck)?
-3. Are the sleeves the same style and length?
-4. Is the waist defined the same way?
-5. Is every flower/pattern in the same position?
+=== VERIFICATION ===
+1. Did I accidentally include any props/jewelry from the photo? REMOVE THEM.
+2. Did I add any trim/pearls not sewn to the original? REMOVE THEM.
+3. Is the neckline the EXACT shape of the original fabric edge?
+4. Are sleeves EXACTLY the same style?
+5. Is the skirt EXACTLY the same (no added tiers/ruffles)?
 
-If ANY answer is NO, you have failed. Redo it.
-
-OUTPUT: A professional catalog photo showing the EXACT SAME GARMENT with identical construction details.`;
+OUTPUT: The exact garment as it would appear if physically moved to a mannequin - nothing added, nothing changed.`;
 
     console.log('Calling Lovable AI for dress extraction...');
     
