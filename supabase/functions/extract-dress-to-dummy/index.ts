@@ -116,34 +116,51 @@ serve(async (req) => {
 
     const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
 
-    const systemPrompt = `You are an expert clothing extraction and mannequin placement AI. Your task is to:
+    const systemPrompt = `You are an expert clothing extraction and mannequin placement AI. 
 
-1. DETECT AND ISOLATE: Carefully identify and extract ONLY the clothing/outfit from the person in the image
-2. REMOVE COMPLETELY: Remove the person's body, face, hair, skin, and ALL accessories including:
-   - Jewelry (necklaces, earrings, rings, bracelets, bangles, watches)
-   - Belts, bags, purses, handbags
-   - Scarves, shawls, stoles (unless part of the main outfit)
-   - Hair accessories, headbands, clips
-   - Any other ornaments or accessories
-3. EXTRACT EXACT DRESS: Keep the clothing exactly as it appears with:
-   - Same design, pattern, and style
-   - Same colors and color combinations
-   - Same fabric texture and material appearance
-   - Same folds, draping, and structure
-   - Same embellishments that are part of the clothing (embroidery, sequins on fabric)
-4. PLACE ON MANNEQUIN:
+CRITICAL MISSION: Extract the EXACT dress from the person and place it on a mannequin with PIXEL-PERFECT ACCURACY.
+
+STEP 1 - ANALYZE THE DRESS IN EXTREME DETAIL:
+Before extraction, study and memorize every detail of the clothing:
+- EXACT embroidery patterns (peacock motifs, floral designs, paisley, geometric patterns)
+- EXACT border designs and their placement (hem borders, sleeve borders, neckline borders)
+- EXACT colors including gradients and color transitions
+- EXACT fabric texture (silk sheen, velvet texture, chiffon flow, cotton weave)
+- EXACT sequin/mirror/stone placements if present
+- EXACT thread work including zari/gold thread patterns
+- EXACT draping style (how dupatta/pallu is arranged, pleats, gathers)
+
+STEP 2 - EXTRACT WITH 100% FIDELITY:
+- Copy EVERY embroidery pattern EXACTLY as it appears - same size, same placement, same colors
+- Preserve ALL intricate details: if there are 50 small motifs, include all 50
+- Keep the EXACT same border width, pattern repetition, and design elements
+- Maintain the EXACT fabric appearance - if it has a silk sheen, keep that sheen
+- Preserve ALL color variations and gradients exactly as in original
+- Keep the EXACT same proportions and sizing of design elements
+
+STEP 3 - REMOVE ONLY THE PERSON:
+- Remove person's body, face, hair, skin completely
+- Remove ALL jewelry (necklaces, earrings, bangles, maang tikka, rings)
+- Remove ALL accessories not part of the garment
+- Keep the dupatta/stole ONLY if it's part of the outfit set
+
+STEP 4 - PLACE ON MANNEQUIN:
 ${selectedStyle.mannequin}
-5. BACKGROUND: 
-${selectedStyle.background}
-6. OUTPUT QUALITY: Generate a high-resolution, catalog-ready image
 
-CRITICAL RULES:
-- The dress must be a 1:1 copy of what the person was wearing
-- Do NOT redesign, modify, or create a new style
-- Do NOT include any body parts, face, or hair
-- Do NOT include any jewelry or accessories
-- Focus ONLY on the clothing item itself
-- Make it look professional and e-commerce ready`;
+STEP 5 - BACKGROUND:
+${selectedStyle.background}
+
+ABSOLUTE RULES (DO NOT VIOLATE):
+1. The extracted dress must be IDENTICAL to the original - NOT similar, NOT inspired by, but IDENTICAL
+2. Do NOT simplify any embroidery - every single detail must be preserved
+3. Do NOT change any colors - use the EXACT same shades
+4. Do NOT alter any patterns - if the border has a specific peacock design, use that EXACT design
+5. Do NOT reduce detail for any reason - full resolution, full detail preservation
+6. The output must look like the EXACT same garment was physically moved to a mannequin
+7. If the original has intricate zari work, the output MUST have the same intricate zari work
+8. Match the exact embroidery density - if an area has heavy work, keep it heavy
+
+OUTPUT: A catalog-ready image with the EXACT SAME DRESS in perfect detail on the mannequin.`;
 
     console.log('Calling Lovable AI for dress extraction...');
     
