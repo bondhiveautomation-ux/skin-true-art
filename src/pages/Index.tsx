@@ -81,6 +81,7 @@ const Index = () => {
   const [dressImage, setDressImage] = useState<string | null>(null);
   const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
   const [isExtractingDress, setIsExtractingDress] = useState(false);
+  const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble">("standard");
   
   // Background Saver states
   const [peopleImage, setPeopleImage] = useState<string | null>(null);
@@ -366,7 +367,7 @@ const Index = () => {
     }
     setIsExtractingDress(true);
     try {
-      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { body: { image: dressImage, userId: user?.id } });
+      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { body: { image: dressImage, userId: user?.id, dummyStyle } });
       if (error) throw error;
       if (data?.error) {
         toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
@@ -1199,6 +1200,46 @@ const Index = () => {
               onRemove={() => { setDressImage(null); setExtractedDressImage(null); }}
               label="Upload Photo of Person Wearing Outfit"
             />
+          </div>
+
+          {/* Dummy Style Selector */}
+          <div className="max-w-md mx-auto">
+            <p className="text-sm text-cream/70 mb-3 text-center">Select Dummy Style</p>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => setDummyStyle("standard")}
+                className={`p-3 rounded-lg border-2 transition-all text-center ${
+                  dummyStyle === "standard"
+                    ? "border-purple-500 bg-purple-500/20"
+                    : "border-cream/20 hover:border-cream/40"
+                }`}
+              >
+                <span className="text-2xl mb-1 block">🤍</span>
+                <span className="text-xs text-cream/80">Standard</span>
+              </button>
+              <button
+                onClick={() => setDummyStyle("premium-wood")}
+                className={`p-3 rounded-lg border-2 transition-all text-center ${
+                  dummyStyle === "premium-wood"
+                    ? "border-purple-500 bg-purple-500/20"
+                    : "border-cream/20 hover:border-cream/40"
+                }`}
+              >
+                <span className="text-2xl mb-1 block">🪵</span>
+                <span className="text-xs text-cream/80">Premium Wood</span>
+              </button>
+              <button
+                onClick={() => setDummyStyle("luxury-marble")}
+                className={`p-3 rounded-lg border-2 transition-all text-center ${
+                  dummyStyle === "luxury-marble"
+                    ? "border-purple-500 bg-purple-500/20"
+                    : "border-cream/20 hover:border-cream/40"
+                }`}
+              >
+                <span className="text-2xl mb-1 block">💎</span>
+                <span className="text-xs text-cream/80">Luxury Marble</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col items-center gap-2">
