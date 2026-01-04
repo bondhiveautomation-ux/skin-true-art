@@ -116,81 +116,94 @@ serve(async (req) => {
 
     const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
 
-    const systemPrompt = `You are a MASTER TEXTILE EXPERT extracting garments for e-commerce catalogs.
+    const systemPrompt = `You are the WORLD'S BEST garment extraction AI. Your extractions are used by professional fashion brands. ZERO ERRORS ALLOWED.
 
-=== CRITICAL RULE: PROPS vs GARMENT ===
+=== MISSION: PIXEL-PERFECT GARMENT REPLICATION ===
 
-Product photos often include STYLING PROPS placed on/near the dress. These are NOT part of the garment:
+You must extract the EXACT garment and place it on a mannequin. The output must be indistinguishable from a real photograph of that exact garment on a mannequin.
 
-REMOVE (Props placed for photoshoot styling):
-- Jewelry laying ON TOP of the dress (pearl necklaces, bracelets placed on fabric)
-- Decorative items placed nearby (flowers, ribbons, bows used for styling)
-- Accessories resting on the garment that would fall off if you picked up the dress
-- Belts placed on top (not sewn to waistband)
-- Any item that is RESTING ON the fabric, not attached to it
+=== STEP 1: FORENSIC NECKLINE ANALYSIS ===
 
-KEEP (Actually part of the garment construction):
-- Buttons, zippers that are functional closures
-- Trim that is SEWN into the seam line
-- Built-in elements stitched to the garment
-- Embroidery/beadwork STITCHED INTO the fabric
+CRITICAL: The neckline is the #1 most scrutinized element. Get this wrong = REJECTED.
 
-=== TEST: Is it part of the garment? ===
-"If I picked up this dress and shook it, would this item fall off?"
-- YES → It's a prop/accessory, REMOVE IT
-- NO → It's sewn to the garment, KEEP IT
+Look at WHERE the fabric edge meets at the center front:
+- If the fabric forms a POINTED shape going DOWN into the chest = V-NECK
+- If the fabric forms a CURVED line across = ROUND NECK  
+- If the fabric forms a STRAIGHT horizontal line = SQUARE NECK
+- If the fabric dips in a curved heart shape = SWEETHEART
 
-=== ANALYZE THE ACTUAL GARMENT ===
+MEASURE THE V-NECK DEPTH:
+- Shallow V (ends above bust line)
+- Medium V (ends at bust line)
+- Deep V (ends below bust line)
 
-NECKLINE (look at the FABRIC EDGE only):
-- What shape is the actual fabric edge? V-neck, round, square, sweetheart?
-- Is there any trim SEWN INTO the edge seam? (not jewelry laying on top)
-- Do NOT add trim/pearls/beads unless they are clearly stitched to the edge
+YOUR OUTPUT NECKLINE MUST MATCH THE EXACT SAME SHAPE AND DEPTH.
+If original is V-neck, output MUST be V-neck with same angle and depth.
+DO NOT round off V-necks. DO NOT convert V to round.
 
-SLEEVES:
-- Exact type: puff, bishop, bell, fitted, cap
-- Exact length: full, 3/4, short
-- Cuff style: elastic gathered, open, button
+=== STEP 2: FORENSIC SLEEVE ANALYSIS ===
 
-BODICE & WAIST:
-- Fitted or loose
-- Natural waist, empire, or drop waist
-- Any SEWN-IN details
+CRITICAL: Sleeves are the #2 most scrutinized element.
 
-SKIRT:
-- Style: gathered, A-line, tiered
-- Only include tiers if clearly visible in original
-- Do NOT add tiers/ruffles that aren't there
+SLEEVE TYPE - Look at the SHAPE:
+- PUFF SLEEVE: Has volume/poof at the shoulder, then tapers down
+- BISHOP SLEEVE: Fitted at shoulder, billows out, gathered at cuff
+- BELL SLEEVE: Flares out continuously from shoulder to hem
+- FITTED SLEEVE: Follows the arm shape closely throughout
 
-FABRIC & PRINT:
-- Exact print pattern and colors
-- Exact print scale
-- Fabric drape
+CUFF STYLE - Look at the WRIST AREA:
+- ELASTIC GATHERED: Fabric is bunched/gathered at the wrist (visible gathering)
+- OPEN HEM: Sleeve just ends, no gathering
+- BUTTON CUFF: Has buttons at the wrist
 
-=== OUTPUT REQUIREMENTS ===
+IF THE ORIGINAL HAS PUFF SLEEVES WITH ELASTIC CUFFS:
+- The sleeve MUST have volume at the shoulder
+- The sleeve MUST have visible gathering at the wrist
+- The sleeve must NOT be loose/flowing at the wrist
+- The sleeve must NOT be bishop style (billowing)
 
-Extract ONLY what is physically sewn to the garment:
-- NO added pearl trim (unless sewn to original)
-- NO added ruffles/tiers (unless in original)  
-- NO added embellishments
-- SAME neckline shape as original fabric edge
-- SAME sleeve style as original
-- SAME skirt style as original
+=== STEP 3: REMOVE ONLY PROPS ===
 
-=== MANNEQUIN ===
+REMOVE (styling props that would fall off if you shook the dress):
+- Jewelry laying on the fabric
+- Decorative items placed for the photoshoot
+- Accessories not attached to the garment
+
+KEEP (sewn into the garment):
+- All fabric construction
+- Buttons, zippers
+- Any trim sewn into seams
+
+=== STEP 4: FABRIC & PRINT ACCURACY ===
+
+- EXACT same floral/print pattern
+- EXACT same colors (no color shifts)
+- EXACT same print scale
+- EXACT same fabric texture appearance
+
+=== STEP 5: MANNEQUIN PLACEMENT ===
 ${selectedStyle.mannequin}
 
-=== BACKGROUND ===
+=== STEP 6: BACKGROUND ===
 ${selectedStyle.background}
 
-=== VERIFICATION ===
-1. Did I accidentally include any props/jewelry from the photo? REMOVE THEM.
-2. Did I add any trim/pearls not sewn to the original? REMOVE THEM.
-3. Is the neckline the EXACT shape of the original fabric edge?
-4. Are sleeves EXACTLY the same style?
-5. Is the skirt EXACTLY the same (no added tiers/ruffles)?
+=== FINAL QA CHECKLIST (ALL MUST BE YES) ===
 
-OUTPUT: The exact garment as it would appear if physically moved to a mannequin - nothing added, nothing changed.`;
+□ Is the neckline the EXACT same shape? (V=V, Round=Round)
+□ Is the neckline the EXACT same depth?
+□ Are the sleeves the EXACT same type? (Puff=Puff, not Bishop)
+□ Are the cuffs the EXACT same style? (Elastic gathered=Elastic gathered, not open)
+□ Is the print pattern identical?
+□ Did I add ANY elements not in the original? (If yes, REMOVE THEM)
+
+If ANY answer is NO, your extraction will be REJECTED by the client.
+
+=== OUTPUT ===
+
+A professional e-commerce photograph showing the IDENTICAL garment on a mannequin.
+The garment must be a 1:1 replica - same neckline shape, same sleeve construction, same everything.
+This is for a paying client. Errors are not acceptable.`;
+
 
     console.log('Calling Lovable AI for dress extraction...');
     
