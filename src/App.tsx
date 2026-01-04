@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PresenceProvider } from "@/components/PresenceProvider";
-import { WelcomePopup } from "@/components/WelcomePopup";
-import Index from "./pages/Index";
+import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import CaptionStudio from "./pages/CaptionStudio";
@@ -14,6 +14,7 @@ import PhotographyStudio from "./pages/PhotographyStudio";
 import BrandingStudio from "./pages/BrandingStudio";
 import Pricing from "./pages/Pricing";
 import Classes from "./pages/Classes";
+import Info from "./pages/Info";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,13 +26,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <PresenceProvider>
-          <WelcomePopup />
           <Routes>
-            {/* Public route */}
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/info" element={<Info />} />
             
             {/* Protected routes */}
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/caption-studio" element={<ProtectedRoute><CaptionStudio /></ProtectedRoute>} />
             <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudio /></ProtectedRoute>} />
