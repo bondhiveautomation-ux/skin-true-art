@@ -116,6 +116,7 @@ const Dashboard = () => {
   const [cinematicImage, setCinematicImage] = useState<string | null>(null);
   const [selectedCinematicPreset, setSelectedCinematicPreset] = useState<string | null>(null);
   const [selectedCinematicBackground, setSelectedCinematicBackground] = useState<string | null>(null);
+  const [cinematicCustomBackground, setCinematicCustomBackground] = useState<string | null>(null);
   const [cinematicResult, setCinematicResult] = useState<string | null>(null);
   const [isTransformingCinematic, setIsTransformingCinematic] = useState(false);
 
@@ -803,6 +804,7 @@ const Dashboard = () => {
 
   const CINEMATIC_BACKGROUNDS = [
     { id: null, name: "None (Keep Original Background)", emoji: "📷" },
+    { id: "custom", name: "Use Own Background", emoji: "🖼️" },
     { id: "warm-neutral-luxury", name: "Warm Neutral Luxury Wall", emoji: "1️⃣" },
     { id: "dark-mocha-editorial", name: "Dark Mocha Editorial Studio", emoji: "2️⃣" },
     { id: "classic-off-white-panel", name: "Classic Off-White Panel Room", emoji: "3️⃣" },
@@ -814,6 +816,8 @@ const Dashboard = () => {
     { id: "soft-shadow-editorial", name: "Soft Shadow Editorial Backdrop", emoji: "9️⃣" },
     { id: "classic-dark-studio-fade", name: "Classic Dark Studio Fade", emoji: "🔟" },
   ];
+
+  const handleCinematicCustomBackgroundUpload = createImageUploadHandler(setCinematicCustomBackground);
 
   const handleCinematicImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -875,7 +879,12 @@ const Dashboard = () => {
     setCinematicResult(null);
     try {
       const { data, error } = await supabase.functions.invoke("cinematic-transform", {
-        body: { image: cinematicImage, presetId: selectedCinematicPreset, backgroundId: selectedCinematicBackground },
+        body: { 
+          image: cinematicImage, 
+          presetId: selectedCinematicPreset, 
+          backgroundId: selectedCinematicBackground === "custom" ? null : selectedCinematicBackground,
+          customBackgroundImage: selectedCinematicBackground === "custom" ? cinematicCustomBackground : null
+        },
       });
       if (error) throw error;
       if (data?.error) {
@@ -1917,6 +1926,21 @@ const Dashboard = () => {
                     </button>
                   ))}
                 </div>
+
+                {/* Custom Background Upload - show when "custom" is selected */}
+                {selectedCinematicBackground === "custom" && (
+                  <div className="max-w-xs mx-auto mt-4">
+                    <ImageUploader
+                      id="cinematic-custom-bg-upload"
+                      image={cinematicCustomBackground}
+                      onUpload={handleCinematicCustomBackgroundUpload}
+                      onRemove={() => setCinematicCustomBackground(null)}
+                      label="Upload Your Background"
+                      description="Your own background image"
+                      aspectRatio="portrait"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}

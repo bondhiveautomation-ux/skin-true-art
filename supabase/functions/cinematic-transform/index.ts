@@ -175,7 +175,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, presetId, backgroundId } = await req.json();
+    const { image, presetId, backgroundId, customBackgroundImage } = await req.json();
 
     if (!image) {
       return new Response(
@@ -184,8 +184,8 @@ serve(async (req) => {
       );
     }
 
-    // At least one option must be selected
-    if (!presetId && !backgroundId) {
+    // At least one option must be selected (preset, backgroundId, or customBackgroundImage)
+    if (!presetId && !backgroundId && !customBackgroundImage) {
       return new Response(
         JSON.stringify({ error: 'Please select at least a cinematic style or a background option' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -206,19 +206,34 @@ serve(async (req) => {
     }
 
     const background = backgroundId ? BACKGROUND_OPTIONS[backgroundId] : null;
-    console.log(`Processing cinematic transform with preset: ${preset?.name || 'None'}, background: ${background?.name || 'Original'}`);
+    const hasCustomBackground = !!customBackgroundImage;
+    console.log(`Processing cinematic transform with preset: ${preset?.name || 'None'}, background: ${background?.name || (hasCustomBackground ? 'Custom' : 'Original')}`);
 
     // Build background instructions
     let backgroundInstructions = '';
-    if (background) {
+    if (hasCustomBackground) {
+      backgroundInstructions = `
+BACKGROUND REPLACEMENT INSTRUCTIONS:
+You are provided with TWO images:
+1. The subject image (bridal portrait)
+2. A custom background image provided by the user
+
+Your task: Extract the subject (the person) from the first image and seamlessly composite them onto the second image (the custom background). 
+
+Requirements:
+- Keep the subject EXACTLY as they appear - same face, makeup, jewellery, clothing
+- Place the subject naturally within the custom background
+- Match the lighting of the background to the subject
+- Create realistic shadows and depth
+- Ensure seamless blending - the subject must look naturally photographed in this environment
+- Maintain photorealistic DSLR quality`;
+    } else if (background) {
       backgroundInstructions = `
 BACKGROUND REPLACEMENT INSTRUCTIONS:
 Replace ONLY the background using the following description while keeping the subject completely unchanged:
 ${background.prompt}
 
 Ensure realistic lighting integration, natural shadows, correct perspective, and seamless blending. The subject must look naturally photographed in the new environment.`;
-    } else {
-      backgroundInstructions = '';
     }
 
     // Build cinematic style instructions - this is the PRIMARY transformation
@@ -239,7 +254,7 @@ Keep the exact same pose, angle, and composition as the original photo.`;
 
     // Combine instructions with clear priority
     let taskInstructions = '';
-    if (preset && background) {
+    if (preset && (background || hasCustomBackground)) {
       taskInstructions = `
 DUAL TASK - Apply BOTH transformations:
 1. FIRST: Transform the pose/composition as described in the cinematic style
@@ -250,7 +265,7 @@ Both transformations must be applied together in the final output.`;
       taskInstructions = `
 SINGLE TASK - Cinematic Style Only:
 Transform the pose/composition as described. Keep the original background.`;
-    } else if (background) {
+    } else if (background || hasCustomBackground) {
       taskInstructions = `
 SINGLE TASK - Background Only:
 Keep the exact same pose. Only replace the background as described.`;
@@ -270,6 +285,17 @@ QUALITY REMINDERS:
 - Photorealistic DSLR quality, no AI artifacts
 - Output should look like a real professional photograph`;
 
+    // Build message content - include custom background image if provided
+    const messageContent: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
+      { type: "text", text: fullPrompt },
+      { type: "image_url", image_url: { url: image } }
+    ];
+    
+    // Add custom background image if provided
+    if (hasCustomBackground) {
+      messageContent.push({ type: "image_url", image_url: { url: customBackgroundImage } });
+    }
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -281,10 +307,7 @@ QUALITY REMINDERS:
         messages: [
           {
             role: "user",
-            content: [
-              { type: "text", text: fullPrompt },
-              { type: "image_url", image_url: { url: image } }
-            ]
+            content: messageContent
           }
         ],
         modalities: ["image", "text"]
@@ -325,7 +348,7 @@ QUALITY REMINDERS:
       JSON.stringify({ 
         result: generatedImage,
         presetName: preset?.name || 'None',
-        backgroundName: background?.name || 'Original'
+        backgroundName: background?.name || (hasCustomBackground ? 'Custom Background' : 'Original')
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
