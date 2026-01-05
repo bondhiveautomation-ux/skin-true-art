@@ -296,42 +296,75 @@ QUALITY REMINDERS:
       messageContent.push({ type: "image_url", image_url: { url: customBackgroundImage } });
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: messageContent
-          }
-        ],
-        modalities: ["image", "text"]
-      })
-    });
+    // Retry logic for resilience against temporary API outages
+    let response: Response | null = null;
+    let lastError: string = "";
+    const maxRetries = 2;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          console.log(`Retry attempt ${attempt}/${maxRetries}...`);
+          await new Promise(resolve => setTimeout(resolve, 2000 * attempt)); // Exponential backoff
+        }
+        
+        response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-pro-image-preview",
+            messages: [
+              {
+                role: "user",
+                content: messageContent
+              }
+            ],
+            modalities: ["image", "text"]
+          })
+        });
 
-    if (response.status === 429) {
-      return new Response(
-        JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "API credits exhausted. Please contact support." }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // On 503/502/500, retry
+        if (response.status >= 500 && attempt < maxRetries) {
+          lastError = `Server error: ${response.status}`;
+          console.log(`API returned ${response.status}, will retry...`);
+          continue;
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("AI API error:", response.status, errorText);
+          throw new Error(`AI API error: ${response.status}`);
+        }
+        
+        break; // Success, exit retry loop
+      } catch (fetchError) {
+        lastError = fetchError instanceof Error ? fetchError.message : String(fetchError);
+        console.error(`Fetch attempt ${attempt + 1} failed:`, lastError);
+        if (attempt === maxRetries) {
+          throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError}`);
+        }
+      }
     }
-
-    if (response.status === 402) {
-      return new Response(
-        JSON.stringify({ error: "API credits exhausted. Please contact support." }),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI API error:", response.status, errorText);
-      throw new Error(`AI API error: ${response.status}`);
+    
+    if (!response || !response.ok) {
+      throw new Error(`API request failed: ${lastError}`);
     }
 
     const data = await response.json();
