@@ -315,7 +315,8 @@ QUALITY REMINDERS:
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-pro-image-preview",
+            // Use Nano banana for image editing/generation
+            model: "google/gemini-2.5-flash-image-preview",
             messages: [
               {
                 role: "user",
@@ -369,6 +370,13 @@ QUALITY REMINDERS:
 
     const data = await response.json();
     console.log("AI response received");
+
+    // The gateway may return 200 with an error payload
+    if (data?.error) {
+      console.error("AI gateway error payload:", JSON.stringify(data));
+      const msg = typeof data.error?.message === "string" ? data.error.message : "AI gateway internal error";
+      throw new Error(msg);
+    }
 
     const generatedImage = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
