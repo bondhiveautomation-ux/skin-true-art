@@ -119,6 +119,12 @@ const Dashboard = () => {
   const [cinematicResult, setCinematicResult] = useState<string | null>(null);
   const [isTransformingCinematic, setIsTransformingCinematic] = useState(false);
 
+  // Background Creator states
+  const [selectedBackgroundPreset, setSelectedBackgroundPreset] = useState<string | null>(null);
+  const [backgroundCustomPrompt, setBackgroundCustomPrompt] = useState("");
+  const [generatedBackground, setGeneratedBackground] = useState<string | null>(null);
+  const [isGeneratingBackground, setIsGeneratingBackground] = useState(false);
+
   // Dress Change Studio states
   const { activeDresses, loading: dressesLoading } = useDressLibrary();
   const [dressChangeCategory, setDressChangeCategory] = useState<"male" | "female" | "kids">("female");
@@ -907,6 +913,73 @@ const Dashboard = () => {
     setCinematicResult(null);
     setSelectedCinematicPreset(null);
     setSelectedCinematicBackground(null);
+  };
+
+  // ==================== BACKGROUND CREATOR ====================
+  const BACKGROUND_PRESETS = [
+    { id: "luxury-neutral", name: "Luxury Neutral Studio", emoji: "🏛️" },
+    { id: "royal-mughal", name: "Royal Mughal Interior", emoji: "👑" },
+    { id: "floral-studio", name: "Floral Studio Wall", emoji: "🌸" },
+    { id: "modern-bridal", name: "Modern Bridal Studio", emoji: "✨" },
+    { id: "white-gold", name: "Classic White & Gold", emoji: "🤍" },
+    { id: "draped-fabric", name: "Soft Draped Fabric", emoji: "🎀" },
+    { id: "dark-luxury", name: "Dark Luxury Editorial", emoji: "🖤" },
+    { id: "palace-wall", name: "Palace-Inspired Wall", emoji: "🏰" },
+    { id: "window-light", name: "Window Light Studio", emoji: "🪟" },
+    { id: "makeup-studio", name: "Premium Makeup Studio", emoji: "💄" },
+  ];
+
+  const handleGenerateBackground = async () => {
+    if (!selectedBackgroundPreset && !backgroundCustomPrompt.trim()) {
+      toast({ title: "No input", description: "Please select a preset or enter a custom prompt", variant: "destructive" });
+      return;
+    }
+    if (!hasEnoughGems("generate-background")) {
+      toast({ title: "Insufficient gems", description: `You need ${getGemCost("generate-background")} gems for this feature`, variant: "destructive" });
+      return;
+    }
+    const gemResult = await deductGems("generate-background");
+    if (!gemResult.success) {
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+    setIsGeneratingBackground(true);
+    setGeneratedBackground(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-background", {
+        body: { presetId: selectedBackgroundPreset, customPrompt: backgroundCustomPrompt.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Generation Failed", description: data.error, variant: "destructive" });
+        return;
+      }
+      if (data?.result) {
+        setGeneratedBackground(data.result);
+        await logGeneration("Background Creator", [], [data.result]);
+        toast({ title: "Background Created!", description: `Generated: ${data.presetName}` });
+      }
+    } catch (error: any) {
+      toast({ title: "Generation Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsGeneratingBackground(false);
+    }
+  };
+
+  const handleDownloadGeneratedBackground = () => {
+    if (!generatedBackground) return;
+    const link = document.createElement("a");
+    link.href = generatedBackground;
+    link.download = `background-${selectedBackgroundPreset || 'custom'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleResetBackground = () => {
+    setGeneratedBackground(null);
+    setSelectedBackgroundPreset(null);
+    setBackgroundCustomPrompt("");
   };
 
 
@@ -1884,8 +1957,104 @@ const Dashboard = () => {
         </div>
       </ToolSection>
 
+      {/* Background Creator Section */}
+      <ToolSection
+        id="background-creator"
+        title="Background"
+        subtitle="Creator"
+        description="Generate premium, studio-grade bridal backgrounds for your composite work"
+      >
+        <div className="space-y-6">
+          {/* Preset Selection */}
+          {!generatedBackground && (
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-foreground text-center">
+                Select Background Style (Optional)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                {BACKGROUND_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => setSelectedBackgroundPreset(selectedBackgroundPreset === preset.id ? null : preset.id)}
+                    disabled={isGeneratingBackground}
+                    className={`relative rounded-xl border text-left transition-all duration-300 p-4 ${
+                      selectedBackgroundPreset === preset.id
+                        ? "border-gold/50 bg-gold/10 text-cream shadow-gold"
+                        : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30 hover:bg-charcoal"
+                    } ${isGeneratingBackground ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg flex-shrink-0">{preset.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium leading-tight">{preset.name}</p>
+                      </div>
+                    </div>
+                    {selectedBackgroundPreset === preset.id && (
+                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Classes Preview Section */}
+          {/* Custom Prompt */}
+          {!generatedBackground && (
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-foreground text-center">
+                Custom Description (Optional)
+              </label>
+              <Textarea
+                placeholder="Describe your ideal background... e.g., 'Warm terracotta walls with soft golden hour lighting' or 'Minimalist white studio with subtle shadows'"
+                value={backgroundCustomPrompt}
+                onChange={(e) => setBackgroundCustomPrompt(e.target.value)}
+                disabled={isGeneratingBackground}
+                className="min-h-[80px] bg-charcoal border-gold/20 text-cream placeholder:text-cream/30 focus:border-gold/50 resize-none"
+              />
+              <p className="text-xs text-cream/40 text-center">
+                {selectedBackgroundPreset 
+                  ? "Your custom description will enhance the selected preset"
+                  : "Select a preset above or describe your own background"}
+              </p>
+            </div>
+          )}
+
+          {/* Generate Button */}
+          {!generatedBackground && (
+            <div className="flex flex-col items-center gap-2">
+              <LoadingButton
+                onClick={handleGenerateBackground}
+                isLoading={isGeneratingBackground}
+                loadingText="Creating Background..."
+                disabled={!selectedBackgroundPreset && !backgroundCustomPrompt.trim()}
+                size="lg"
+                className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate Background
+              </LoadingButton>
+              <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+                <Diamond className="w-3.5 h-3.5 text-purple-400" />
+                <span>Costs {getGemCost("generate-background")} gems</span>
+              </div>
+            </div>
+          )}
+
+          {/* Result */}
+          {generatedBackground && (
+            <ResultDisplay
+              result={generatedBackground}
+              onDownload={handleDownloadGeneratedBackground}
+              onRegenerate={handleGenerateBackground}
+              onReset={handleResetBackground}
+              isProcessing={isGeneratingBackground}
+              resetLabel="Create Another"
+            />
+          )}
+        </div>
+      </ToolSection>
+
+
       <ClassesPreview />
 
       {/* Footer */}
