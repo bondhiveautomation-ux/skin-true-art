@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.cinematic-transform]
 verify_jwt = false
+
+[functions.generate-background]
+verify_jwt = false
