@@ -226,7 +226,7 @@ Generate a HIGH-RESOLUTION image of the SAME person with the specified makeup pr
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
+        model: "google/gemini-3-pro-image-preview",
         messages: [
           {
             role: "user",
