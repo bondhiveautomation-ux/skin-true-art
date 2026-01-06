@@ -119,7 +119,7 @@ The output must look like a professional photograph of the same person who simpl
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: "google/gemini-2.5-flash-image-preview",
         messages: [
           {
             role: "user",
@@ -163,6 +163,16 @@ The output must look like a professional photograph of the same person who simpl
 
     const data = await response.json();
     console.log("AI response received");
+
+    // Check for error payload in 200 response
+    if (data?.error) {
+      console.error("AI gateway error payload:", JSON.stringify(data));
+      const msg = typeof data.error?.message === "string" ? data.error.message : "AI service temporarily unavailable";
+      return new Response(
+        JSON.stringify({ error: msg }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 

@@ -245,6 +245,16 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
     const data = await response.json();
     console.log("AI response received");
 
+    // Check for error payload in 200 response
+    if (data?.error) {
+      console.error("AI gateway error payload:", JSON.stringify(data));
+      const msg = typeof data.error?.message === "string" ? data.error.message : "AI service temporarily unavailable";
+      return new Response(
+        JSON.stringify({ error: msg }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Extract the enhanced image from the response
     const enhancedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
