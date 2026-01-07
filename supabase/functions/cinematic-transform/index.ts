@@ -104,6 +104,96 @@ CAMERA: Angled to capture both the real subject AND their mirror reflection simu
 VISIBLE: Part of subject's back/side + their face visible IN THE MIRROR reflection.
 FRAMING: Artistic split composition - real subject on one side, mirror with reflection on other.
 This requires adding a MIRROR element to the scene showing the subject's reflection.`
+  },
+  "golden-hour-silhouette": {
+    name: "Golden Hour Silhouette",
+    prompt: `CAMERA: Low angle shooting toward strong backlight (sun/window behind subject).
+LIGHTING: Intense golden rim light outlining the subject's silhouette. Face partially in shadow with golden edge glow.
+BODY: Subject standing in profile or three-quarter view, dupatta catching the golden backlight.
+VISIBLE: Silhouette outline with glowing golden rim, hair lit from behind, fabric translucent edges.
+FRAMING: Full or 3/4 body with dramatic backlighting creating ethereal golden aura.
+This is a BACKLIT SILHOUETTE shot with golden hour warmth.`
+  },
+  "dramatic-low-angle": {
+    name: "Dramatic Low-Angle Power",
+    prompt: `CAMERA: Very low position, shooting UPWARD at subject from below waist level.
+BODY: Subject standing tall, chin slightly raised, powerful confident posture.
+VISIBLE: Full figure looming above camera, lehenga fabric dramatic from below, ceiling/sky visible behind.
+FRAMING: Subject appears powerful and majestic, shot from ground level looking up.
+This is a LOW ANGLE HERO shot - camera is on ground, subject towers above.`
+  },
+  "hands-henna-detail": {
+    name: "Mehndi Hands Artistry",
+    prompt: `CAMERA: Close macro shot focused on hands.
+BODY: Both hands raised near face or chest, fingers gracefully posed, showing intricate mehndi/henna patterns.
+VISIBLE: Detailed henna designs on palms and fingers, rings and bangles, part of face soft in background.
+FRAMING: EXTREME CLOSE-UP of hands only, face blurred behind. Henna patterns are the hero.
+This is a HANDS DETAIL shot showcasing mehndi artistry.`
+  },
+  "veil-mystery": {
+    name: "Veiled Mystery Portrait",
+    prompt: `CAMERA: Eye level, intimate portrait distance.
+BODY: Dupatta/veil partially covering face - draped over head, one eye or half face visible through sheer fabric.
+VISIBLE: Face seen THROUGH translucent veil fabric, creating mystery and romance. Fabric texture visible.
+FRAMING: Head and shoulders, emphasis on the veil creating soft diffusion over features.
+This is a VEILED PORTRAIT - face partially hidden behind dupatta creating romantic mystery.`
+  },
+  "twirl-motion": {
+    name: "Lehenga Twirl Motion",
+    prompt: `CAMERA: Slightly low angle, capturing spinning motion.
+BODY: Subject MID-SPIN, lehenga fabric swirling outward in circular motion, dupatta floating.
+VISIBLE: Fabric in motion blur, lehenga spread in circular pattern, joyful expression, arms extended.
+FRAMING: Full body with emphasis on the circular motion of swirling fabric.
+This is a SPINNING ACTION shot - frozen moment of joyful twirl.`
+  },
+  "dutch-angle-editorial": {
+    name: "Dutch Angle Editorial",
+    prompt: `CAMERA: Tilted 15-20 degrees (Dutch angle), creating dynamic diagonal composition.
+BODY: Subject in confident pose, body angled opposite to camera tilt for balance.
+VISIBLE: Full or 3/4 body with dramatic diagonal lines, editorial fashion magazine aesthetic.
+FRAMING: Intentionally tilted frame creating edgy, high-fashion magazine cover look.
+This is a DUTCH ANGLE shot - camera deliberately tilted for editorial drama.`
+  },
+  "reflection-floor": {
+    name: "Floor Reflection Glamour",
+    prompt: `CAMERA: Low angle near reflective floor surface.
+COMPOSITION: Subject standing on polished marble/reflective floor, their reflection visible below.
+VISIBLE: Full standing figure with mirror-like reflection on glossy floor surface below feet.
+FRAMING: Full body centered with symmetrical reflection extending downward.
+This is a REFLECTION shot - polished floor creates mirror image beneath subject.`
+  },
+  "intimate-profile": {
+    name: "Intimate Profile Silhouette",
+    prompt: `CAMERA: Exact 90-degree side angle, subject in pure profile view.
+BODY: Face in perfect profile - nose, lips, chin creating elegant outline. Eyes looking straight ahead (not at camera).
+VISIBLE: Complete side profile of face, neck, shoulder line. Single earring visible, nose pin prominent.
+FRAMING: Head and neck only, emphasis on the elegant profile silhouette line.
+This is a PURE PROFILE shot - perfect side view of face.`
+  },
+  "dreamy-bokeh-lights": {
+    name: "Dreamy Bokeh Fairylights",
+    prompt: `CAMERA: Standard portrait angle with wide aperture creating heavy background blur.
+LIGHTING: Warm fairy lights/bokeh orbs scattered behind subject creating magical dreamy atmosphere.
+BODY: Subject in relaxed pose, soft expression, warmly lit face.
+VISIBLE: Sharp subject with heavily blurred warm light orbs in background creating romantic ambiance.
+FRAMING: Head to waist, shallow depth of field with magical light bokeh behind.
+This is a BOKEH PORTRAIT with dreamy background lights.`
+  },
+  "staircase-regal": {
+    name: "Staircase Regal Descent",
+    prompt: `CAMERA: Below subject, shooting upward as subject descends stairs.
+BODY: Subject on staircase, one hand on railing, lehenga trailing on steps behind, graceful descent pose.
+VISIBLE: Full figure on stairs, fabric flowing down steps, regal posture, architectural elements.
+FRAMING: Environmental portrait showing subject's grandeur on elegant staircase.
+This is a STAIRCASE PORTRAIT - subject descending stairs like royalty.`
+  },
+  "backless-elegance": {
+    name: "Backless Blouse Elegance",
+    prompt: `CAMERA: Behind subject at slight angle, focusing on back.
+BODY: Subject's BACK facing camera, head turned slightly showing profile, elegant backless blouse visible.
+VISIBLE: Bare back, blouse details, back of neck, hair styled up or to side, subtle profile.
+FRAMING: Upper body from behind, emphasis on the elegant back and blouse design.
+This is a BACK DETAIL shot showcasing backless blouse design.`
   }
 };
 

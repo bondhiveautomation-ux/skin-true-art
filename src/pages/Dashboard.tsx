@@ -800,6 +800,17 @@ const Dashboard = () => {
     { id: "floor-seated", name: "Floor-Seated Royal Pose", emoji: "🧘‍♀️" },
     { id: "jewellery-glow", name: "Jewellery Glow Portrait", emoji: "✨" },
     { id: "mirror", name: "Mirror Reflection Elegance", emoji: "🪞" },
+    { id: "golden-hour-silhouette", name: "Golden Hour Silhouette", emoji: "🌅" },
+    { id: "dramatic-low-angle", name: "Dramatic Low-Angle Power", emoji: "⚡" },
+    { id: "hands-henna-detail", name: "Mehndi Hands Artistry", emoji: "🖐️" },
+    { id: "veil-mystery", name: "Veiled Mystery Portrait", emoji: "🧕" },
+    { id: "twirl-motion", name: "Lehenga Twirl Motion", emoji: "💃" },
+    { id: "dutch-angle-editorial", name: "Dutch Angle Editorial", emoji: "📐" },
+    { id: "reflection-floor", name: "Floor Reflection Glamour", emoji: "🪩" },
+    { id: "intimate-profile", name: "Intimate Profile Silhouette", emoji: "🗿" },
+    { id: "dreamy-bokeh-lights", name: "Dreamy Bokeh Fairylights", emoji: "✨" },
+    { id: "staircase-regal", name: "Staircase Regal Descent", emoji: "🏰" },
+    { id: "backless-elegance", name: "Backless Blouse Elegance", emoji: "💫" },
   ];
 
   const CINEMATIC_BACKGROUNDS = [
