@@ -17,8 +17,8 @@ import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
 import { getGemCost } from "@/lib/gemCosts";
 
 type PhotoType = "product" | "portrait" | "lifestyle";
-type StylePreset = "clean_studio" | "luxury_brand" | "soft_natural" | "dark_premium" | "ecommerce_white" | "instagram_editorial";
-type BackgroundOption = "keep_original" | "clean_studio" | "premium_lifestyle";
+type StylePreset = "clean_studio" | "luxury_brand" | "soft_natural" | "dark_premium" | "ecommerce_white" | "royal_monochrome" | "instagram_editorial";
+type BackgroundOption = "keep_original" | "clean_studio" | "premium_lifestyle" | "royal_bridal_chamber" | "garden_pavilion" | "palace_corridor";
 type OutputQuality = "hd" | "ultra_hd";
 type SkinFinishIntensity = "light" | "medium" | "pro";
 
@@ -33,6 +33,7 @@ const PhotographyStudio = () => {
   // States
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
+  const [creativeBrief, setCreativeBrief] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [photoType, setPhotoType] = useState<PhotoType>("portrait");
   const [stylePreset, setStylePreset] = useState<StylePreset>("clean_studio");
@@ -171,10 +172,11 @@ const PhotographyStudio = () => {
 
       if (data?.enhancedImage) {
         setEnhancedImage(data.enhancedImage);
+        setCreativeBrief(data.creativeBrief || null);
         await logGeneration("Photography Studio", [], [data.enhancedImage]);
         toast({
           title: "Photo enhanced!",
-          description: "Your professional-quality image is ready",
+          description: data.creativeBrief ? data.creativeBrief.substring(0, 100) + "..." : "Your professional-quality image is ready",
         });
       }
     } catch (error: any) {
@@ -202,6 +204,7 @@ const PhotographyStudio = () => {
   const handleReset = () => {
     setOriginalImage(null);
     setEnhancedImage(null);
+    setCreativeBrief(null);
     setSliderPosition(50);
     setZoomLevel(1);
   };
@@ -227,18 +230,22 @@ const PhotographyStudio = () => {
   ];
 
   const stylePresets = [
-    { value: "clean_studio", label: "Clean Studio" },
-    { value: "luxury_brand", label: "Luxury Brand" },
-    { value: "soft_natural", label: "Soft Natural Light" },
-    { value: "dark_premium", label: "Dark Premium" },
-    { value: "ecommerce_white", label: "E-commerce White" },
-    { value: "instagram_editorial", label: "Instagram Editorial" },
+    { value: "clean_studio", label: "Clean Studio", desc: "Professional studio lighting" },
+    { value: "luxury_brand", label: "Couture Mood", desc: "Luxury brand editorial" },
+    { value: "soft_natural", label: "Soft Natural Light", desc: "Golden hour warmth" },
+    { value: "dark_premium", label: "Dark Premium", desc: "Dramatic shadows" },
+    { value: "ecommerce_white", label: "E-commerce White", desc: "Pure white backdrop" },
+    { value: "royal_monochrome", label: "Silver Screen", desc: "Classic B&W glamour" },
+    { value: "instagram_editorial", label: "Instagram Editorial", desc: "Trendy lifestyle" },
   ];
 
   const backgroundOptions = [
-    { value: "keep_original", label: "Keep Original (Enhanced)" },
-    { value: "clean_studio", label: "Clean Studio Background" },
-    { value: "premium_lifestyle", label: "Premium Lifestyle" },
+    { value: "keep_original", label: "Keep Original (Enhanced)", desc: "Refine existing background" },
+    { value: "clean_studio", label: "Clean Studio Background", desc: "Seamless gradient" },
+    { value: "premium_lifestyle", label: "Premium Lifestyle", desc: "Aspirational interior" },
+    { value: "royal_bridal_chamber", label: "Royal Bridal Chamber", desc: "Gold trim & ivory panels" },
+    { value: "garden_pavilion", label: "Garden Pavilion", desc: "Elegant outdoor setting" },
+    { value: "palace_corridor", label: "Palace Corridor", desc: "Grand royal heritage" },
   ];
 
   return (
@@ -360,11 +367,11 @@ const PhotographyStudio = () => {
                   </div>
                 </div>
 
-                {/* Studio Skin Finish - Only for Portrait/Lifestyle */}
+                {/* Skin Finish (Frequency Separation) - Only for Portrait/Lifestyle */}
                 <div className={`space-y-3 ${photoType === "product" ? "opacity-40 pointer-events-none" : ""}`}>
                   <div className="flex items-center justify-between">
                     <label className="block text-sm font-medium text-cream">
-                      Studio Skin Finish <span className="text-cream/40 font-normal">(Optional)</span>
+                      Skin Finish <span className="text-cream/40 font-normal">(Frequency Separation)</span>
                     </label>
                     <Switch
                       id="skin-finish"
@@ -377,7 +384,7 @@ const PhotographyStudio = () => {
                   <p className="text-xs text-cream/50">
                     {photoType === "product" 
                       ? "Not available for product photos" 
-                      : "Professionally smooth skin while preserving natural texture and realism."}
+                      : "Treats skin as texture layer—prevents 'plastic AI face' look."}
                   </p>
                   
                   {/* Intensity Selector - Only visible when enabled */}
@@ -427,68 +434,81 @@ const PhotographyStudio = () => {
                   )}
                 </div>
 
-                {/* Output Quality */}
+                {/* Output Fidelity */}
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-cream">Output Quality</label>
+                  <label className="block text-sm font-medium text-cream">Output Fidelity</label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setOutputQuality("hd")}
-                      className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
+                      className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-300 ${
                         outputQuality === "hd"
-                          ? "border-gold/50 bg-gold/10 text-gold shadow-gold"
-                          : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30"
+                          ? "border-gold/50 bg-gold/10 shadow-gold"
+                          : "border-gold/15 bg-charcoal-light hover:border-gold/30"
                       }`}
                     >
-                      Standard HD
+                      <span className={`block text-sm font-medium ${outputQuality === "hd" ? "text-gold" : "text-cream/70"}`}>
+                        Editorial Print
+                      </span>
+                      <span className="block text-[10px] text-cream/40 mt-0.5">HD Quality</span>
                     </button>
                     <button
                       onClick={() => setOutputQuality("ultra_hd")}
-                      className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
+                      className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-300 relative ${
                         outputQuality === "ultra_hd"
-                          ? "border-gold/50 bg-gold/10 text-gold shadow-gold"
-                          : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30"
+                          ? "border-gold/50 bg-gold/10 shadow-gold"
+                          : "border-gold/15 bg-charcoal-light hover:border-gold/30"
                       }`}
                     >
-                      Ultra HD (DSLR)
+                      <span className="absolute -top-1.5 right-2 text-[8px] text-gold bg-charcoal px-1.5 rounded">PRO</span>
+                      <span className={`block text-sm font-medium ${outputQuality === "ultra_hd" ? "text-gold" : "text-cream/70"}`}>
+                        Master Portfolio
+                      </span>
+                      <span className="block text-[10px] text-cream/40 mt-0.5">Ultra HD • DSLR</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Style Presets */}
+                {/* Artistic Direction - Style Presets */}
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-cream">Style Preset</label>
+                  <label className="block text-sm font-medium text-cream">Artistic Direction <span className="text-cream/40 font-normal">(Global Illumination)</span></label>
                   <div className="grid grid-cols-2 gap-2">
                     {stylePresets.map((preset) => (
                       <button
                         key={preset.value}
                         onClick={() => setStylePreset(preset.value as StylePreset)}
-                        className={`py-2.5 px-3 rounded-xl border text-xs font-medium transition-all duration-300 ${
+                        className={`py-2.5 px-3 rounded-xl border text-left transition-all duration-300 ${
                           stylePreset === preset.value
-                            ? "border-gold/50 bg-gold/10 text-gold shadow-gold"
-                            : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30"
+                            ? "border-gold/50 bg-gold/10 shadow-gold"
+                            : "border-gold/15 bg-charcoal-light hover:border-gold/30"
                         }`}
                       >
-                        {preset.label}
+                        <span className={`block text-xs font-medium ${stylePreset === preset.value ? "text-gold" : "text-cream/70"}`}>
+                          {preset.label}
+                        </span>
+                        <span className="block text-[10px] text-cream/40 mt-0.5">{preset.desc}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Background Handling */}
+                {/* Background Logic - Environmental Set */}
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-cream">Background</label>
-                  <div className="space-y-2">
+                  <label className="block text-sm font-medium text-cream">Background Logic <span className="text-cream/40 font-normal">(Environmental Set)</span></label>
+                  <div className="grid grid-cols-2 gap-2">
                     {backgroundOptions.map((option) => (
                       <button
                         key={option.value}
                         onClick={() => setBackgroundOption(option.value as BackgroundOption)}
-                        className={`w-full py-2.5 px-4 rounded-xl border text-left text-sm font-medium transition-all duration-300 ${
+                        className={`py-2.5 px-3 rounded-xl border text-left transition-all duration-300 ${
                           backgroundOption === option.value
-                            ? "border-gold/50 bg-gold/10 text-gold shadow-gold"
-                            : "border-gold/15 bg-charcoal-light text-cream/70 hover:border-gold/30"
+                            ? "border-gold/50 bg-gold/10 shadow-gold"
+                            : "border-gold/15 bg-charcoal-light hover:border-gold/30"
                         }`}
                       >
-                        {option.label}
+                        <span className={`block text-xs font-medium ${backgroundOption === option.value ? "text-gold" : "text-cream/70"}`}>
+                          {option.label}
+                        </span>
+                        <span className="block text-[10px] text-cream/40 mt-0.5">{option.desc}</span>
                       </button>
                     ))}
                   </div>
