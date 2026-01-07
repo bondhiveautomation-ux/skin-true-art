@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Upload, Loader2, Download, Copy, Search, Sparkles, Diamond } from "lucide-react";
+import { MakeupDNAStudio } from "@/components/makeup/MakeupDNAStudio";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -94,11 +95,6 @@ const Dashboard = () => {
   const [poseTransferResult, setPoseTransferResult] = useState<string | null>(null);
   const [isTransferringPose, setIsTransferringPose] = useState(false);
   
-  // Makeup Studio states
-  const [makeupImage, setMakeupImage] = useState<string | null>(null);
-  const [selectedMakeupStyle, setSelectedMakeupStyle] = useState<string>("");
-  const [makeupResult, setMakeupResult] = useState<string | null>(null);
-  const [isApplyingMakeup, setIsApplyingMakeup] = useState(false);
   
 
   // Swap Studio (Face Swap) states
@@ -509,76 +505,6 @@ const Dashboard = () => {
     setPoseTransferResult(null);
   };
 
-  // ==================== MAKEUP STUDIO ====================
-  const handleMakeupImageUpload = createImageUploadHandler(setMakeupImage, [() => setMakeupResult(null)]);
-
-  const makeupStyles = [
-    { id: "soft-glam", name: "Soft Glam", description: "Subtle contour, nude lips, warm eyeshadow", emoji: "✨" },
-    { id: "bridal-glow", name: "Bridal Glow", description: "Dewy base, highlighted cheeks, bold lashes", emoji: "💍" },
-    { id: "bridal-luxe-glam", name: "Bridal Luxe Glam", description: "South Asian bridal glam, champagne-gold eyes", emoji: "👑" },
-    { id: "bold-night-out", name: "Bold Night Out", description: "Smokey eyes, winged liner, deep lipstick", emoji: "🌙" },
-    { id: "clean-girl", name: "Clean Girl", description: "Minimal makeup, glossy lips, fresh skin", emoji: "🌿" },
-    { id: "instagram-trendy", name: "Instagram Trendy", description: "Sharp brows, light contour, vibrant eyeshadow", emoji: "📸" },
-    { id: "matte-professional", name: "Matte Professional", description: "Smooth matte finish, neutral tones", emoji: "💼" },
-    { id: "classic-red-glam", name: "Classic Red Glam", description: "Red lips, cat eyeliner, vintage glamour", emoji: "💄" },
-  ];
-
-  const handleApplyMakeup = async () => {
-    if (!makeupImage) {
-      toast({ title: "Missing Image", description: "Please upload a face photo first", variant: "destructive" });
-      return;
-    }
-    if (!selectedMakeupStyle) {
-      toast({ title: "No Style Selected", description: "Please select a makeup style", variant: "destructive" });
-      return;
-    }
-    if (!hasEnoughGems("apply-makeup")) {
-      toast({ title: "Insufficient gems", description: `You need ${getGemCost("apply-makeup")} gems for this feature`, variant: "destructive" });
-      return;
-    }
-    const gemResult = await deductGems("apply-makeup");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
-    setIsApplyingMakeup(true);
-    setMakeupResult(null);
-    try {
-      const { data, error } = await supabase.functions.invoke('apply-makeup', {
-        body: { image: makeupImage, makeupStyle: selectedMakeupStyle }
-      });
-      if (error) throw error;
-      if (data?.error) {
-        toast({ title: "Makeup Application Failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      if (data?.generatedImageUrl) {
-        setMakeupResult(data.generatedImageUrl);
-        await logGeneration("Makeup Studio", [], [data.generatedImageUrl]);
-        toast({ title: "Makeup Applied!", description: "Your look has been created successfully" });
-      }
-    } catch (error: any) {
-      toast({ title: "Application Failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsApplyingMakeup(false);
-    }
-  };
-
-  const handleDownloadMakeup = () => {
-    if (!makeupResult) return;
-    const link = document.createElement('a');
-    link.href = makeupResult;
-    link.download = 'makeup-result.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleResetMakeup = () => {
-    setMakeupImage(null);
-    setSelectedMakeupStyle("");
-    setMakeupResult(null);
-  };
 
 
   // ==================== SWAP STUDIO (FACE SWAP) ====================
@@ -1413,66 +1339,14 @@ const Dashboard = () => {
         </div>
       </ToolSection>
 
-      {/* Makeup Studio Section */}
+      {/* Makeup DNA Studio Section */}
       <ToolSection
         id="makeup-studio"
-        title="Make Me Up –"
-        subtitle="AI Makeup Studio"
-        description="Apply professional-grade makeup styles digitally"
+        title="Makeup DNA –"
+        subtitle="Pro Studio"
+        description="Professional layer-based makeup system with DNA extraction and manual control"
       >
-        <div className="space-y-6">
-          <div className="max-w-sm mx-auto">
-            <ImageUploader
-              id="makeup-upload"
-              image={makeupImage}
-              onUpload={handleMakeupImageUpload}
-              onRemove={handleResetMakeup}
-              label="Upload a Clear Face Photo"
-            />
-          </div>
-
-          {makeupImage && (
-            <div className="space-y-3">
-              <label className="block text-sm font-medium text-foreground text-center">Select Makeup Style</label>
-              <SelectionGrid
-                options={makeupStyles}
-                selectedId={selectedMakeupStyle}
-                onSelect={setSelectedMakeupStyle}
-                disabled={isApplyingMakeup}
-                columns={4}
-              />
-            </div>
-          )}
-
-          <div className="flex flex-col items-center gap-2">
-            <LoadingButton
-              onClick={handleApplyMakeup}
-              isLoading={isApplyingMakeup}
-              loadingText="Applying Makeup..."
-              disabled={!makeupImage || !selectedMakeupStyle}
-              size="lg"
-              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
-            >
-              Apply Selected Makeup
-            </LoadingButton>
-            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-              <Diamond className="w-3.5 h-3.5 text-purple-400" />
-              <span>Costs {getGemCost("apply-makeup")} gems</span>
-            </div>
-          </div>
-
-          {makeupResult && (
-            <ResultDisplay
-              result={makeupResult}
-              originalImages={makeupImage ? [{ src: makeupImage, label: "Original" }] : []}
-              onDownload={handleDownloadMakeup}
-              onRegenerate={handleApplyMakeup}
-              onReset={handleResetMakeup}
-              isProcessing={isApplyingMakeup}
-              resetLabel="Try Another Style"
-            />
-          )}
-        </div>
+        <MakeupDNAStudio onLogGeneration={logGeneration} />
       </ToolSection>
 
 
