@@ -28,7 +28,7 @@ const FEATURES = [
   { icon: Camera, title: "Photo Studio", description: "DSLR-quality" },
   { icon: Type, title: "Captions", description: "Bangla/English" },
   { icon: Shield, title: "Branding", description: "Logo batch" },
-  { icon: Palette, title: "Makeup AI", description: "Full look transfer" },
+  { icon: Palette, title: "Makeup AI", description: "Professional styles" },
 ];
 
 const BENEFITS = [

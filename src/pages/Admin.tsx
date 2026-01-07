@@ -241,11 +241,6 @@ const Admin = () => {
       inputLabels: ["Character", "Pose Reference"],
       outputLabel: "New Pose"
     },
-    "Full Look Transfer": {
-      description: "Transfers the complete look (outfit, styling) from a reference image onto your character.",
-      inputLabels: ["Character", "Style Reference"],
-      outputLabel: "New Look"
-    },
     "Apply Makeup": {
       description: "Applies makeup styling from a reference to a portrait while maintaining natural appearance.",
       inputLabels: ["Portrait", "Makeup Reference"],

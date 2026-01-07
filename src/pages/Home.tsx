@@ -51,7 +51,7 @@ const Home = () => {
     {
       title: homeContent.feature_group_2_title || "Fashion & Look Transformation",
       description: homeContent.feature_group_2_desc || "Transform outfits, apply professional makeup, and create stunning fashion content.",
-      tools: (homeContent.feature_group_2_tools || "Dress Change, Makeup Studio, Full Look Transfer, Dress Extractor").split(", ")
+      tools: (homeContent.feature_group_2_tools || "Dress Change, Makeup Studio, Dress Extractor").split(", ")
     },
     {
       title: homeContent.feature_group_3_title || "Professional Content Creation",
