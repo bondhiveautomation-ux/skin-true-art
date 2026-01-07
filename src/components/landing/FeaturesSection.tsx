@@ -24,7 +24,6 @@ const featureSectionIds: Record<string, string> = {
   feature_5: "background-saver",
   feature_6: "pose-transfer",
   feature_7: "makeup-studio",
-  feature_8: "full-look-transfer",
   feature_9: "dress-change-studio",
   feature_10: "/caption-studio",
   feature_11: "/photography-studio",

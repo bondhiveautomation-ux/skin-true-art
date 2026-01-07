@@ -5,7 +5,6 @@ export const GEM_COSTS = {
   "apply-makeup": 15,
   "generate-character-image": 15,
   "pose-transfer": 15,
-  "full-look-transfer": 15,
   "face-swap": 15,
   "cinematic-transform": 15,
   "extract-dress-to-dummy": 15, // Premium model (Gemini 3 Pro)
@@ -32,7 +31,7 @@ export const FEATURE_CATEGORIES = {
   "high-impact": {
     label: "High-Impact Features",
     cost: 15,
-    features: ["dress-change", "apply-makeup", "generate-character-image", "pose-transfer", "full-look-transfer", "face-swap", "cinematic-transform", "extract-dress-to-dummy", "generate-background"],
+    features: ["dress-change", "apply-makeup", "generate-character-image", "pose-transfer", "face-swap", "cinematic-transform", "extract-dress-to-dummy", "generate-background"],
   },
   "studio-utility": {
     label: "Studio Utility Features", 

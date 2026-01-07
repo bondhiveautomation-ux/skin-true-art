@@ -100,11 +100,6 @@ const Dashboard = () => {
   const [makeupResult, setMakeupResult] = useState<string | null>(null);
   const [isApplyingMakeup, setIsApplyingMakeup] = useState(false);
   
-  // Full Look Transfer states
-  const [fullLookFaceImage, setFullLookFaceImage] = useState<string | null>(null);
-  const [fullLookReferenceImage, setFullLookReferenceImage] = useState<string | null>(null);
-  const [fullLookResult, setFullLookResult] = useState<string | null>(null);
-  const [isTransferringLook, setIsTransferringLook] = useState(false);
 
   // Swap Studio (Face Swap) states
   const [swapInfluencerImage, setSwapInfluencerImage] = useState<string | null>(null);
@@ -585,66 +580,6 @@ const Dashboard = () => {
     setMakeupResult(null);
   };
 
-  // ==================== FULL LOOK TRANSFER ====================
-  const handleFullLookFaceUpload = createImageUploadHandler(setFullLookFaceImage, [() => setFullLookResult(null)]);
-  const handleFullLookReferenceUpload = createImageUploadHandler(setFullLookReferenceImage, [() => setFullLookResult(null)]);
-
-  const handleFullLookTransfer = async () => {
-    if (!fullLookFaceImage) {
-      toast({ title: "Missing Face Image", description: "Please upload the influencer face photo", variant: "destructive" });
-      return;
-    }
-    if (!fullLookReferenceImage) {
-      toast({ title: "Missing Reference Image", description: "Please upload the reference look image", variant: "destructive" });
-      return;
-    }
-    if (!hasEnoughGems("full-look-transfer")) {
-      toast({ title: "Insufficient gems", description: `You need ${getGemCost("full-look-transfer")} gems for this feature`, variant: "destructive" });
-      return;
-    }
-    const gemResult = await deductGems("full-look-transfer");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
-    setIsTransferringLook(true);
-    setFullLookResult(null);
-    try {
-      const { data, error } = await supabase.functions.invoke('full-look-transfer', {
-        body: { influencerFaceImage: fullLookFaceImage, referenceLookImage: fullLookReferenceImage }
-      });
-      if (error) throw error;
-      if (data?.error) {
-        toast({ title: "Transfer Failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      if (data?.generatedImageUrl) {
-        setFullLookResult(data.generatedImageUrl);
-        await logGeneration("Full Look Transfer", [], [data.generatedImageUrl]);
-        toast({ title: "Full Look Transfer Complete!", description: "Your influencer look has been created successfully" });
-      }
-    } catch (error: any) {
-      toast({ title: "Transfer Failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsTransferringLook(false);
-    }
-  };
-
-  const handleDownloadFullLook = () => {
-    if (!fullLookResult) return;
-    const link = document.createElement('a');
-    link.href = fullLookResult;
-    link.download = 'full-look-transfer-result.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleResetFullLook = () => {
-    setFullLookFaceImage(null);
-    setFullLookReferenceImage(null);
-    setFullLookResult(null);
-  };
 
   // ==================== SWAP STUDIO (FACE SWAP) ====================
   const handleSwapInfluencerUpload = createImageUploadHandler(setSwapInfluencerImage, [() => setSwapResult(null)]);
@@ -1540,68 +1475,6 @@ const Dashboard = () => {
         </div>
       </ToolSection>
 
-      {/* Full Look Transfer Section */}
-      <ToolSection
-        id="full-look-transfer"
-        title="Full Look Transfer"
-        subtitle="(Face Keep)"
-        description="Transfer the complete look while keeping the original face"
-      >
-        <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
-            <ImageUploader
-              id="face-upload"
-              image={fullLookFaceImage}
-              onUpload={handleFullLookFaceUpload}
-              onRemove={() => { setFullLookFaceImage(null); setFullLookResult(null); }}
-              label="Image 1: Influencer Face"
-              description="The face/identity to keep"
-              aspectRatio="portrait"
-            />
-            <ImageUploader
-              id="reference-upload"
-              image={fullLookReferenceImage}
-              onUpload={handleFullLookReferenceUpload}
-              onRemove={() => { setFullLookReferenceImage(null); setFullLookResult(null); }}
-              label="Image 2: Reference Look"
-              description="Outfit, pose & style to copy"
-              aspectRatio="portrait"
-            />
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <LoadingButton
-              onClick={handleFullLookTransfer}
-              isLoading={isTransferringLook}
-              loadingText="Generating Full Look..."
-              disabled={!fullLookFaceImage || !fullLookReferenceImage}
-              size="lg"
-              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
-            >
-              Generate Full Look
-            </LoadingButton>
-            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-              <Diamond className="w-3.5 h-3.5 text-purple-400" />
-              <span>Costs {getGemCost("full-look-transfer")} gems</span>
-            </div>
-          </div>
-
-          {fullLookResult && (
-            <ResultDisplay
-              result={fullLookResult}
-              originalImages={[
-                ...(fullLookFaceImage ? [{ src: fullLookFaceImage, label: "Face" }] : []),
-                ...(fullLookReferenceImage ? [{ src: fullLookReferenceImage, label: "Look Ref" }] : []),
-              ]}
-              onDownload={handleDownloadFullLook}
-              onRegenerate={handleFullLookTransfer}
-              onReset={handleResetFullLook}
-              isProcessing={isTransferringLook}
-              resetLabel="Try Another Look"
-            />
-          )}
-        </div>
-      </ToolSection>
 
       {/* Swap Studio (Face Swap) Section */}
       <ToolSection
