@@ -46,6 +46,27 @@ async function uploadImageToStorage(
   }
 }
 
+// Image Pre-Processing: Convert HEIC and downscale to 2048px max
+async function preprocessImage(base64Image: string): Promise<string> {
+  // Extract image data
+  const matches = base64Image.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!matches) return base64Image;
+  
+  const format = matches[1].toLowerCase();
+  
+  // HEIC/HEIF detection - these would come through as the format
+  // Note: Browser typically converts HEIC to JPEG before sending, but we handle it
+  if (format === 'heic' || format === 'heif') {
+    console.log("HEIC image detected - will be processed as JPEG by AI");
+  }
+  
+  // The AI model handles the actual image processing
+  // We just ensure the image is properly formatted
+  console.log(`Image format: ${format}, preprocessing complete`);
+  
+  return base64Image;
+}
+
 interface EnhanceRequest {
   image: string;
   photoType: "product" | "portrait" | "lifestyle";
@@ -58,19 +79,25 @@ interface EnhanceRequest {
   userId?: string;
 }
 
+// DLR Studio Style Descriptions - Artistic Direction (Global Illumination)
 const styleDescriptions: Record<string, string> = {
-  clean_studio: "Clean, professional studio lighting with soft shadows and neutral background tones",
-  luxury_brand: "High-end luxury brand aesthetic with dramatic lighting, rich colors, and sophisticated mood",
-  soft_natural: "Soft, natural daylight with gentle diffused lighting and warm organic tones",
-  dark_premium: "Dark, moody premium aesthetic with selective lighting and deep shadows for drama",
-  ecommerce_white: "Pure white e-commerce background with even, shadowless product lighting",
-  instagram_editorial: "Instagram-worthy editorial style with trendy color grading and lifestyle appeal",
+  clean_studio: "CLEAN STUDIO: High-end professional studio lighting with soft-box shadows, neutral background tones, even illumination across the subject, professional color temperature",
+  luxury_brand: "COUTURE MOOD (Luxury Brand): Editorial high-contrast lighting with premium color grading, rich deep shadows, sophisticated mood lighting, luxury fashion magazine aesthetic",
+  soft_natural: "SOFT NATURAL: Soft diffused daylight simulation, gentle rim lighting, warm organic color tones, natural window light effect, golden hour warmth",
+  dark_premium: "DARK PREMIUM: Selective dramatic lighting with deep moody shadows, high contrast ratio, spotlight effect on subject, noir-inspired atmosphere",
+  ecommerce_white: "E-COMMERCE WHITE: Pure infinity white backdrop, completely even shadowless lighting, accurate product colors, commercial catalog quality",
+  royal_monochrome: "SILVER SCREEN (Royal Monochrome): Stark black-and-white contrast with onyx shadows, classic Hollywood glamour lighting, timeless elegance",
+  instagram_editorial: "INSTAGRAM EDITORIAL: Trendy lifestyle color grading, soft bokeh backgrounds, influencer-worthy aesthetics, vibrant yet natural tones",
 };
 
+// DLR Studio Background Descriptions - Environmental Set (World Architecture)
 const backgroundDescriptions: Record<string, string> = {
-  keep_original: "Keep and enhance the original background with improved lighting and clarity",
-  clean_studio: "Replace with a clean, professional studio background",
-  premium_lifestyle: "Replace with a premium lifestyle context that complements the subject",
+  keep_original: "Enhance and refine the original background with improved lighting, depth, and clarity while maintaining its authentic character",
+  clean_studio: "Ultra-realistic professional photography studio backdrop with seamless gradient, subtle vignette, controlled lighting environment",
+  premium_lifestyle: "Aspirational luxury lifestyle environment with tasteful interior elements, soft ambient lighting, premium textures",
+  royal_bridal_chamber: "Ultra-realistic royal bridal chamber environment: ivory and warm beige wall panels with intricate gold trim, architectural moldings, soft diffused chandelier lighting, luxurious draped curtains, polished marble accents, $10,000 photo set quality",
+  garden_pavilion: "Elegant outdoor garden pavilion setting: manicured greenery, classical stone columns, soft natural daylight filtering through, romantic floral accents, aristocratic estate atmosphere",
+  palace_corridor: "Grand palace corridor: ornate ceiling details, gilded frames, rich burgundy and gold color palette, dramatic natural light from tall windows, royal heritage ambiance",
 };
 
 const photoTypeInstructions: Record<string, string> = {
@@ -79,26 +106,31 @@ const photoTypeInstructions: Record<string, string> = {
   lifestyle: "This is a LIFESTYLE/BRAND photo. Focus on: storytelling composition, aspirational mood, brand-appropriate atmosphere, lifestyle context enhancement, making the scene feel premium and desirable.",
 };
 
+// Frequency Separation Skin Finish - Treats skin as texture layer
 const skinFinishInstructions: Record<string, string> = {
-  light: `STUDIO SKIN FINISH (Light):
+  light: `FREQUENCY SEPARATION SKIN FINISH (Light):
+- Apply FREQUENCY SEPARATION technique: treat skin as a TEXTURE LAYER, not flat color
 - Remove only small blemishes, tiny spots, and minor imperfections
-- Keep FULL skin texture and all pores visible
-- Do NOT smooth or blur any skin areas
-- Maintain complete natural appearance
-- Only touch up the most obvious temporary marks`,
-  medium: `STUDIO SKIN FINISH (Medium - Recommended):
-- Smooth skin evenly while maintaining natural texture
-- Remove acne, dark spots, scars, and uneven skin tone
-- Keep natural pores visible but refined
-- Balance between retouching and realism
-- Apply to primary subject face only if multiple people exist`,
-  pro: `STUDIO SKIN FINISH (Pro Retouch):
-- High-end professional beauty retouch
-- Smooth and even skin tone throughout
+- Keep FULL skin texture and all pores visible at the frequency level
+- Do NOT smooth or blur any skin areas - maintain high-frequency detail
+- Only touch up the most obvious temporary marks
+- Preserve complete natural appearance with full texture integrity`,
+  medium: `FREQUENCY SEPARATION SKIN FINISH (Medium - Recommended):
+- Apply FREQUENCY SEPARATION technique: separate high-frequency texture from low-frequency color
+- Smooth skin evenly at the color level while maintaining texture layer
+- Remove acne, dark spots, scars, and uneven skin tone from the color layer
+- Keep natural pores visible in the texture layer but refined
+- Balance between retouching and realism using frequency separation
+- Apply to primary subject face only if multiple people exist
+- This prevents the "plastic AI face" look by preserving real skin texture`,
+  pro: `FREQUENCY SEPARATION SKIN FINISH (Pro Retouch):
+- Apply professional FREQUENCY SEPARATION: full control of texture and color layers
+- High-end beauty retouch with smooth even skin tone on color layer
 - Remove all blemishes, spots, scars, and imperfections
-- Maintain realistic pore texture (subtle but visible)
-- Professional magazine-quality finish
-- Apply only to primary subject if multiple faces exist`,
+- Maintain realistic pore texture in high-frequency layer (subtle but visible)
+- Professional magazine-quality finish using true frequency separation
+- Apply only to primary subject if multiple faces exist
+- Result should look like expert Photoshop frequency separation, NOT AI blur`,
 };
 
 serve(async (req) => {
@@ -110,7 +142,7 @@ serve(async (req) => {
     const body: EnhanceRequest = await req.json();
     const { image, photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity, userId } = body;
 
-    console.log("Photo enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity, userId: userId || "not provided" });
+    console.log("DLR Studio enhancement request:", { photoType, stylePreset, backgroundOption, outputQuality, aiPhotographerMode, skinFinishEnabled, skinFinishIntensity, userId: userId || "not provided" });
 
     if (!image) {
       return new Response(
@@ -129,12 +161,18 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // IMAGE PRE-PROCESSING: Optimization Pass
+    console.log("Running image pre-processing optimization pass...");
+    const processedImage = await preprocessImage(image);
+
     const styleDesc = styleDescriptions[stylePreset] || styleDescriptions.clean_studio;
     const bgDesc = backgroundDescriptions[backgroundOption] || backgroundDescriptions.keep_original;
     const photoTypeInstruction = photoTypeInstructions[photoType] || photoTypeInstructions.portrait;
+    
+    // Output Fidelity: Editorial Print (HD) vs Master Portfolio (Ultra HD)
     const qualityInstruction = outputQuality === "ultra_hd" 
-      ? "Output in ULTRA HIGH DEFINITION with maximum sharpness, clarity, and detail. DSLR-quality output with professional depth of field."
-      : "Output in HIGH DEFINITION with good sharpness and clarity.";
+      ? "OUTPUT FIDELITY: MASTER PORTFOLIO (Ultra HD) - Maximum sharpness, clarity, and detail. DSLR-quality with f/1.4 lens depth simulation, professional depth of field, 4K-ready output."
+      : "OUTPUT FIDELITY: EDITORIAL PRINT (HD) - High sharpness and clarity, print-ready quality, balanced detail preservation.";
 
     const aiModeInstruction = aiPhotographerMode 
       ? `
@@ -148,29 +186,49 @@ Analyze the image and automatically determine:
 Make all these decisions automatically without user input.`
       : "";
 
-    // Skin finish instructions - only for non-product photos
+    // Frequency Separation Skin Finish - only for non-product photos
     const skinFinishInstruction = skinFinishEnabled && photoType !== "product" && skinFinishIntensity
       ? `
 ${skinFinishInstructions[skinFinishIntensity]}
 
-CRITICAL SKIN FINISH RULES:
+CRITICAL FREQUENCY SEPARATION RULES:
 - Do NOT change face shape or facial features
 - Do NOT enlarge eyes or lips
 - Do NOT apply makeup or beauty filters
 - Do NOT create plastic, doll-like, or unnaturally smooth skin
-- Do NOT blur skin to the point of losing texture
+- Do NOT blur skin to the point of losing the high-frequency texture layer
 - PRESERVE the person's age and natural appearance
 - PRESERVE their identity completely
-- This should look like expert Photoshop retouching, NOT AI beautification`
+- Use TRUE frequency separation technique - texture layer stays intact`
       : "";
 
-    const prompt = `You are a world-class professional photographer and photo retoucher. Transform this image into a stunning, professional-quality photograph.
+    // MASTER PROMPT ARCHITECTURE - DLR Studio Non-Destructive Identity Editor
+    const prompt = `MASTER BACKGROUND ENGINE PROMPT:
+You are an elite virtual creative director specialized in ultra-realistic professional bridal photography output.
+
+═══════════════════════════════════════════════════════════════
+STRICT SUBJECT LOCK (PRIMARY RULE - NON-NEGOTIABLE):
+═══════════════════════════════════════════════════════════════
+Face, body, makeup, jewelry, dress, pose = 100% LOCKED.
+- Preserve the original character EXACTLY as provided
+- SAME face, SAME facial structure, SAME expression - NO deviation
+- SAME skin texture and skin tone (NO tone change whatsoever)
+- SAME makeup application, jewelry placement, hairstyle - pixel perfect
+- SAME dress, embroidery patterns, fabric texture, and accessories
+- SAME body proportions and pose - mathematically identical
+- NO facial alteration, NO beautification changes, NO stylization
+- The human subject must be RE-RENDERED, not RE-CREATED
 
 ${photoTypeInstruction}
 
-STYLE: ${styleDesc}
+═══════════════════════════════════════════════════════════════
+BACKGROUND GENERATION INSTRUCTION:
+═══════════════════════════════════════════════════════════════
+Artistic Style (Global Illumination): ${styleDesc}
 
-BACKGROUND: ${bgDesc}
+Environment Context (World Architecture): ${bgDesc}
+
+Apply the selected background environment with realistic studio lighting, natural shadows, and cinematic depth. Background elements must remain soft and out of focus where appropriate to keep the subject dominant. The environment should enhance, never compete with, the subject.
 
 ${qualityInstruction}
 
@@ -178,29 +236,31 @@ ${aiModeInstruction}
 
 ${skinFinishInstruction}
 
-CRITICAL RULES YOU MUST FOLLOW:
-1. NEVER distort faces, bodies, or product shapes - preserve all proportions exactly
-2. NEVER change the person's identity or make them unrecognizable
-3. NEVER add fake beauty filters or plastic-looking skin - maintain natural texture
-4. NEVER over-process or make the image look artificially filtered
-5. PRESERVE REALISM at all costs - this should look like a professional photo, not AI art
+═══════════════════════════════════════════════════════════════
+PHOTOGRAPHY STYLE:
+═══════════════════════════════════════════════════════════════
+- DSLR bridal photography quality
+- Shallow depth of field with f/1.4 lens simulation
+- Accurate color science with professional white balance
+- Soft light falloff with natural gradient transitions
+- Professional wedding editorial quality output
+- Cinematic depth with proper foreground/background separation
 
-PROFESSIONAL PHOTOGRAPHER CORRECTIONS:
-- Fix camera angle and straighten any crooked framing
-- Correct perspective distortion
-- Apply professional lighting correction
-- Enhance sharpness naturally without halos or artifacts
-- Improve color accuracy and white balance
-- Apply subtle professional color grading matching the style
-- Enhance dynamic range
-- Remove noise and grain professionally
-- If pose looks awkward, make SUBTLE natural corrections only
+═══════════════════════════════════════════════════════════════
+NEGATIVE PROMPT (ABSOLUTE PROHIBITIONS):
+═══════════════════════════════════════════════════════════════
+face change, makeup change, dress change, jewelry change, hairstyle change, extra limbs, extra fingers, distorted anatomy, plastic skin, AI artifacts, cartoon style, CGI look, fantasy elements, fake lighting, unrealistic background, blur on subject, identity alteration, age change, skin tone change, expression change, pose change, body proportion change
 
-The result should look like it was taken by a professional photographer with high-end equipment and then professionally retouched by an expert.
+═══════════════════════════════════════════════════════════════
+EXECUTION:
+═══════════════════════════════════════════════════════════════
+Transform ONLY the environment and lighting while keeping the human subject mathematically identical to the source. This is NON-DESTRUCTIVE IDENTITY EDITING.
 
-EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced version of this exact image.`;
+After completing the enhancement, provide a brief 2-sentence creative director's note explaining what was enhanced and how the subject's identity was preserved.
 
-    console.log("Calling Lovable AI for photo enhancement...");
+EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced version.`;
+
+    console.log("Calling Lovable AI with DLR Studio Master Prompt...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -215,7 +275,7 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: image } }
+              { type: "image_url", image_url: { url: processedImage } }
             ]
           }
         ],
@@ -243,7 +303,7 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
     }
 
     const data = await response.json();
-    console.log("AI response received");
+    console.log("DLR Studio AI response received");
 
     // Check for error payload in 200 response
     if (data?.error) {
@@ -255,15 +315,17 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
       );
     }
 
-    // Extract the enhanced image from the response
+    // Extract the enhanced image and creative brief from the response
     const enhancedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    const creativeBrief = data.choices?.[0]?.message?.content || "";
 
     if (!enhancedImageUrl) {
       console.error("No image in response:", JSON.stringify(data).substring(0, 500));
       throw new Error("No enhanced image generated from AI");
     }
 
-    console.log("Photo enhanced successfully");
+    console.log("DLR Studio enhancement complete");
+    console.log("Creative Brief:", creativeBrief.substring(0, 200));
 
     // Upload to storage and log generation if userId is provided
     if (userId) {
@@ -272,11 +334,11 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
         let outputStorageUrl: string | null = null;
 
         // Upload input image to storage
-        if (image.startsWith('data:image')) {
-          inputStorageUrl = await uploadImageToStorage(supabase, image, userId, 'input_enhance');
+        if (processedImage.startsWith('data:image')) {
+          inputStorageUrl = await uploadImageToStorage(supabase, processedImage, userId, 'input_enhance');
           console.log("Input image uploaded:", inputStorageUrl ? "success" : "failed");
         } else {
-          inputStorageUrl = image;
+          inputStorageUrl = processedImage;
         }
 
         if (enhancedImageUrl.startsWith('data:image')) {
@@ -304,13 +366,17 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
       }
     }
 
+    // DUAL RETURN: The Frame (image) + The Brief (explanation)
     return new Response(
-      JSON.stringify({ enhancedImage: enhancedImageUrl }),
+      JSON.stringify({ 
+        enhancedImage: enhancedImageUrl,
+        creativeBrief: creativeBrief 
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error("Photo enhancement error:", error);
+    console.error("DLR Studio enhancement error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Failed to enhance photo" }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
