@@ -254,7 +254,7 @@ Generate a HIGH-RESOLUTION image of the SAME person with the specified makeup pr
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-3-pro-image-preview",
         messages: [
           { role: "user", content: [
             { type: "text", text: masterPrompt },
@@ -283,8 +283,16 @@ Generate a HIGH-RESOLUTION image of the SAME person with the specified makeup pr
         );
       }
       
+      // Check for region restriction
+      if (errorText.includes("not available in your country")) {
+        return new Response(
+          JSON.stringify({ error: "Image generation is not available in your region. Please contact support." }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
-        JSON.stringify({ error: "Failed to apply makeup" }),
+        JSON.stringify({ error: "Failed to apply makeup. Please try again." }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
