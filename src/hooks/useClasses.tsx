@@ -50,11 +50,23 @@ export const useClasses = () => {
 
       if (error) throw error;
       
-      // Parse features from JSONB
-      const parsed = (data || []).map(item => ({
-        ...item,
-        features: (item.features as unknown as ClassFeature[]) || [],
-      })) as ClassItem[];
+      // Parse features from JSONB - handle both array and string formats
+      const parsed = (data || []).map(item => {
+        let features: ClassFeature[] = [];
+        if (Array.isArray(item.features)) {
+          features = item.features as unknown as ClassFeature[];
+        } else if (typeof item.features === 'string') {
+          try {
+            features = JSON.parse(item.features);
+          } catch {
+            features = [];
+          }
+        }
+        return {
+          ...item,
+          features,
+        };
+      }) as ClassItem[];
       
       setClasses(parsed);
     } catch (error) {
