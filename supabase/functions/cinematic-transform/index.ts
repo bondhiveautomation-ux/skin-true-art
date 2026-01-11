@@ -242,19 +242,40 @@ const BACKGROUND_OPTIONS: Record<string, { name: string; prompt: string }> = {
 
 const GLOBAL_SYSTEM_PROMPT = `You are a professional bridal photography editor. Your task is to transform the provided photo according to the instructions below.
 
-LOCKED ELEMENTS (MUST NEVER CHANGE):
-- Face identity: EXACT same person, same facial structure, same makeup style/shape, same skin tone.
+##############################################################################
+#                    CRITICAL: FACE PRESERVATION RULES                       #
+#           THE FACE MUST NEVER BE CHANGED - THIS IS NON-NEGOTIABLE          #
+##############################################################################
+
+ABSOLUTE FACE LOCK (ZERO TOLERANCE FOR CHANGES):
+- The subject's FACE must remain 100% IDENTICAL to the input image
+- EXACT same facial structure, bone structure, nose shape, eye shape, lip shape
+- EXACT same facial proportions - distance between eyes, nose width, jawline
+- EXACT same skin tone, skin texture, and complexion
+- EXACT same makeup - same eyeshadow colors, lipstick shade, blush placement, eyeliner style
+- EXACT same eyebrows - same shape, thickness, arch
+- EXACT same expression and mouth position
+- You are ONLY allowed to adjust LIGHTING on the face (highlights, shadows, color temperature)
+- You are FORBIDDEN from changing ANY facial feature, structure, or proportion
+- If you cannot preserve the face exactly, DO NOT generate the image
+
+Think of it this way: If you showed the output to the person in the photo, they must immediately recognize themselves with zero doubt. The face must be pixel-perfect identical in structure.
+
+##############################################################################
+
+OTHER LOCKED ELEMENTS (MUST NEVER CHANGE):
 - Jewellery: EXACT same jewellery pieces as the input. Same number of items, same design, same stones/metal style, same size, same placement.
   - DO NOT add new jewellery.
   - DO NOT remove jewellery.
   - DO NOT replace jewellery with different designs.
   - DO NOT "invent" extra chains, extra earrings, extra nose ring chains, extra bangles, extra headpieces, etc.
 - Clothing/outfit: must remain the same outfit (same color, embroidery/patterns, fabric type). Do not introduce new clothing pieces.
+- Hair: Same hairstyle, same hair color, same hair accessories.
 
 QUALITY REQUIREMENTS:
 - Photorealistic DSLR quality output
-- Cinematic lighting appropriate to the scene
-- Natural skin texture (no plastic look)
+- Cinematic lighting appropriate to the scene (you may adjust lighting ON the face, but never change the face itself)
+- Natural skin texture (no plastic look, no smoothing that changes appearance)
 - No AI artifacts, no cut-out edges, no fake blur
 - Seamless, natural result that looks like a real photograph`;
 
@@ -348,11 +369,21 @@ CRITICAL REQUIREMENTS FOR NATURAL LOOK:
    - Add subtle light wrap/rim light from background onto subject edges
    - Flyaway hairs should blend into the environment
 
-LOCKED ELEMENTS:
-- Keep the subject's face, makeup, jewellery, and clothing EXACTLY the same
-- Only modify lighting, color grading, and integration - NOT the actual features
+##############################################################################
+#                    CRITICAL: FACE MUST NOT CHANGE                          #
+##############################################################################
+- The subject's FACE must be PIXEL-PERFECT IDENTICAL to the original image
+- Same facial structure, same features, same proportions, same expression
+- Same makeup colors, same skin tone, same complexion
+- You may ONLY adjust lighting/shadows on the face to match the new environment
+- You are ABSOLUTELY FORBIDDEN from altering any facial feature or structure
+- If the person looked at this output, they must recognize themselves INSTANTLY
 
-OUTPUT: The final image must look like an authentic photograph where the person was ACTUALLY present in that location, not a cut-and-paste composite.`;
+OTHER LOCKED ELEMENTS:
+- Keep jewellery, clothing, and hair EXACTLY the same
+- Only modify environmental lighting and color grading
+
+OUTPUT: The final image must look like an authentic photograph where the EXACT SAME PERSON was photographed in that location. Face identity preservation is the #1 priority.`;
     } else if (background) {
       backgroundInstructions = `
 BACKGROUND REPLACEMENT INSTRUCTIONS:
