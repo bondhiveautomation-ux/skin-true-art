@@ -303,20 +303,56 @@ serve(async (req) => {
     let backgroundInstructions = '';
     if (hasCustomBackground) {
       backgroundInstructions = `
-BACKGROUND REPLACEMENT INSTRUCTIONS:
+BACKGROUND REPLACEMENT INSTRUCTIONS - NATURAL COMPOSITING:
 You are provided with TWO images:
 1. The subject image (bridal portrait)
 2. A custom background image provided by the user
 
-Your task: Extract the subject (the person) from the first image and seamlessly composite them onto the second image (the custom background). 
+Your PRIMARY task: Extract the subject (the person) from the first image and seamlessly composite them onto the second image so it looks like a NATURAL PHOTOGRAPH taken in that location.
 
-Requirements:
-- Keep the subject EXACTLY as they appear - same face, makeup, jewellery, clothing
-- Place the subject naturally within the custom background
-- Match the lighting of the background to the subject
-- Create realistic shadows and depth
-- Ensure seamless blending - the subject must look naturally photographed in this environment
-- Maintain photorealistic DSLR quality`;
+CRITICAL REQUIREMENTS FOR NATURAL LOOK:
+
+1. LIGHTING ADAPTATION (MOST IMPORTANT):
+   - Analyze the lighting direction, color temperature, and intensity in the background image
+   - MODIFY the subject's lighting to match the background - adjust highlights, shadows, and color cast
+   - If background has warm golden light, add warm tones to subject's skin and clothing
+   - If background has cool blue tones, reflect that on the subject
+   - Match shadow direction - if background light comes from left, subject shadows should fall to the right
+   - Add ambient light spill from the environment onto the subject's edges
+
+2. COLOR GRADING & HARMONY:
+   - Match the overall color grading of the background (warm/cool, saturated/desaturated)
+   - Apply the same color palette influence to the subject
+   - Ensure whites, blacks, and mid-tones have the same characteristics
+   - The subject and background should look like they were photographed with the same camera settings
+
+3. PERSPECTIVE & SCALE:
+   - Analyze the perspective and horizon line of the background
+   - Place the subject at appropriate scale relative to background elements
+   - Match the camera angle/lens perspective of the background
+   - Ensure ground plane and eye level are consistent
+
+4. REALISTIC SHADOWS & GROUNDING:
+   - Add contact shadows where subject meets ground/surface
+   - Create ambient occlusion at subject's feet/base
+   - Shadow color should match the environment (outdoor = cooler shadows, indoor = warmer)
+   - Shadow softness should match the lighting in the background
+
+5. ATMOSPHERIC INTEGRATION:
+   - If background has haze, mist, or atmosphere, add subtle atmospheric effect to subject
+   - Match the focus/blur characteristics - if background is sharp, keep subject sharp
+   - Add subtle environmental reflections on shiny surfaces (jewellery, fabric)
+
+6. EDGE BLENDING:
+   - NO hard cutout edges - hair and fabric edges must blend naturally
+   - Add subtle light wrap/rim light from background onto subject edges
+   - Flyaway hairs should blend into the environment
+
+LOCKED ELEMENTS:
+- Keep the subject's face, makeup, jewellery, and clothing EXACTLY the same
+- Only modify lighting, color grading, and integration - NOT the actual features
+
+OUTPUT: The final image must look like an authentic photograph where the person was ACTUALLY present in that location, not a cut-and-paste composite.`;
     } else if (background) {
       backgroundInstructions = `
 BACKGROUND REPLACEMENT INSTRUCTIONS:
