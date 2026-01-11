@@ -324,50 +324,58 @@ serve(async (req) => {
     let backgroundInstructions = '';
     if (hasCustomBackground) {
       backgroundInstructions = `
-BACKGROUND REPLACEMENT INSTRUCTIONS - NATURAL COMPOSITING:
+BACKGROUND REPLACEMENT INSTRUCTIONS - PROFESSIONAL COMPOSITING:
 You are provided with TWO images:
-1. The subject image (bridal portrait)
+1. The subject image (bridal portrait) - THIS DEFINES THE OUTPUT ASPECT RATIO
 2. A custom background image provided by the user
 
-Your PRIMARY task: Extract the subject (the person) from the first image and seamlessly composite them onto the second image so it looks like a NATURAL PHOTOGRAPH taken in that location.
+##############################################################################
+#                    ASPECT RATIO REQUIREMENT                                #
+##############################################################################
+The OUTPUT image MUST have the EXACT SAME ASPECT RATIO as the SUBJECT IMAGE (image 1).
+- If the subject image is portrait (vertical), output must be portrait
+- If the subject image is 3:4 ratio, output must be 3:4 ratio
+- CROP or EXTEND the background as needed to match the subject's aspect ratio
+- NEVER change the subject's proportions or crop the subject
 
-CRITICAL REQUIREMENTS FOR NATURAL LOOK:
+##############################################################################
+#                    BACKGROUND ENHANCEMENT ALLOWED                          #
+##############################################################################
+You ARE ALLOWED and ENCOURAGED to MODIFY/ENHANCE the background to create a natural, professional result:
+- You may CHANGE the background's lighting to better match the subject
+- You may ADJUST the background's colors for better harmony
+- You may ADD or MODIFY lighting elements in the background (lamps, windows, ambient glow)
+- You may BLUR or SHARPEN parts of the background for depth-of-field effect
+- You may REMOVE distracting elements from the background
+- You may ENHANCE the background to look more luxurious/professional
+- You may CREATE a seamless environment that feels cohesive with the subject
 
-1. LIGHTING ADAPTATION (MOST IMPORTANT):
-   - Analyze the lighting direction, color temperature, and intensity in the background image
-   - MODIFY the subject's lighting to match the background - adjust highlights, shadows, and color cast
-   - If background has warm golden light, add warm tones to subject's skin and clothing
-   - If background has cool blue tones, reflect that on the subject
-   - Match shadow direction - if background light comes from left, subject shadows should fall to the right
-   - Add ambient light spill from the environment onto the subject's edges
+The goal is a PROFESSIONAL STUDIO RESULT - the background should complement and enhance the subject.
 
-2. COLOR GRADING & HARMONY:
-   - Match the overall color grading of the background (warm/cool, saturated/desaturated)
-   - Apply the same color palette influence to the subject
-   - Ensure whites, blacks, and mid-tones have the same characteristics
-   - The subject and background should look like they were photographed with the same camera settings
+PROFESSIONAL COMPOSITING REQUIREMENTS:
 
-3. PERSPECTIVE & SCALE:
-   - Analyze the perspective and horizon line of the background
-   - Place the subject at appropriate scale relative to background elements
-   - Match the camera angle/lens perspective of the background
-   - Ensure ground plane and eye level are consistent
+1. LIGHTING HARMONY (CRITICAL):
+   - The subject and background must have MATCHING lighting direction
+   - Adjust the background lighting to match the subject, OR adjust subject lighting to match background
+   - Create a unified light source - no conflicting shadows
+   - Add rim lighting, ambient glow, or fill light as needed for professional look
 
-4. REALISTIC SHADOWS & GROUNDING:
-   - Add contact shadows where subject meets ground/surface
-   - Create ambient occlusion at subject's feet/base
-   - Shadow color should match the environment (outdoor = cooler shadows, indoor = warmer)
-   - Shadow softness should match the lighting in the background
+2. COLOR GRADING:
+   - Apply a UNIFIED color grade across both subject and background
+   - Match skin tones with environment colors
+   - Create a cohesive, magazine-quality color palette
+   - The final image should look like a single photograph, not a composite
 
-5. ATMOSPHERIC INTEGRATION:
-   - If background has haze, mist, or atmosphere, add subtle atmospheric effect to subject
-   - Match the focus/blur characteristics - if background is sharp, keep subject sharp
-   - Add subtle environmental reflections on shiny surfaces (jewellery, fabric)
+3. DEPTH & ATMOSPHERE:
+   - Add appropriate depth-of-field blur to background if subject is in focus
+   - Create atmospheric perspective if needed
+   - Add subtle haze or glow for a dreamy, bridal aesthetic
 
-6. EDGE BLENDING:
-   - NO hard cutout edges - hair and fabric edges must blend naturally
-   - Add subtle light wrap/rim light from background onto subject edges
-   - Flyaway hairs should blend into the environment
+4. PROFESSIONAL FINISHING:
+   - Ensure no visible edges or cutout artifacts
+   - Hair and fabric edges must blend seamlessly
+   - Add contact shadows and ambient occlusion for grounding
+   - The result should look like a high-end studio photograph
 
 ##############################################################################
 #                    CRITICAL: FACE MUST NOT CHANGE                          #
@@ -381,9 +389,9 @@ CRITICAL REQUIREMENTS FOR NATURAL LOOK:
 
 OTHER LOCKED ELEMENTS:
 - Keep jewellery, clothing, and hair EXACTLY the same
-- Only modify environmental lighting and color grading
+- Only modify environmental lighting and color grading on these elements
 
-OUTPUT: The final image must look like an authentic photograph where the EXACT SAME PERSON was photographed in that location. Face identity preservation is the #1 priority.`;
+OUTPUT: A professional, magazine-quality bridal photograph where the subject appears naturally photographed in a beautiful environment. The background can be creatively enhanced, but the FACE must remain 100% identical.`;
     } else if (background) {
       backgroundInstructions = `
 BACKGROUND REPLACEMENT INSTRUCTIONS:
