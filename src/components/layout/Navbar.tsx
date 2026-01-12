@@ -65,7 +65,10 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
           <div className="flex items-center justify-between h-16 sm:h-18 lg:h-22 py-3 sm:py-4 gap-4">
             {/* Logo - Fashion Serif */}
             <button 
-              onClick={() => navigate("/dashboard")}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                navigate("/dashboard");
+              }}
               className="flex items-center gap-2 sm:gap-3 group shrink-0"
             >
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg gold-icon flex items-center justify-center group-hover:animate-pulse-glow transition-all duration-300">
