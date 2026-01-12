@@ -86,6 +86,7 @@ const Dashboard = () => {
   const [dressExtractionTime, setDressExtractionTime] = useState<number | null>(null);
   const [dressInspectTimeRemaining, setDressInspectTimeRemaining] = useState<number>(0);
   const [isInspectingDress, setIsInspectingDress] = useState(false);
+  const [dressMismatchFeedback, setDressMismatchFeedback] = useState<string | null>(null);
   
   // Background Saver states
   const [peopleImage, setPeopleImage] = useState<string | null>(null);
@@ -392,7 +393,14 @@ const Dashboard = () => {
     setIsExtractingDress(true);
     setDressExtractionTime(null);
     try {
-      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { body: { image: dressImage, userId: user?.id, dummyStyle } });
+      const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { 
+        body: { 
+          image: dressImage, 
+          userId: user?.id, 
+          dummyStyle,
+          correctionFeedback: dressMismatchFeedback // Pass previous mismatch feedback if any
+        } 
+      });
       if (error) throw error;
       if (data?.error) {
         toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
@@ -401,7 +409,8 @@ const Dashboard = () => {
       if (data?.extractedImage) {
         setExtractedDressImage(data.extractedImage);
         setDressExtractionTime(Date.now()); // Start the 5-minute inspection timer
-        toast({ title: "Success!", description: "Dress extracted and placed on mannequin" });
+        setDressMismatchFeedback(null); // Clear feedback after successful generation
+        toast({ title: "Success!", description: dressMismatchFeedback ? "Regenerated with corrections applied" : "Dress extracted and placed on mannequin" });
       }
     } catch (error: any) {
       toast({ title: "Extraction failed", description: error.message, variant: "destructive" });
@@ -441,14 +450,16 @@ const Dashboard = () => {
       }
 
       if (data?.verdict === 'mismatch') {
+        // Store the mismatch feedback for next regeneration
+        setDressMismatchFeedback(data.explanation || "The generated dress does not match the original");
         // Refund was processed
         toast({
           title: "🎉 Gems Refunded!",
-          description: `AI confirmed mismatch. ${data.gemsRefunded} gems have been refunded.`,
+          description: `AI confirmed mismatch: "${data.explanation}". ${data.gemsRefunded} gems refunded. Regenerate to fix it!`,
         });
         // Refresh gems balance
         refetchGems();
-        // Clear the extraction time to hide inspect button
+        // Clear the extraction time to hide inspect button but keep the result for regeneration
         setDressExtractionTime(null);
       } else {
         toast({
@@ -457,6 +468,7 @@ const Dashboard = () => {
         });
         // Hide inspect button after verification
         setDressExtractionTime(null);
+        setDressMismatchFeedback(null);
       }
     } catch (error: any) {
       console.error("Inspection error:", error);

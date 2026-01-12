@@ -52,7 +52,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, userId, dummyStyle = "standard" } = await req.json();
+    const { image, userId, dummyStyle = "standard", correctionFeedback } = await req.json();
 
     if (!image) {
       return new Response(
@@ -75,7 +75,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log("Processing dress extraction, userId:", userId || "not provided", "style:", dummyStyle);
+    console.log("Processing dress extraction, userId:", userId || "not provided", "style:", dummyStyle, "hasCorrectionFeedback:", !!correctionFeedback);
 
     // Define mannequin and background styles
     const DUMMY_STYLES: Record<string, { mannequin: string; background: string }> = {
@@ -116,8 +116,20 @@ serve(async (req) => {
 
     const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
 
-    const systemPrompt = `You are the WORLD'S BEST garment extraction AI. Your extractions are used by professional fashion brands. ZERO ERRORS ALLOWED.
+    // Build correction section if there's feedback from previous inspection
+    const correctionSection = correctionFeedback ? `
 
+=== ⚠️ CRITICAL CORRECTION REQUIRED ⚠️ ===
+
+A previous generation was REJECTED because: "${correctionFeedback}"
+
+YOU MUST FIX THIS SPECIFIC ISSUE. This is your TOP PRIORITY.
+Pay extra attention to whatever was wrong and make sure it is CORRECT this time.
+
+` : "";
+
+    const systemPrompt = `You are the WORLD'S BEST garment extraction AI. Your extractions are used by professional fashion brands. ZERO ERRORS ALLOWED.
+${correctionSection}
 === MISSION: PIXEL-PERFECT GARMENT REPLICATION ===
 
 You must extract the EXACT garment and place it on a mannequin. The output must be indistinguishable from a real photograph of that exact garment on a mannequin.
@@ -195,6 +207,7 @@ ${selectedStyle.background}
 □ Are the cuffs the EXACT same style? (Elastic gathered=Elastic gathered, not open)
 □ Is the print pattern identical?
 □ Did I add ANY elements not in the original? (If yes, REMOVE THEM)
+${correctionFeedback ? `□ Did I fix the specific issue: "${correctionFeedback}"? (MUST BE YES)` : ""}
 
 If ANY answer is NO, your extraction will be REJECTED by the client.
 

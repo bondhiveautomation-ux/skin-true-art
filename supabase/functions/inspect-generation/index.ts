@@ -48,38 +48,46 @@ serve(async (req) => {
     let inspectionPrompt = "";
     
     if (featureName === "Dress Extractor" || featureName === "extract-dress-to-dummy") {
-      inspectionPrompt = `You are a STRICT quality control inspector for a fashion AI service. Your job is to determine if a dress extraction was done correctly.
+      inspectionPrompt = `You are a FAIR quality control inspector for a fashion AI service. Your job is to determine if a dress extraction was done correctly.
 
 TASK: Compare the INPUT image (person wearing a dress) with the OUTPUT image (dress on a mannequin).
 
-=== CRITICAL INSPECTION CRITERIA ===
+=== WHAT COUNTS AS A MISMATCH (Only these MAJOR issues) ===
 
-The OUTPUT dress MUST match the INPUT dress EXACTLY in:
+ONLY mark as MISMATCH if there is a SIGNIFICANT, OBVIOUS difference that any person would notice:
 
-1. **NECKLINE** - Must be identical shape (V-neck stays V-neck, round stays round)
-2. **SLEEVE TYPE** - Must be identical (puff sleeves stay puff, not bishop or bell)
-3. **SLEEVE LENGTH** - Full length stays full, 3/4 stays 3/4, short stays short
-4. **PATTERN/PRINT** - Exact same floral pattern, colors, scale
-5. **FABRIC APPEARANCE** - Same texture and drape
-6. **OVERALL SILHOUETTE** - Same cut and shape
-7. **DETAILS** - Same buttons, zippers, trims, embellishments
+1. **NECKLINE COMPLETELY WRONG** - V-neck became round neck, or vice versa (not minor shape variations)
+2. **SLEEVE TYPE COMPLETELY WRONG** - Full sleeves became sleeveless, or puff became completely different style
+3. **PATTERN/PRINT COMPLETELY DIFFERENT** - Floral became solid, stripes became checks, etc.
+4. **WRONG COLOR** - Red dress became blue, etc.
+5. **COMPLETELY DIFFERENT DRESS** - The output shows a totally different garment
+
+=== WHAT IS ACCEPTABLE (NOT a mismatch) ===
+
+These are NORMAL and should be marked as MATCH:
+- Slight variations in how fabric drapes on mannequin vs human body
+- Minor color temperature differences due to lighting
+- Pattern appearing slightly different scale due to mannequin proportions  
+- Sleeve puffiness looking slightly different on mannequin
+- Neckline depth appearing slightly different
+- Small details being less visible
+- Any difference that requires close inspection to notice
 
 === YOUR VERDICT ===
 
-If the dress in the OUTPUT is CLEARLY DIFFERENT from the INPUT (different neckline shape, different sleeve type, different pattern, etc.), respond with:
-VERDICT: MISMATCH
+VERDICT: MISMATCH - ONLY if there's a MAJOR, OBVIOUS difference that anyone would notice at first glance
+VERDICT: MATCH - If the dress is recognizably the same garment (most cases should be MATCH)
 
-If the dress in the OUTPUT is ESSENTIALLY THE SAME as the INPUT (minor lighting/angle differences are acceptable), respond with:
-VERDICT: MATCH
+=== CRITICAL RULE ===
 
-=== IMPORTANT RULES ===
+Be LENIENT. The AI generation is doing its best. Only reject if there's a CLEAR, OBVIOUS error.
+Ask yourself: "Would the average person say this is the same dress?" If yes → MATCH.
 
-- Be FAIR to the user - if there's a noticeable difference that changes how the dress looks, it's a MISMATCH
-- Be FAIR to the system - minor variations in lighting, mannequin pose, or background are NOT mismatches
-- Focus on the GARMENT ITSELF, not the mannequin or background
-- The key question: "Would a fashion buyer recognize this as the SAME DRESS?"
+If MISMATCH, you MUST explain specifically what is wrong so it can be fixed.
 
-Respond with ONLY your verdict (MATCH or MISMATCH) followed by a brief 1-sentence explanation.`;
+Format your response as:
+VERDICT: [MATCH or MISMATCH]
+[If MISMATCH, explain exactly what is different, e.g., "The neckline changed from V-neck to round neck" or "The floral pattern is completely different"]`;
     } else {
       // Generic inspection for other features
       inspectionPrompt = `You are a quality control inspector. Compare the INPUT image with the OUTPUT image and determine if the AI generation was successful and accurate.
