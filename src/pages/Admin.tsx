@@ -36,8 +36,15 @@ import {
   AlertTriangle,
   X,
   FileText,
-  BarChart3
+  BarChart3,
+  MoreHorizontal
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -91,6 +98,7 @@ const Admin = () => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState("counter");
   const [bulkDeleting, setBulkDeleting] = useState(false);
   
   // New user form state
@@ -532,16 +540,17 @@ const Admin = () => {
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
-        <Tabs defaultValue="live-users" className="w-full">
-          <div className="mb-6 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex h-auto min-w-max gap-1 p-1 sm:flex-wrap sm:h-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="mb-6">
+            <TabsList className="flex flex-wrap h-auto gap-1 p-1 bg-card/50">
+              {/* Primary tabs - always visible */}
               <TabsTrigger value="counter" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
                 Counter
               </TabsTrigger>
               <TabsTrigger value="live-users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Radio className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Live</span> Users
+                Live
               </TabsTrigger>
               <TabsTrigger value="inbox" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Inbox className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -549,7 +558,7 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                Users ({users.length})
+                Users
               </TabsTrigger>
               <TabsTrigger value="payments" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -559,30 +568,43 @@ const Admin = () => {
                 <History className="w-3 h-3 sm:w-4 sm:h-4" />
                 History
               </TabsTrigger>
-              <TabsTrigger value="dress-library" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <Shirt className="w-3 h-3 sm:w-4 sm:h-4" />
-                Dresses
-              </TabsTrigger>
-              <TabsTrigger value="pricing" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <Diamond className="w-3 h-3 sm:w-4 sm:h-4" />
-                Pricing
-              </TabsTrigger>
-              <TabsTrigger value="website-cms" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <Settings2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                CMS
-              </TabsTrigger>
-              <TabsTrigger value="articles" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
-                Articles
-              </TabsTrigger>
-              <TabsTrigger value="classes" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4" />
-                Classes
-              </TabsTrigger>
-              <TabsTrigger value="class-leads" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4" />
-                Leads
-              </TabsTrigger>
+
+              {/* More dropdown for additional tabs */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-md bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <MoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
+                    More
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-card border-border z-50">
+                  <DropdownMenuItem onClick={() => setActiveTab("dress-library")} className="gap-2 cursor-pointer">
+                    <Shirt className="w-4 h-4" />
+                    Dresses
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("pricing")} className="gap-2 cursor-pointer">
+                    <Diamond className="w-4 h-4" />
+                    Pricing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("website-cms")} className="gap-2 cursor-pointer">
+                    <Settings2 className="w-4 h-4" />
+                    CMS
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("articles")} className="gap-2 cursor-pointer">
+                    <FileText className="w-4 h-4" />
+                    Articles
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("classes")} className="gap-2 cursor-pointer">
+                    <GraduationCap className="w-4 h-4" />
+                    Classes
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("class-leads")} className="gap-2 cursor-pointer">
+                    <GraduationCap className="w-4 h-4" />
+                    Leads
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </TabsList>
           </div>
 
