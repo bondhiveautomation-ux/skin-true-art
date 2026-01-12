@@ -319,6 +319,27 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_counter_resets: {
+        Row: {
+          id: string
+          note: string | null
+          reset_at: string
+          reset_by: string
+        }
+        Insert: {
+          id?: string
+          note?: string | null
+          reset_at?: string
+          reset_by: string
+        }
+        Update: {
+          id?: string
+          note?: string | null
+          reset_at?: string
+          reset_by?: string
+        }
+        Relationships: []
+      }
       generation_history: {
         Row: {
           created_at: string
