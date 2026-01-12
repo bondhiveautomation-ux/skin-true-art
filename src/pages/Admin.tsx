@@ -35,7 +35,8 @@ import {
   Clock,
   AlertTriangle,
   X,
-  FileText
+  FileText,
+  BarChart3
 } from "lucide-react";
 import {
   Table,
@@ -78,6 +79,7 @@ import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
 import { ArticlesManager } from "@/components/admin/ArticlesManager";
 import { ClassesManager } from "@/components/admin/ClassesManager";
+import { GenerationCounter } from "@/components/admin/GenerationCounter";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -533,6 +535,10 @@ const Admin = () => {
         <Tabs defaultValue="live-users" className="w-full">
           <div className="mb-6 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex h-auto min-w-max gap-1 p-1 sm:flex-wrap sm:h-auto">
+              <TabsTrigger value="counter" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+                <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                Counter
+              </TabsTrigger>
               <TabsTrigger value="live-users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Radio className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden xs:inline">Live</span> Users
@@ -579,6 +585,10 @@ const Admin = () => {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="counter">
+            <GenerationCounter />
+          </TabsContent>
 
           <TabsContent value="live-users">
             <LiveUsersMonitor />
