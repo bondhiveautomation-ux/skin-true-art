@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { Download, Search, Loader2 } from "lucide-react";
 import { Button } from "./button";
 
 interface ResultDisplayProps {
@@ -11,6 +11,12 @@ interface ResultDisplayProps {
   downloadLabel?: string;
   regenerateLabel?: string;
   resetLabel?: string;
+  // Inspect feature props
+  showInspect?: boolean;
+  onInspect?: () => void;
+  isInspecting?: boolean;
+  inspectTimeRemaining?: number; // seconds remaining
+  inspectDisabled?: boolean;
 }
 
 export const ResultDisplay = ({
@@ -23,7 +29,18 @@ export const ResultDisplay = ({
   downloadLabel = "Download",
   regenerateLabel = "Regenerate",
   resetLabel = "Start Over",
+  showInspect = false,
+  onInspect,
+  isInspecting = false,
+  inspectTimeRemaining,
+  inspectDisabled = false,
 }: ResultDisplayProps) => {
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <h3 className="text-base sm:text-lg font-serif font-medium text-cream text-center">
@@ -66,6 +83,44 @@ export const ResultDisplay = ({
           className="w-full object-contain"
         />
       </div>
+
+      {/* Inspect button - shown above action buttons if enabled */}
+      {showInspect && onInspect && (
+        <div className="flex flex-col items-center gap-2 max-w-sm mx-auto px-2">
+          <Button
+            onClick={onInspect}
+            variant="outline"
+            size="sm"
+            disabled={isInspecting || inspectDisabled}
+            className="w-full sm:w-auto h-10 sm:h-11 text-sm border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:text-orange-300"
+          >
+            {isInspecting ? (
+              <>
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                Inspecting...
+              </>
+            ) : (
+              <>
+                <Search className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Inspect Result
+              </>
+            )}
+          </Button>
+          {inspectTimeRemaining !== undefined && inspectTimeRemaining > 0 && !inspectDisabled && (
+            <p className="text-xs text-orange-400/70">
+              ⏱ {formatTime(inspectTimeRemaining)} remaining to inspect
+            </p>
+          )}
+          {inspectDisabled && (
+            <p className="text-xs text-muted-foreground">
+              Inspection time expired
+            </p>
+          )}
+          <p className="text-[10px] text-cream/50 text-center">
+            If the result doesn't match the original, AI will verify and refund your gems
+          </p>
+        </div>
+      )}
 
       {/* Action buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 max-w-sm mx-auto px-2">

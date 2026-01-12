@@ -83,6 +83,9 @@ const Dashboard = () => {
   const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
   const [isExtractingDress, setIsExtractingDress] = useState(false);
   const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble">("standard");
+  const [dressExtractionTime, setDressExtractionTime] = useState<number | null>(null);
+  const [dressInspectTimeRemaining, setDressInspectTimeRemaining] = useState<number>(0);
+  const [isInspectingDress, setIsInspectingDress] = useState(false);
   
   // Background Saver states
   const [peopleImage, setPeopleImage] = useState<string | null>(null);
@@ -134,6 +137,25 @@ const Dashboard = () => {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  // Dress Extractor inspection timer (5 minutes = 300 seconds)
+  useEffect(() => {
+    if (!dressExtractionTime || !extractedDressImage) {
+      setDressInspectTimeRemaining(0);
+      return;
+    }
+
+    const updateTimer = () => {
+      const elapsed = Math.floor((Date.now() - dressExtractionTime) / 1000);
+      const remaining = Math.max(0, 300 - elapsed); // 5 minutes = 300 seconds
+      setDressInspectTimeRemaining(remaining);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [dressExtractionTime, extractedDressImage]);
 
   // Generic image upload handler
   const createImageUploadHandler = (
@@ -348,7 +370,10 @@ const Dashboard = () => {
   };
 
   // ==================== DRESS EXTRACTOR ====================
-  const handleDressImageUpload = createImageUploadHandler(setDressImage, [() => setExtractedDressImage(null)]);
+  const handleDressImageUpload = createImageUploadHandler(setDressImage, [
+    () => setExtractedDressImage(null),
+    () => setDressExtractionTime(null),
+  ]);
 
   const handleExtractDress = async () => {
     if (!dressImage) {
@@ -365,6 +390,7 @@ const Dashboard = () => {
       return;
     }
     setIsExtractingDress(true);
+    setDressExtractionTime(null);
     try {
       const { data, error } = await supabase.functions.invoke('extract-dress-to-dummy', { body: { image: dressImage, userId: user?.id, dummyStyle } });
       if (error) throw error;
@@ -374,12 +400,69 @@ const Dashboard = () => {
       }
       if (data?.extractedImage) {
         setExtractedDressImage(data.extractedImage);
+        setDressExtractionTime(Date.now()); // Start the 5-minute inspection timer
         toast({ title: "Success!", description: "Dress extracted and placed on mannequin" });
       }
     } catch (error: any) {
       toast({ title: "Extraction failed", description: error.message, variant: "destructive" });
     } finally {
       setIsExtractingDress(false);
+    }
+  };
+
+  const handleInspectDressResult = async () => {
+    if (!dressImage || !extractedDressImage || !user?.id) {
+      toast({ title: "Missing data", description: "Cannot inspect without both images", variant: "destructive" });
+      return;
+    }
+
+    if (dressInspectTimeRemaining <= 0) {
+      toast({ title: "Time expired", description: "The 5-minute inspection window has expired", variant: "destructive" });
+      return;
+    }
+
+    setIsInspectingDress(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('inspect-generation', {
+        body: {
+          inputImage: dressImage,
+          outputImage: extractedDressImage,
+          featureName: "Dress Extractor",
+          userId: user.id,
+          gemCost: getGemCost("extract-dress-to-dummy"),
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({ title: "Inspection failed", description: data.error, variant: "destructive" });
+        return;
+      }
+
+      if (data?.verdict === 'mismatch') {
+        // Refund was processed
+        toast({
+          title: "🎉 Gems Refunded!",
+          description: `AI confirmed mismatch. ${data.gemsRefunded} gems have been refunded.`,
+        });
+        // Refresh gems balance
+        refetchGems();
+        // Clear the extraction time to hide inspect button
+        setDressExtractionTime(null);
+      } else {
+        toast({
+          title: "✅ Generation Verified",
+          description: data.explanation || "AI confirmed the result matches the original dress.",
+        });
+        // Hide inspect button after verification
+        setDressExtractionTime(null);
+      }
+    } catch (error: any) {
+      console.error("Inspection error:", error);
+      toast({ title: "Inspection failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsInspectingDress(false);
     }
   };
 
@@ -1221,8 +1304,13 @@ const Dashboard = () => {
               originalImages={dressImage ? [{ src: dressImage, label: "Original" }] : []}
               onDownload={handleDownloadDress}
               onRegenerate={handleExtractDress}
-              onReset={() => { setDressImage(null); setExtractedDressImage(null); }}
+              onReset={() => { setDressImage(null); setExtractedDressImage(null); setDressExtractionTime(null); }}
               isProcessing={isExtractingDress}
+              showInspect={true}
+              onInspect={handleInspectDressResult}
+              isInspecting={isInspectingDress}
+              inspectTimeRemaining={dressInspectTimeRemaining}
+              inspectDisabled={dressInspectTimeRemaining <= 0}
             />
           )}
         </div>
