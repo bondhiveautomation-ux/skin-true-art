@@ -56,26 +56,41 @@ serve(async (req) => {
     const { characterImage, characterLeftProfile, characterRightProfile, prompt, productImage, preset, cameraAngle, backgroundImage, pose, userId } = await req.json();
     
     if (!characterImage) {
-      throw new Error("No character reference image provided");
+      return new Response(
+        JSON.stringify({ error: "No character reference image provided" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
     
     const hasMultipleReferenceImages = characterLeftProfile || characterRightProfile;
     
     if (!prompt && !productImage && !backgroundImage) {
-      throw new Error("No prompt, product, or background provided");
+      return new Response(
+        JSON.stringify({ error: "No prompt, product, or background provided" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     if (productImage && !preset) {
-      throw new Error("Product preset not specified");
+      return new Response(
+        JSON.stringify({ error: "Product preset not specified" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     if (backgroundImage && !pose) {
-      throw new Error("Character pose not specified for background integration");
+      return new Response(
+        JSON.stringify({ error: "Character pose not specified for background integration" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      return new Response(
+        JSON.stringify({ error: "Service not configured. Please contact support." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Initialize Supabase client for storage and logging
@@ -394,7 +409,6 @@ Generate an image showing the same person in this new situation.`;
         error: error instanceof Error ? error.message : "Unknown error occurred" 
       }),
       {
-        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );

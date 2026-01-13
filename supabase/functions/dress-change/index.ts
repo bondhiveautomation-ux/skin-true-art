@@ -54,14 +54,14 @@ serve(async (req) => {
     if (!userImage) {
       return new Response(
         JSON.stringify({ error: "User image is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!dressImageUrl) {
       return new Response(
         JSON.stringify({ error: "Dress image is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -69,8 +69,8 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "AI service not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Service not configured. Please contact support." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -148,24 +148,23 @@ The output image orientation and rotation must EXACTLY match IMAGE 1. This is th
         );
       }
 
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Too many requests. Please try again in a moment." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({
-            error: "AI credits depleted. Please add credits to continue.",
-          }),
-          {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
+          JSON.stringify({ error: "Service credits exhausted. Please try again later." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       return new Response(
-        JSON.stringify({ error: "Failed to process image with AI" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: "Failed to process image. Please try again." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -178,7 +177,7 @@ The output image orientation and rotation must EXACTLY match IMAGE 1. This is th
       const msg = typeof data.error?.message === "string" ? data.error.message : "AI service temporarily unavailable";
       return new Response(
         JSON.stringify({ error: msg }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -191,10 +190,7 @@ The output image orientation and rotation must EXACTLY match IMAGE 1. This is th
         JSON.stringify({
           error: "Could not generate the dress change. Please try with a clearer photo.",
         }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -239,10 +235,7 @@ The output image orientation and rotation must EXACTLY match IMAGE 1. This is th
       JSON.stringify({
         error: error instanceof Error ? error.message : "An unexpected error occurred",
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

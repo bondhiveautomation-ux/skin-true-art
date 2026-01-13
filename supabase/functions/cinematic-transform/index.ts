@@ -291,7 +291,7 @@ serve(async (req) => {
     if (!image) {
       return new Response(
         JSON.stringify({ error: 'Image is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -299,7 +299,7 @@ serve(async (req) => {
     if (!presetId && !backgroundId && !customBackgroundImage) {
       return new Response(
         JSON.stringify({ error: 'Please select at least a cinematic style or a background option' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -307,13 +307,16 @@ serve(async (req) => {
     if (presetId && !preset) {
       return new Response(
         JSON.stringify({ error: 'Invalid preset ID' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service not configured. Please contact support.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const background = backgroundId ? BACKGROUND_OPTIONS[backgroundId] : null;
@@ -494,15 +497,15 @@ QUALITY REMINDERS:
 
         if (response.status === 429) {
           return new Response(
-            JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            JSON.stringify({ error: "Too many requests. Please try again in a moment." }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
         if (response.status === 402) {
           return new Response(
-            JSON.stringify({ error: "API credits exhausted. Please contact support." }),
-            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            JSON.stringify({ error: "Service credits exhausted. Please try again later." }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
@@ -516,7 +519,10 @@ QUALITY REMINDERS:
         if (!response.ok) {
           const errorText = await response.text();
           console.error("AI API error:", response.status, errorText);
-          throw new Error(`AI API error: ${response.status}`);
+          return new Response(
+            JSON.stringify({ error: `Service error (${response.status}). Please try again.` }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
         
         break; // Success, exit retry loop
@@ -524,13 +530,19 @@ QUALITY REMINDERS:
         lastError = fetchError instanceof Error ? fetchError.message : String(fetchError);
         console.error(`Fetch attempt ${attempt + 1} failed:`, lastError);
         if (attempt === maxRetries) {
-          throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError}`);
+          return new Response(
+            JSON.stringify({ error: `Failed after ${maxRetries + 1} attempts. Please try again.` }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
       }
     }
     
     if (!response || !response.ok) {
-      throw new Error(`API request failed: ${lastError}`);
+      return new Response(
+        JSON.stringify({ error: `Service request failed. Please try again.` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();
@@ -539,15 +551,21 @@ QUALITY REMINDERS:
     // The gateway may return 200 with an error payload
     if (data?.error) {
       console.error("AI gateway error payload:", JSON.stringify(data));
-      const msg = typeof data.error?.message === "string" ? data.error.message : "AI gateway internal error";
-      throw new Error(msg);
+      const msg = typeof data.error?.message === "string" ? data.error.message : "AI service temporarily unavailable";
+      return new Response(
+        JSON.stringify({ error: msg }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const generatedImage = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!generatedImage) {
       console.error("No image in response:", JSON.stringify(data));
-      throw new Error("Failed to generate cinematic image");
+      return new Response(
+        JSON.stringify({ error: "Failed to generate cinematic image. Please try again." }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     return new Response(
@@ -564,7 +582,7 @@ QUALITY REMINDERS:
     const errorMessage = error instanceof Error ? error.message : 'Failed to transform image';
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
