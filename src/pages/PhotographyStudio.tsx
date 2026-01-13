@@ -131,21 +131,11 @@ const PhotographyStudio = () => {
       return;
     }
 
-    const result = await deductGems("enhance-photo");
-    if (!result.success) {
-      toast({
-        title: "Insufficient gems",
-        description: "Please top up your gems to continue",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsEnhancing(true);
     setEnhancedImage(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('enhance-photo', {
+      const { data, error } = await supabase.functions.invoke("enhance-photo", {
         body: {
           image: originalImage,
           photoType,
@@ -154,13 +144,18 @@ const PhotographyStudio = () => {
           outputQuality,
           aiPhotographerMode,
           skinFinishEnabled: photoType !== "product" && skinFinishEnabled,
-          skinFinishIntensity: photoType !== "product" && skinFinishEnabled ? skinFinishIntensity : undefined,
+          skinFinishIntensity:
+            photoType !== "product" && skinFinishEnabled ? skinFinishIntensity : undefined,
           userId: user?.id,
-        }
+        },
       });
 
-      if (error) throw error;
-      
+      // The backend always returns 200 with { error } on failure, but keep this
+      // for safety in case the runtime returns a non-2xx.
+      if (error) {
+        throw error;
+      }
+
       if (data?.error) {
         toast({
           title: "Enhancement failed",
@@ -171,12 +166,31 @@ const PhotographyStudio = () => {
       }
 
       if (data?.enhancedImage) {
+        // Only deduct gems after a successful enhancement (prevents charging on failures).
+        const charge = await deductGems("enhance-photo");
+        if (!charge.success) {
+          toast({
+            title: "Couldn’t charge gems",
+            description: "Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         setEnhancedImage(data.enhancedImage);
         setCreativeBrief(data.creativeBrief || null);
         await logGeneration("Photography Studio", [], [data.enhancedImage]);
         toast({
           title: "Photo enhanced!",
-          description: data.creativeBrief ? data.creativeBrief.substring(0, 100) + "..." : "Your professional-quality image is ready",
+          description: data.creativeBrief
+            ? data.creativeBrief.substring(0, 100) + "..."
+            : "Your professional-quality image is ready",
+        });
+      } else {
+        toast({
+          title: "Enhancement failed",
+          description: "No image returned. Please try again.",
+          variant: "destructive",
         });
       }
     } catch (error: any) {

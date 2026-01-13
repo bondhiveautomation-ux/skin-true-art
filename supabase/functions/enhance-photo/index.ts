@@ -147,13 +147,20 @@ serve(async (req) => {
     if (!image) {
       return new Response(
         JSON.stringify({ error: "Please provide an image to enhance" }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      // Always return 200 so the client shows the real message instead of
+      // "Edge Function returned a non-2xx status code".
+      return new Response(
+        JSON.stringify({
+          error: "Service is not configured (missing API key). Please contact support.",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Initialize Supabase client
@@ -377,9 +384,10 @@ EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced ve
 
   } catch (error) {
     console.error("DLR Studio enhancement error:", error);
+    // Always 200 so the client can show the real message.
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Failed to enhance photo" }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
