@@ -16,14 +16,14 @@ serve(async (req) => {
     if (!influencerImage) {
       return new Response(
         JSON.stringify({ error: "Missing influencer image" }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!referenceImage) {
       return new Response(
         JSON.stringify({ error: "Missing reference image" }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -31,8 +31,8 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) {
       console.error('LOVABLE_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: "API key not configured" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Service not configured. Please contact support." }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -110,21 +110,21 @@ OUTPUT: Generate the face-swapped image.`;
 
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Too many requests. Please try again in a moment." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "API credits depleted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Service credits exhausted. Please try again later." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       return new Response(
-        JSON.stringify({ error: "Failed to process face swap" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Failed to process face swap. Please try again." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -137,7 +137,7 @@ OUTPUT: Generate the face-swapped image.`;
       const msg = typeof data.error?.message === "string" ? data.error.message : "AI service temporarily unavailable";
       return new Response(
         JSON.stringify({ error: msg }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -147,7 +147,7 @@ OUTPUT: Generate the face-swapped image.`;
       console.error("Model returned reference image unchanged");
       return new Response(
         JSON.stringify({ error: "Face swap failed. Please try a clearer face photo or different reference image." }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -155,7 +155,7 @@ OUTPUT: Generate the face-swapped image.`;
       console.error("No image in response:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ error: "No image was generated. The AI may have blocked the request due to content filters." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -168,7 +168,7 @@ OUTPUT: Generate the face-swapped image.`;
     console.error('Face swap error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error occurred" }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
