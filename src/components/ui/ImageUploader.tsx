@@ -12,6 +12,17 @@ interface ImageUploaderProps {
   aspectRatio?: "square" | "portrait" | "landscape" | "auto";
 }
 
+// Helper to reset file input after upload
+const handleUploadWithReset = (
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+) => {
+  return (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpload(e);
+    // Reset the input value so the same file can be uploaded again
+    e.target.value = '';
+  };
+};
+
 export const ImageUploader = ({
   id,
   image,
@@ -43,7 +54,7 @@ export const ImageUploader = ({
       <input
         type="file"
         accept="image/*"
-        onChange={onUpload}
+        onChange={handleUploadWithReset(onUpload)}
         className="hidden"
         id={id}
       />
