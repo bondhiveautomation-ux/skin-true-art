@@ -259,13 +259,24 @@ NEGATIVE PROMPT (ABSOLUTE PROHIBITIONS):
 face change, makeup change, dress change, jewelry change, hairstyle change, extra limbs, extra fingers, distorted anatomy, plastic skin, AI artifacts, cartoon style, CGI look, fantasy elements, fake lighting, unrealistic background, blur on subject, identity alteration, age change, skin tone change, expression change, pose change, body proportion change
 
 ═══════════════════════════════════════════════════════════════
+ASPECT RATIO & DIMENSION LOCK (CRITICAL):
+═══════════════════════════════════════════════════════════════
+- The OUTPUT image MUST have the EXACT SAME aspect ratio as the INPUT image
+- Do NOT crop, zoom in, or cut off any part of the original image
+- Do NOT change the framing or composition boundaries
+- If the input is portrait orientation, output MUST be portrait orientation
+- If the input is landscape orientation, output MUST be landscape orientation  
+- Every element visible in the original image MUST be visible in the output
+- The full body/scene from the original MUST be preserved - NO cropping allowed
+
+═══════════════════════════════════════════════════════════════
 EXECUTION:
 ═══════════════════════════════════════════════════════════════
-Transform ONLY the environment and lighting while keeping the human subject mathematically identical to the source. This is NON-DESTRUCTIVE IDENTITY EDITING.
+Transform ONLY the environment and lighting while keeping the human subject mathematically identical to the source. This is NON-DESTRUCTIVE IDENTITY EDITING. PRESERVE THE EXACT FRAMING AND ASPECT RATIO - the output must show everything the input shows, with no cropping.
 
 After completing the enhancement, provide a brief 2-sentence creative director's note explaining what was enhanced and how the subject's identity was preserved.
 
-EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced version.`;
+EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced version with the SAME aspect ratio and framing.`;
 
     console.log("Calling Lovable AI with DLR Studio Master Prompt...");
 
