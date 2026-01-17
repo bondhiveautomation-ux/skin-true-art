@@ -79,58 +79,243 @@ interface EnhanceRequest {
   userId?: string;
 }
 
-// DLR Studio Style Descriptions - Artistic Direction (Global Illumination)
+// ═══════════════════════════════════════════════════════════════════════════════
+// DLR STUDIO MASTER STYLE LIBRARY - Professional Photography Lighting Presets
+// ═══════════════════════════════════════════════════════════════════════════════
 const styleDescriptions: Record<string, string> = {
-  clean_studio: "CLEAN STUDIO: High-end professional studio lighting with soft-box shadows, neutral background tones, even illumination across the subject, professional color temperature",
-  luxury_brand: "COUTURE MOOD (Luxury Brand): Editorial high-contrast lighting with premium color grading, rich deep shadows, sophisticated mood lighting, luxury fashion magazine aesthetic",
-  soft_natural: "SOFT NATURAL: Soft diffused daylight simulation, gentle rim lighting, warm organic color tones, natural window light effect, golden hour warmth",
-  dark_premium: "DARK PREMIUM: Selective dramatic lighting with deep moody shadows, high contrast ratio, spotlight effect on subject, noir-inspired atmosphere",
-  ecommerce_white: "E-COMMERCE WHITE: Pure infinity white backdrop, completely even shadowless lighting, accurate product colors, commercial catalog quality",
-  royal_monochrome: "SILVER SCREEN (Royal Monochrome): Stark black-and-white contrast with onyx shadows, classic Hollywood glamour lighting, timeless elegance",
-  instagram_editorial: "INSTAGRAM EDITORIAL: Trendy lifestyle color grading, soft bokeh backgrounds, influencer-worthy aesthetics, vibrant yet natural tones",
+  clean_studio: `CLEAN STUDIO PROFESSIONAL:
+Emulate a high-end commercial photography studio setup:
+- Three-point lighting system: Key light at 45° with large octabox softbox (f/8 quality), fill light at 30% power opposite, hair light from above-behind
+- Color temperature: 5600K neutral daylight, perfect white balance
+- Catchlights in eyes should be visible and natural
+- Subtle graduated backdrop: seamless paper or cyclorama effect with gentle falloff
+- Shadow quality: soft, directional, never harsh or flat
+- Professional product/portrait lighting used by brands like Apple, Glossier, Zara
+- Clean, commercial, catalog-ready output`,
+
+  luxury_brand: `COUTURE FASHION EDITORIAL (Luxury Brand):
+Recreate the lighting aesthetic of Vogue, Harper's Bazaar, and high-fashion editorials:
+- Dramatic directional lighting with intentional shadow play
+- Chiaroscuro technique: rich contrast between highlights and deep shadows
+- Color grading: desaturated luxury tones—champagne golds, deep burgundies, midnight blues
+- Film grain simulation: subtle organic texture (Kodak Portra 400 aesthetic)
+- Accent lighting: rim/kicker light to separate subject from background
+- Mood: mysterious, sophisticated, aspirational
+- Reference: Annie Leibovitz, Peter Lindbergh, Steven Meisel lighting styles`,
+
+  soft_natural: `SOFT NATURAL GOLDEN HOUR:
+Simulate the most flattering natural light conditions photographers seek:
+- Golden hour sunlight: warm 3200K-4000K color temperature
+- Direction: 45° side lighting simulating window or outdoor sun at golden hour
+- Soft diffusion: light appears filtered through sheer curtains or cloud cover
+- Gentle rim lighting to create depth and dimension
+- Skin tones: warm, healthy, luminous without being orange
+- Fill shadows naturally—never completely dark, never flat
+- Environment feels organic, inviting, lifestyle-aspirational
+- Reference: natural light photographers, lifestyle brand campaigns`,
+
+  dark_premium: `DARK PREMIUM CINEMATIC NOIR:
+Create dramatic, moody, high-contrast lighting for premium brand imagery:
+- Single key light: dramatic side or Rembrandt lighting with pronounced shadows
+- Contrast ratio: 4:1 or higher between lit and shadow areas
+- Background: falls to near-black or very dark, subject pops forward
+- Selective lighting: only illuminate what matters, let mystery exist in shadows
+- Color palette: rich blacks, selective warm highlights, subtle color accents
+- Catchlight: single, dramatic, intentional
+- Mood: powerful, editorial, art-gallery worthy
+- Reference: Helmut Newton, low-key fashion photography, premium automotive ads`,
+
+  ecommerce_white: `E-COMMERCE PURE WHITE INFINITY:
+Professional e-commerce product photography standard used by Amazon, Shopify, fashion retailers:
+- Pure white background: RGB 255,255,255 or within 5% tolerance
+- Completely shadowless OR minimal soft shadow for grounding
+- Even, diffused lighting from all angles—eliminate all harsh shadows
+- Color accuracy: products must show TRUE colors as they appear in real life
+- No color cast—neutral white balance throughout
+- Crisp edge definition: subject clearly separated from background
+- Commercial catalog quality: professional, clean, conversion-optimized
+- Reference: ASOS, Net-a-Porter, Amazon product photography standards`,
+
+  royal_monochrome: `SILVER SCREEN BLACK & WHITE GLAMOUR:
+Classic Hollywood golden-age portraiture with timeless elegance:
+- Convert to stunning black and white with full tonal range
+- Zone system exposure: rich blacks (Zone II), luminous whites (Zone VIII), detailed midtones
+- Lighting: classic Hollywood butterfly or Paramount lighting
+- Skin luminosity: smooth, glowing, porcelain-like quality
+- Contrast: punchy but not crushed—maintain shadow detail
+- Film aesthetic: classic Tri-X or Ilford HP5 tonal quality
+- Mood: timeless, elegant, museum-worthy, iconic
+- Reference: George Hurrell, Irving Penn, Richard Avedon portraiture`,
+
+  instagram_editorial: `INSTAGRAM EDITORIAL LIFESTYLE:
+Modern social media aesthetic that drives engagement and brand love:
+- Bright, airy exposure with lifted shadows
+- Color grading: trendy warm tones (peachy highlights), teal-orange color harmony
+- Subtle film emulation: Fujifilm or VSCO-style color science
+- Soft background bokeh: creamy, dreamy out-of-focus areas
+- Lifestyle context: image feels candid yet perfectly composed
+- Aspirational but attainable aesthetic
+- Clean, share-worthy, scroll-stopping quality
+- Reference: top lifestyle influencers, DTC brand campaigns, modern editorial`,
 };
 
-// DLR Studio Background Descriptions - Environmental Set (World Architecture)
+// ═══════════════════════════════════════════════════════════════════════════════
+// DLR STUDIO BACKGROUND ENVIRONMENT LIBRARY - Premium Set Designs
+// ═══════════════════════════════════════════════════════════════════════════════
 const backgroundDescriptions: Record<string, string> = {
-  keep_original: "Enhance and refine the original background with improved lighting, depth, and clarity while maintaining its authentic character",
-  clean_studio: "Ultra-realistic professional photography studio backdrop with seamless gradient, subtle vignette, controlled lighting environment",
-  premium_lifestyle: "Aspirational luxury lifestyle environment with tasteful interior elements, soft ambient lighting, premium textures",
-  royal_bridal_chamber: "Ultra-realistic royal bridal chamber environment: ivory and warm beige wall panels with intricate gold trim, architectural moldings, soft diffused chandelier lighting, luxurious draped curtains, polished marble accents, $10,000 photo set quality",
-  garden_pavilion: "Elegant outdoor garden pavilion setting: manicured greenery, classical stone columns, soft natural daylight filtering through, romantic floral accents, aristocratic estate atmosphere",
-  palace_corridor: "Grand palace corridor: ornate ceiling details, gilded frames, rich burgundy and gold color palette, dramatic natural light from tall windows, royal heritage ambiance",
+  keep_original: `PRESERVE ORIGINAL BACKGROUND (MANDATORY):
+CRITICAL INSTRUCTION - DO NOT REPLACE THE BACKGROUND. This is a NON-DESTRUCTIVE enhancement:
+- Keep 100% of the original background elements, colors, and composition
+- Only ENHANCE the existing background: improve clarity, reduce noise, balance exposure
+- Adjust background lighting to complement the selected style preset
+- Add subtle depth enhancement if appropriate (slight blur graduation to separate planes)
+- Fix any background imperfections (dust spots, minor distractions) while keeping the scene
+- Color grade the background to match the overall style harmoniously
+- DO NOT add new elements, DO NOT change the location, DO NOT replace anything
+- The original environment must remain recognizable and authentic`,
+
+  clean_studio: `PROFESSIONAL PHOTOGRAPHY STUDIO BACKDROP:
+Generate a high-end studio environment backdrop:
+- Seamless gradient background: subtle grey-to-white or neutral tone graduation
+- OR solid professional grey (18% grey card reference)
+- Gentle vignette: darker edges drawing focus to center subject
+- Floor reflection: subtle, polished surface feel if full-body shot
+- Professional cyclorama curve where wall meets floor (no hard edge)
+- Lighting ambiance consistent with selected style preset
+- Clean, distraction-free, allows subject to be the complete focus
+- Commercial studio quality: $2,000/day rental studio look`,
+
+  premium_lifestyle: `LUXURY LIFESTYLE INTERIOR ENVIRONMENT:
+Place subject in an aspirational high-end interior setting:
+- Setting: modern luxury apartment, boutique hotel, or upscale café
+- Soft ambient lighting: warm interior glow with natural window light
+- Background elements: tasteful furniture, plants, art pieces (blurred softly)
+- Textures: marble, velvet, brass accents, linen, natural materials
+- Depth: clear foreground/midground/background separation with natural bokeh
+- Color palette: neutral warm tones—cream, beige, soft grey, gold accents
+- Mood: sophisticated, aspirational, lifestyle brand campaign quality
+- Reference: Architectural Digest interiors, luxury brand lookbooks`,
+
+  royal_bridal_chamber: `ROYAL BRIDAL PALACE CHAMBER:
+Ultra-premium bridal/formal photography backdrop with royal elegance:
+- Setting: aristocratic palace interior, bridal suite, or ballroom
+- Walls: ivory and champagne panels with intricate gold leaf trim and moldings
+- Architectural details: ornate crown molding, chandelier soft glow, tall windows
+- Fabric elements: luxurious draped silk curtains, velvet accents
+- Floor: polished marble or parquet with subtle reflection
+- Lighting: soft diffused chandelier glow mixed with window light
+- Props: fresh flowers, candelabra, antique furniture (blurred in background)
+- Color palette: ivory, gold, champagne, blush pink, soft cream
+- Quality: $15,000 destination wedding venue atmosphere`,
+
+  garden_pavilion: `ELEGANT GARDEN PAVILION SETTING:
+Romantic outdoor estate photography environment:
+- Setting: manicured formal garden, estate grounds, or botanical pavilion
+- Architectural elements: classical stone columns, pergola, gazebo structure
+- Greenery: soft-focus hedges, climbing roses, wisteria, manicured lawn
+- Lighting: golden hour sunlight filtering through foliage, dappled light
+- Floral accents: romantic blooms—roses, peonies, hydrangeas (subtle, not overwhelming)
+- Atmosphere: English country estate, French château gardens, aristocratic grounds
+- Depth: natural bokeh from foliage, subject clearly separated from environment
+- Mood: romantic, fairy-tale, timeless elegance
+- Reference: royal wedding photography, estate lifestyle campaigns`,
+
+  palace_corridor: `GRAND PALACE CORRIDOR:
+Majestic royal heritage architectural setting:
+- Setting: palace corridor, grand gallery, or museum hall
+- Architecture: ornate gilded ceiling, classical columns, arched doorways
+- Walls: rich burgundy, deep green, or ivory with gold frame accents
+- Floor: polished marble with geometric patterns, reflective surface
+- Lighting: dramatic natural light from tall arched windows, chandelier glow
+- Art: classical paintings in ornate frames (blurred background elements)
+- Depth: long perspective corridor with subject as focal point
+- Color palette: burgundy, gold, ivory, deep emerald, royal blue accents
+- Mood: regal, powerful, museum-gallery prestige
+- Reference: Versailles, Hermitage, Buckingham Palace aesthetics`,
 };
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// PHOTO TYPE SPECIFIC INSTRUCTIONS - Contextual Enhancement Rules
+// ═══════════════════════════════════════════════════════════════════════════════
 const photoTypeInstructions: Record<string, string> = {
-  product: "This is a PRODUCT photo. Focus on: showcasing the product clearly, accurate colors, appealing presentation, remove any distracting elements, ensure the product is the hero of the image.",
-  portrait: "This is a PORTRAIT/INFLUENCER photo. Focus on: flattering lighting on the face, natural skin texture (no plastic look), natural pose correction, eye enhancement, professional headshot quality while maintaining the person's authentic identity.",
-  lifestyle: "This is a LIFESTYLE/BRAND photo. Focus on: storytelling composition, aspirational mood, brand-appropriate atmosphere, lifestyle context enhancement, making the scene feel premium and desirable.",
+  product: `PRODUCT PHOTOGRAPHY OPTIMIZATION:
+This is a PRODUCT photograph—the item being sold is the hero:
+- Focus ALL attention on the product: perfect focus, crisp edges, accurate detail
+- Color accuracy is CRITICAL: product colors must match real-life appearance exactly
+- Remove ALL distracting elements: dust, fingerprints, scratches, unwanted reflections
+- Enhance product texture and material quality: make fabrics look touchable, metals gleam, glass sparkle
+- Professional product isolation with appropriate shadowing or reflection
+- Composition: product fills frame appropriately, balanced negative space
+- Lighting: even, revealing product details without harsh shadows or blown highlights
+- E-commerce ready: image should meet marketplace photography standards
+- DO NOT add elements that aren't in the original product shot`,
+
+  portrait: `PORTRAIT & INFLUENCER PHOTOGRAPHY OPTIMIZATION:
+This is a PORTRAIT/HEADSHOT/INFLUENCER photograph—the person is the star:
+- Flattering facial lighting: soft, even, with natural dimensionality
+- PRESERVE 100% of facial identity: same face structure, features, expression, age
+- Natural skin texture: NO plastic, waxy, or overly smoothed appearance (unless skin finish enabled)
+- Eye enhancement: subtle catchlight, clarity, life—NOT color change or enlargement
+- Natural pose refinement: subtle improvements to posture if needed, nothing drastic
+- Hair: maintain natural texture and style, enhance shine and definition
+- Expression: preserve the authentic emotion and personality
+- Background separation: clear subject focus with appropriate depth of field
+- Professional headshot/creator content quality—magazine or LinkedIn-ready
+- IDENTITY PRESERVATION IS NON-NEGOTIABLE`,
+
+  lifestyle: `LIFESTYLE & BRAND PHOTOGRAPHY OPTIMIZATION:
+This is a LIFESTYLE/BRAND photograph—the scene tells a story:
+- Storytelling composition: the image should evoke emotion and aspiration
+- Brand-appropriate atmosphere: match the mood to the intended brand personality
+- Environmental context: enhance the setting to feel premium and desirable
+- Subject integration: person should feel naturally placed within the environment
+- Color harmony: cohesive color grading across subject and environment
+- Aspirational quality: viewer should want to BE in this image
+- Natural candid feel: even if posed, should feel authentic and unforced
+- Marketing-ready: suitable for social media, website hero, or advertising
+- Lifestyle magazine editorial quality—Condé Nast Traveler, lifestyle brand campaigns
+- Balance between subject and environment—both matter to the story`,
 };
 
-// Frequency Separation Skin Finish - Treats skin as texture layer
+// ═══════════════════════════════════════════════════════════════════════════════
+// FREQUENCY SEPARATION SKIN FINISH - Professional Retouching Technique
+// ═══════════════════════════════════════════════════════════════════════════════
 const skinFinishInstructions: Record<string, string> = {
-  light: `FREQUENCY SEPARATION SKIN FINISH (Light):
-- Apply FREQUENCY SEPARATION technique: treat skin as a TEXTURE LAYER, not flat color
-- Remove only small blemishes, tiny spots, and minor imperfections
-- Keep FULL skin texture and all pores visible at the frequency level
-- Do NOT smooth or blur any skin areas - maintain high-frequency detail
-- Only touch up the most obvious temporary marks
-- Preserve complete natural appearance with full texture integrity`,
-  medium: `FREQUENCY SEPARATION SKIN FINISH (Medium - Recommended):
-- Apply FREQUENCY SEPARATION technique: separate high-frequency texture from low-frequency color
-- Smooth skin evenly at the color level while maintaining texture layer
-- Remove acne, dark spots, scars, and uneven skin tone from the color layer
-- Keep natural pores visible in the texture layer but refined
-- Balance between retouching and realism using frequency separation
-- Apply to primary subject face only if multiple people exist
-- This prevents the "plastic AI face" look by preserving real skin texture`,
-  pro: `FREQUENCY SEPARATION SKIN FINISH (Pro Retouch):
-- Apply professional FREQUENCY SEPARATION: full control of texture and color layers
-- High-end beauty retouch with smooth even skin tone on color layer
-- Remove all blemishes, spots, scars, and imperfections
-- Maintain realistic pore texture in high-frequency layer (subtle but visible)
-- Professional magazine-quality finish using true frequency separation
-- Apply only to primary subject if multiple faces exist
-- Result should look like expert Photoshop frequency separation, NOT AI blur`,
+  light: `FREQUENCY SEPARATION SKIN FINISH (Light - Subtle Touch):
+Apply professional frequency separation retouching with minimal intervention:
+- TEXTURE LAYER (High Frequency): Keep 100% of natural skin texture, pores, and fine details
+- COLOR LAYER (Low Frequency): Remove only the most obvious temporary blemishes
+- Target ONLY: small pimples, temporary red spots, minor discolorations
+- PRESERVE: all pores, natural skin texture, moles, beauty marks, freckles
+- Do NOT smooth or blur any skin area—maintain complete high-frequency detail
+- Result should be imperceptible: viewer shouldn't notice any retouching
+- Natural, authentic, "your skin but on a good day" result
+- NEVER create plastic, airbrushed, or doll-like appearance`,
+
+  medium: `FREQUENCY SEPARATION SKIN FINISH (Medium - Balanced Retouch):
+Apply professional frequency separation for polished but natural results:
+- TEXTURE LAYER (High Frequency): Preserve natural pore structure and skin texture
+- COLOR LAYER (Low Frequency): Even out skin tone, remove color inconsistencies
+- Remove: acne, blemishes, dark spots, under-eye circles, redness, uneven patches
+- Maintain: natural pore visibility, skin texture, character marks (moles, beauty marks)
+- Smooth color layer ONLY—texture layer stays intact and visible
+- Balance between magazine polish and authentic appearance
+- Apply to primary subject face if multiple people present
+- This is the "professional headshot" level of retouching
+- Prevents the dreaded "plastic AI face" while still looking polished`,
+
+  pro: `FREQUENCY SEPARATION SKIN FINISH (Pro - Editorial Retouch):
+Apply high-end editorial frequency separation technique:
+- TEXTURE LAYER (High Frequency): Refine pore structure, subtle skin smoothing
+- COLOR LAYER (Low Frequency): Complete color evening, seamless skin tone
+- Remove: all blemishes, spots, scars, dark circles, fine lines, redness
+- Maintain: realistic pore texture (subtle but visible), natural skin character
+- Professional beauty/fashion magazine standard
+- Porcelain skin quality while maintaining realistic texture
+- Apply only to primary subject if multiple faces present
+- Result: expert Photoshop frequency separation by skilled retoucher
+- NEVER AI blur—must maintain organic skin texture visible at 100% zoom
+- Reference: Vogue beauty editorials, high-end cosmetic campaigns`,
 };
 
 serve(async (req) => {
@@ -209,74 +394,165 @@ CRITICAL FREQUENCY SEPARATION RULES:
 - Use TRUE frequency separation technique - texture layer stays intact`
       : "";
 
+    // Determine if background should be preserved or replaced
+    const isKeepOriginalBackground = backgroundOption === "keep_original";
+
     // MASTER PROMPT ARCHITECTURE - DLR Studio Non-Destructive Identity Editor
-    const prompt = `MASTER BACKGROUND ENGINE PROMPT:
-You are an elite virtual creative director specialized in ultra-realistic professional bridal photography output.
+    const prompt = `═══════════════════════════════════════════════════════════════════════════════
+DLR STUDIO PROFESSIONAL PHOTOGRAPHY ENHANCEMENT ENGINE
+You are an elite virtual creative director and master photographer/retoucher.
+═══════════════════════════════════════════════════════════════════════════════
 
-═══════════════════════════════════════════════════════════════
-STRICT SUBJECT LOCK (PRIMARY RULE - NON-NEGOTIABLE):
-═══════════════════════════════════════════════════════════════
-Face, body, makeup, jewelry, dress, pose = 100% LOCKED.
-- Preserve the original character EXACTLY as provided
-- SAME face, SAME facial structure, SAME expression - NO deviation
-- SAME skin texture and skin tone (NO tone change whatsoever)
-- SAME makeup application, jewelry placement, hairstyle - pixel perfect
-- SAME dress, embroidery patterns, fabric texture, and accessories
-- SAME body proportions and pose - mathematically identical
-- NO facial alteration, NO beautification changes, NO stylization
-- The human subject must be RE-RENDERED, not RE-CREATED
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 1: IDENTITY PRESERVATION (ABSOLUTE - NON-NEGOTIABLE)
+═══════════════════════════════════════════════════════════════════════════════
+The human subject(s) in this image are LOCKED. You may ONLY enhance, never alter:
 
+FACE LOCK:
+- Same exact facial structure, bone structure, and proportions
+- Same eyes (shape, size, color, position)
+- Same nose (shape, size, bridge)
+- Same lips (shape, fullness, expression)
+- Same skin tone and complexion
+- Same expression and emotion
+- Same age appearance
+- NO beautification, NO reshaping, NO enlarging features
+
+BODY LOCK:
+- Same pose and posture
+- Same body proportions and silhouette
+- Same hand and finger positions
+- NO pose changes, NO body reshaping
+
+STYLING LOCK:
+- Same makeup application (lips, eyes, blush, etc.)
+- Same hair (style, color, texture, position)
+- Same clothing (dress, outfit, fabric, patterns)
+- Same jewelry and accessories (exact placement)
+- Same any visible tattoos or distinctive marks
+
+THE PERSON MUST BE RE-RENDERED WITH ENHANCEMENTS, NOT RE-CREATED.
+
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 2: PHOTO TYPE CONTEXT
+═══════════════════════════════════════════════════════════════════════════════
 ${photoTypeInstruction}
 
-═══════════════════════════════════════════════════════════════
-BACKGROUND GENERATION INSTRUCTION:
-═══════════════════════════════════════════════════════════════
-Artistic Style (Global Illumination): ${styleDesc}
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 3: LIGHTING & STYLE APPLICATION
+═══════════════════════════════════════════════════════════════════════════════
+Apply the following lighting and color grading style:
 
-Environment Context (World Architecture): ${bgDesc}
+${styleDesc}
 
-Apply the selected background environment with realistic studio lighting, natural shadows, and cinematic depth. Background elements must remain soft and out of focus where appropriate to keep the subject dominant. The environment should enhance, never compete with, the subject.
+Implement this lighting style throughout the image:
+- Adjust light direction, quality, and color temperature accordingly
+- Apply appropriate shadows and highlights for this style
+- Color grade to match the specified aesthetic
+- Ensure consistency between subject lighting and environment
 
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 4: BACKGROUND INSTRUCTION ${isKeepOriginalBackground ? "(PRESERVATION MODE)" : "(REPLACEMENT MODE)"}
+═══════════════════════════════════════════════════════════════════════════════
+${isKeepOriginalBackground ? `
+⚠️ CRITICAL: KEEP ORIGINAL BACKGROUND MODE IS ACTIVE ⚠️
+
+YOU MUST NOT REPLACE, REMOVE, OR SIGNIFICANTLY ALTER THE BACKGROUND.
+
+${bgDesc}
+
+ALLOWED background modifications:
+✓ Enhance clarity and sharpness of existing background elements
+✓ Reduce noise and artifacts
+✓ Improve color balance to match style preset
+✓ Add subtle depth-of-field effect for subject separation
+✓ Fix minor imperfections (dust spots, small distractions)
+✓ Adjust exposure/brightness to match subject lighting
+
+FORBIDDEN background modifications:
+✗ Replacing the background with a different scene
+✗ Removing walls, furniture, or environmental elements
+✗ Adding new architectural or decorative elements
+✗ Changing the location or setting
+✗ Removing people or objects that are part of the original scene
+
+The original environment must remain 100% recognizable.
+` : `
+BACKGROUND REPLACEMENT MODE ACTIVE:
+
+${bgDesc}
+
+Generate this environment behind the subject:
+- Seamlessly composite the subject into the new background
+- Match lighting direction and color temperature between subject and background
+- Apply natural depth of field (background slightly softer than subject)
+- Ensure shadows are consistent with new environment lighting
+- Create realistic integration—no visible compositing edges
+- Background should enhance, never compete with, the subject
+`}
+
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 5: OUTPUT QUALITY
+═══════════════════════════════════════════════════════════════════════════════
 ${qualityInstruction}
+
+Technical requirements:
+- Maximum sharpness on the subject (especially face/product)
+- Proper noise reduction without losing detail
+- Professional color depth and dynamic range
+- Print-ready resolution and quality
+- DSLR-equivalent output with natural lens characteristics
 
 ${aiModeInstruction}
 
 ${skinFinishInstruction}
 
-═══════════════════════════════════════════════════════════════
-PHOTOGRAPHY STYLE:
-═══════════════════════════════════════════════════════════════
-- DSLR bridal photography quality
-- Shallow depth of field with f/1.4 lens simulation
-- Accurate color science with professional white balance
-- Soft light falloff with natural gradient transitions
-- Professional wedding editorial quality output
-- Cinematic depth with proper foreground/background separation
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 6: COMPOSITION & FRAMING (CRITICAL)
+═══════════════════════════════════════════════════════════════════════════════
+ASPECT RATIO PRESERVATION (MANDATORY):
+- Output image MUST have the EXACT SAME aspect ratio as input
+- Portrait input → Portrait output
+- Landscape input → Landscape output
+- Square input → Square output
 
-═══════════════════════════════════════════════════════════════
-NEGATIVE PROMPT (ABSOLUTE PROHIBITIONS):
-═══════════════════════════════════════════════════════════════
-face change, makeup change, dress change, jewelry change, hairstyle change, extra limbs, extra fingers, distorted anatomy, plastic skin, AI artifacts, cartoon style, CGI look, fantasy elements, fake lighting, unrealistic background, blur on subject, identity alteration, age change, skin tone change, expression change, pose change, body proportion change
+FRAMING PRESERVATION (MANDATORY):
+- Do NOT crop any part of the original image
+- Do NOT zoom in or zoom out
+- Do NOT change composition boundaries
+- Every element visible in input MUST be visible in output
+- Full body shots stay full body, headshots stay headshots
 
-═══════════════════════════════════════════════════════════════
-ASPECT RATIO & DIMENSION LOCK (CRITICAL):
-═══════════════════════════════════════════════════════════════
-- The OUTPUT image MUST have the EXACT SAME aspect ratio as the INPUT image
-- Do NOT crop, zoom in, or cut off any part of the original image
-- Do NOT change the framing or composition boundaries
-- If the input is portrait orientation, output MUST be portrait orientation
-- If the input is landscape orientation, output MUST be landscape orientation  
-- Every element visible in the original image MUST be visible in the output
-- The full body/scene from the original MUST be preserved - NO cropping allowed
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 7: ABSOLUTE PROHIBITIONS
+═══════════════════════════════════════════════════════════════════════════════
+NEVER:
+- Change facial features or identity
+- Alter body proportions or pose
+- Modify makeup, hair, or clothing
+- Add extra limbs, fingers, or body parts
+- Create plastic, waxy, or AI-artifact skin
+- Apply cartoon, CGI, or fantasy styling
+- Change skin tone or age appearance
+- Alter expression or emotion
+- Crop or change aspect ratio
+- Remove elements from original image
 
-═══════════════════════════════════════════════════════════════
-EXECUTION:
-═══════════════════════════════════════════════════════════════
-Transform ONLY the environment and lighting while keeping the human subject mathematically identical to the source. This is NON-DESTRUCTIVE IDENTITY EDITING. PRESERVE THE EXACT FRAMING AND ASPECT RATIO - the output must show everything the input shows, with no cropping.
+═══════════════════════════════════════════════════════════════════════════════
+SECTION 8: EXECUTION
+═══════════════════════════════════════════════════════════════════════════════
+This is NON-DESTRUCTIVE PROFESSIONAL ENHANCEMENT:
+1. Preserve the subject's complete identity
+2. Apply the specified lighting/style
+3. ${isKeepOriginalBackground ? "Enhance the original background while keeping it intact" : "Replace background with specified environment"}
+4. Maintain exact framing and aspect ratio
+5. Output at maximum professional quality
 
-After completing the enhancement, provide a brief 2-sentence creative director's note explaining what was enhanced and how the subject's identity was preserved.
+EDIT THE PROVIDED IMAGE following all instructions precisely.
 
-EDIT THE PROVIDED IMAGE following all these instructions. Return the enhanced version with the SAME aspect ratio and framing.`;
+After completing, provide a brief 2-sentence creative director's note explaining:
+1. What enhancements were applied
+2. How the subject's identity was preserved`;
 
     console.log("Calling Lovable AI with DLR Studio Master Prompt...");
 
