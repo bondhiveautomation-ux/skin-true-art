@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { getGemCost } from "@/lib/gemCosts";
+import { getGemCost, getGemCostAsync, preloadGemCosts } from "@/lib/gemCosts";
 
 interface GemsData {
   gems_balance: number;
@@ -26,6 +26,9 @@ export const useGems = () => {
     }
 
     try {
+      // Pre-load gem costs from DB
+      await preloadGemCosts();
+      
       const { data, error } = await supabase.rpc('get_user_gems', {
         p_user_id: user.id
       });
@@ -61,7 +64,8 @@ export const useGems = () => {
   const deductGems = useCallback(async (featureName: string): Promise<{ success: boolean; newBalance: number }> => {
     if (!user?.id) return { success: false, newBalance: 0 };
 
-    const cost = getGemCost(featureName);
+    // Use async version to ensure we have the latest cost from DB
+    const cost = await getGemCostAsync(featureName);
     
     try {
       const { data, error } = await supabase.rpc('deduct_gems', {

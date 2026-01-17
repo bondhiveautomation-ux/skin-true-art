@@ -313,6 +313,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_gem_costs: {
+        Row: {
+          category: string
+          created_at: string
+          feature_key: string
+          feature_name: string
+          gem_cost: number
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          feature_key: string
+          feature_name: string
+          gem_cost?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          feature_key?: string
+          feature_name?: string
+          gem_cost?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gem_transactions: {
         Row: {
           created_at: string
