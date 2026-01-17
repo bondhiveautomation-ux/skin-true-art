@@ -1,4 +1,6 @@
-// Gem costs per feature category
+import { supabase } from "@/integrations/supabase/client";
+
+// Default gem costs per feature (fallback if DB unavailable)
 export const GEM_COSTS = {
   // High-Impact Features - 15 Gems
   "dress-change": 15,
@@ -7,8 +9,8 @@ export const GEM_COSTS = {
   "pose-transfer": 15,
   "face-swap": 15,
   "cinematic-transform": 15,
-  "extract-dress-to-dummy": 15, // Premium model (Gemini 3 Pro)
-  "generate-background": 15, // Premium model (Gemini 3 Pro)
+  "extract-dress-to-dummy": 15,
+  "generate-background": 15,
   
   // Studio Utility Features - 12 Gems
   "enhance-photo": 12,
@@ -23,8 +25,83 @@ export const GEM_COSTS = {
 
 export type FeatureName = keyof typeof GEM_COSTS;
 
+// Cache for DB gem costs
+let dbGemCostsCache: Record<string, number> | null = null;
+let dbCachePromise: Promise<Record<string, number>> | null = null;
+let lastCacheFetch = 0;
+const CACHE_TTL = 60000; // 1 minute cache
+
+// Fetch gem costs from database
+const fetchDBGemCosts = async (): Promise<Record<string, number>> => {
+  const now = Date.now();
+  
+  // Return cache if valid
+  if (dbGemCostsCache && (now - lastCacheFetch) < CACHE_TTL) {
+    return dbGemCostsCache;
+  }
+
+  // If already fetching, wait for that promise
+  if (dbCachePromise) {
+    return dbCachePromise;
+  }
+
+  dbCachePromise = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from("feature_gem_costs")
+        .select("feature_key, gem_cost")
+        .eq("is_active", true);
+
+      if (error) throw error;
+
+      const costsMap: Record<string, number> = {};
+      (data || []).forEach((f: { feature_key: string; gem_cost: number }) => {
+        costsMap[f.feature_key] = f.gem_cost;
+      });
+      
+      dbGemCostsCache = costsMap;
+      lastCacheFetch = Date.now();
+      return costsMap;
+    } catch (error) {
+      console.error("Error fetching gem costs from DB:", error);
+      return {};
+    } finally {
+      dbCachePromise = null;
+    }
+  })();
+
+  return dbCachePromise;
+};
+
+// Clear cache (call when admin updates costs)
+export const clearGemCostCache = () => {
+  dbGemCostsCache = null;
+  dbCachePromise = null;
+  lastCacheFetch = 0;
+};
+
+// Synchronous getter using cached values (falls back to defaults)
 export const getGemCost = (featureName: string): number => {
+  // First check DB cache
+  if (dbGemCostsCache && dbGemCostsCache[featureName] !== undefined) {
+    return dbGemCostsCache[featureName];
+  }
+  // Fall back to hardcoded defaults
   return GEM_COSTS[featureName as FeatureName] ?? 1;
+};
+
+// Async getter that ensures DB values are loaded
+export const getGemCostAsync = async (featureName: string): Promise<number> => {
+  const dbCosts = await fetchDBGemCosts();
+  if (dbCosts[featureName] !== undefined) {
+    return dbCosts[featureName];
+  }
+  return GEM_COSTS[featureName as FeatureName] ?? 1;
+};
+
+// Pre-load gem costs from DB (call on app init)
+export const preloadGemCosts = async (): Promise<void> => {
+  await fetchDBGemCosts();
 };
 
 export const FEATURE_CATEGORIES = {

@@ -82,6 +82,7 @@ import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 import { PaymentInbox } from "@/components/admin/PaymentInbox";
 import { LeadsInbox } from "@/components/admin/LeadsInbox";
 import { PricingManager } from "@/components/admin/PricingManager";
+import { FeatureGemCostsManager } from "@/components/admin/FeatureGemCostsManager";
 import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
 import { ArticlesManager } from "@/components/admin/ArticlesManager";
@@ -586,6 +587,10 @@ const Admin = () => {
                   <DropdownMenuItem onClick={() => setActiveTab("pricing")} className="gap-2 cursor-pointer">
                     <Diamond className="w-4 h-4" />
                     Pricing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("feature-costs")} className="gap-2 cursor-pointer">
+                    <Diamond className="w-4 h-4" />
+                    Tool Costs
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setActiveTab("website-cms")} className="gap-2 cursor-pointer">
                     <Settings2 className="w-4 h-4" />
@@ -1167,6 +1172,10 @@ const Admin = () => {
 
           <TabsContent value="pricing">
             <PricingManager />
+          </TabsContent>
+
+          <TabsContent value="feature-costs">
+            <FeatureGemCostsManager />
           </TabsContent>
 
           <TabsContent value="website-cms">
