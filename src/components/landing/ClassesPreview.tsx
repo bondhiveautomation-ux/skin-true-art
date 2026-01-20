@@ -25,7 +25,7 @@ export const ClassesPreview = () => {
         <div className="text-center mb-12 lg:mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/30 mb-6 animate-fade-in">
             <GraduationCap className="w-4 h-4 text-gold" />
-            <span className="text-sm font-medium text-gold">BondHive Education</span>
+            <span className="text-sm font-medium text-gold">Creators Studio Education</span>
           </div>
           
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">

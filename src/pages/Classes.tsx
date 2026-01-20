@@ -250,13 +250,13 @@ const Classes = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/30 mb-8 animate-fade-in">
             <GraduationCap className="w-4 h-4 text-gold" />
             <span className="text-sm font-medium text-gold">
-              {pageSettings.hero_badge || 'BondHive Education'}
+              {pageSettings.hero_badge || 'Creators Studio Education'}
             </span>
           </div>
 
           {/* Main Title */}
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
-            <span className="gradient-text">{pageSettings.hero_title_highlight || 'BondHive'}</span>
+            <span className="gradient-text">{pageSettings.hero_title_highlight || 'Creators Studio'}</span>
             <span className="text-cream">{pageSettings.hero_title_suffix || ' — The CEO Launchpad'}</span>
           </h1>
 
