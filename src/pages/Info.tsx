@@ -1,8 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useArticles, Article } from "@/hooks/useArticles";
 import { useContent } from "@/hooks/useSiteContent";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Sparkles, 
   ArrowLeft,
@@ -18,7 +25,7 @@ import {
   Zap,
   Loader2,
   Facebook,
-  Share2
+  X
 } from "lucide-react";
 
 const WHATSAPP_NUMBER = "8801234567890"; // Replace with actual WhatsApp number
@@ -40,10 +47,15 @@ const Info = () => {
   const { articles, loading, fetchArticles } = useArticles();
   const { content: headerContent } = useContent("header");
   const { content: infoContent } = useContent("info");
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
   useEffect(() => {
     fetchArticles(true); // Fetch only published articles
   }, [fetchArticles]);
+
+  const handleReadMore = (article: Article) => {
+    setSelectedArticle(article);
+  };
 
   const brandName = headerContent.brand_name || "BH Studio";
   const whatsappMessage = encodeURIComponent(infoContent.whatsapp_message || "Hi, I'd like to request access to BH Studio.");
@@ -239,10 +251,13 @@ const Info = () => {
                     </p>
 
                     {/* Read More */}
-                    <div className="flex items-center gap-2 text-gold/70 group-hover:text-gold transition-colors duration-300 cursor-pointer">
+                    <button
+                      onClick={() => handleReadMore(article)}
+                      className="flex items-center gap-2 text-gold/70 hover:text-gold transition-colors duration-300"
+                    >
                       <span className="text-xs font-semibold uppercase tracking-wider">Read More</span>
                       <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
+                    </button>
                   </article>
                 );
               })}
@@ -289,6 +304,59 @@ const Info = () => {
           </div>
         </div>
       </footer>
+
+      {/* Article Detail Dialog */}
+      <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] bg-charcoal-deep border-gold/20 p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-gold/10">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="px-3 py-1 text-[10px] font-semibold text-gold uppercase tracking-wider bg-gold/10 rounded-full">
+                {selectedArticle?.category}
+              </span>
+              <span className="text-xs text-cream/40">
+                {selectedArticle?.read_time}
+              </span>
+            </div>
+            <DialogTitle className="font-serif text-xl sm:text-2xl font-semibold text-cream leading-tight pr-8">
+              {selectedArticle?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] px-6 py-6">
+            <div className="prose prose-invert prose-gold max-w-none
+              prose-headings:font-serif prose-headings:text-cream prose-headings:font-semibold
+              prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gold/10 prose-h2:pb-2
+              prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-gold
+              prose-p:text-cream/70 prose-p:leading-relaxed prose-p:mb-4
+              prose-strong:text-cream prose-strong:font-semibold
+              prose-ul:text-cream/70 prose-li:mb-2
+              prose-hr:border-gold/10 prose-hr:my-8
+            ">
+              {selectedArticle?.content?.split('\n').map((line, index) => {
+                // Handle headers
+                if (line.startsWith('## ')) {
+                  return <h2 key={index}>{line.replace('## ', '')}</h2>;
+                }
+                if (line.startsWith('### ')) {
+                  return <h3 key={index}>{line.replace('### ', '')}</h3>;
+                }
+                // Handle horizontal rules
+                if (line === '---') {
+                  return <hr key={index} />;
+                }
+                // Handle empty lines
+                if (line.trim() === '') {
+                  return null;
+                }
+                // Handle bold text and regular paragraphs
+                const processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                return (
+                  <p key={index} dangerouslySetInnerHTML={{ __html: processedLine }} />
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
