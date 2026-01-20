@@ -59,10 +59,10 @@ const SparkleParticles = () => {
           createParticle();
         }
 
-        // Gold sparkle
+        // Coral sparkle
         const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size * 2);
-        gradient.addColorStop(0, `hsla(43, 74%, 55%, ${particle.opacity})`);
-        gradient.addColorStop(1, `hsla(43, 74%, 49%, 0)`);
+        gradient.addColorStop(0, `hsla(12, 76%, 65%, ${particle.opacity})`);
+        gradient.addColorStop(1, `hsla(12, 76%, 61%, 0)`);
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
