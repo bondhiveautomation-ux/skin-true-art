@@ -1,4 +1,4 @@
-import { Sparkles, Image, FileText, Shirt, Users, Move, Palette, Layers, Repeat, Type, Camera, Shield, Film } from "lucide-react";
+import { Image, FileText, Shirt, Users, Move, Palette, Layers, Type, Camera, Shield, Film } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useContent, useFeatureContent } from "@/hooks/useSiteContent";
 
@@ -10,7 +10,7 @@ const featureIcons: Record<string, React.ComponentType<{ className?: string }>> 
   feature_6: Move,
   feature_7: Palette,
   feature_8: Layers,
-  feature_9: Repeat,
+  
   feature_10: Type,
   feature_11: Camera,
   feature_12: Shield,
@@ -24,7 +24,7 @@ const featureSectionIds: Record<string, string> = {
   feature_5: "background-saver",
   feature_6: "pose-transfer",
   feature_7: "makeup-studio",
-  feature_9: "dress-change-studio",
+  
   feature_10: "/caption-studio",
   feature_11: "/photography-studio",
   feature_12: "/branding-studio",

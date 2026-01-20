@@ -141,12 +141,6 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
               >
                 Pricing
               </button>
-              <button 
-                onClick={() => navigate("/classes")}
-                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
-              >
-                Classes
-              </button>
             </nav>
 
             {/* Desktop User section */}

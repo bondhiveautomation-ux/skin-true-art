@@ -7,7 +7,7 @@ const PAGE_NAME_MAP: Record<string, string> = {
   "/": "Home",
   "/auth": "Login / Sign Up",
   "/pricing": "Pricing",
-  "/classes": "Classes",
+  
   "/studio/photography": "Photography Studio",
   "/studio/caption": "Caption Studio",
   "/studio/branding": "Branding Studio",

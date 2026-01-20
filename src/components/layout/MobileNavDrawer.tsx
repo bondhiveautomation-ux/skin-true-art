@@ -1,4 +1,4 @@
-import { X, Shield, LogOut, Sparkles, CreditCard, GraduationCap, Play, ExternalLink, Camera, Pen, Palette, Film } from "lucide-react";
+import { X, Shield, LogOut, Sparkles, CreditCard, Play, ExternalLink, Camera, Pen, Palette, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { GemBalance } from "@/components/gems/GemBalance";
@@ -132,13 +132,6 @@ export const MobileNavDrawer = ({
           >
             <CreditCard className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm font-medium">Pricing</span>
-          </button>
-          <button
-            onClick={() => handleRoute("/classes")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left active:scale-[0.98] min-h-[44px]"
-          >
-            <GraduationCap className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm font-medium">Classes</span>
           </button>
           
           {isAdmin && (
