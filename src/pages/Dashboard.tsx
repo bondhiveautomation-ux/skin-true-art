@@ -65,30 +65,30 @@ const Dashboard = () => {
       <Hero onExplore={() => scrollToSection("tools")} />
 
       {/* Tools Showcase Section */}
-      <section id="tools" className="py-16 sm:py-24 lg:py-32 relative overflow-hidden scroll-mt-20">
+      <section id="tools" className="py-12 sm:py-24 lg:py-32 relative overflow-hidden scroll-mt-20">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-charcoal to-background" />
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-primary/8 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-primary/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-gradient-to-br from-primary/8 to-transparent rounded-full blur-3xl" />
+        <div className="hidden sm:block absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-primary/5 to-transparent rounded-full blur-3xl" />
         <div className="absolute inset-0 noise-texture" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section header */}
-          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-primary/10 border border-primary/25 mb-6 sm:mb-8 backdrop-blur-sm">
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          {/* Section header - Compact on mobile */}
+          <div className="text-center mb-8 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-primary/10 border border-primary/25 mb-4 sm:mb-8 backdrop-blur-sm">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-xs font-semibold text-primary uppercase tracking-widest">AI Tools</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-4 sm:mb-6">
+            <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-3 sm:mb-6">
               Your Creative <span className="gradient-text">Arsenal</span>
             </h2>
-            <p className="text-base sm:text-lg text-cream/50 max-w-2xl mx-auto leading-relaxed font-light px-4">
-              Professional AI tools for content creation, image enhancement, and brand building. Click any tool to get started.
+            <p className="text-sm sm:text-lg text-cream/50 max-w-2xl mx-auto leading-relaxed font-light px-2">
+              Professional AI tools for content creation and brand building.
             </p>
           </div>
 
-          {/* Tools Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {/* Tools Grid - Optimized for mobile */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {mergedTools.map((tool, index) => (
               <ToolCard
                 key={tool.id}
