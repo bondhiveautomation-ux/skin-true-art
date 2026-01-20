@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Black + Coral/Warm Pink Luxury Theme */
+    /* Black + Emerald Green Editorial Luxury Theme */
     --background: 0 0% 3%;
     --foreground: 0 0% 95%;
 
@@ -16,8 +16,8 @@
     --popover: 0 0% 6%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 12 76% 61%;
-    --primary-foreground: 0 0% 3%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 92%;
@@ -33,22 +33,22 @@
 
     --border: 0 0% 15%;
     --input: 0 0% 12%;
-    --ring: 12 76% 61%;
+    --ring: 160 84% 39%;
 
     --radius: 0.75rem;
 
-    /* Coral/Warm Pink Accent Tokens */
-    --gold: 12 76% 61%;
-    --gold-light: 12 85% 70%;
-    --gold-dark: 12 70% 50%;
-    --gold-muted: 12 45% 40%;
-    --champagne: 25 60% 75%;
+    /* Emerald Green Accent Tokens */
+    --gold: 160 84% 39%;
+    --gold-light: 158 75% 50%;
+    --gold-dark: 162 90% 30%;
+    --gold-muted: 160 50% 28%;
+    --champagne: 150 45% 65%;
     
-    /* Rose / Blush Accents */
-    --rose-gold: 350 65% 60%;
-    --rose-gold-light: 350 55% 72%;
-    --blush: 345 55% 65%;
-    --nude: 20 35% 70%;
+    /* Teal / Sage Accents */
+    --rose-gold: 170 60% 45%;
+    --rose-gold-light: 168 50% 60%;
+    --blush: 165 40% 55%;
+    --nude: 145 25% 60%;
     
     /* Deep Black Tones */
     --charcoal: 0 0% 6%;
@@ -57,30 +57,30 @@
     --charcoal-muted: 0 0% 45%;
     
     /* Soft White for text */
-    --cream: 30 25% 95%;
-    --cream-dark: 30 20% 88%;
-    --ivory: 35 35% 97%;
+    --cream: 60 10% 95%;
+    --cream-dark: 60 8% 88%;
+    --ivory: 55 20% 97%;
 
-    /* Premium Glass Effect - Pure Black */
-    --glass-bg: hsla(0, 0%, 5%, 0.9);
-    --glass-border: hsla(12, 70%, 61%, 0.15);
+    /* Premium Glass Effect - Pure Black with Emerald */
+    --glass-bg: hsla(0, 0%, 5%, 0.92);
+    --glass-border: hsla(160, 80%, 39%, 0.15);
     --glass-shadow: 0 8px 32px -8px hsla(0, 0%, 0%, 0.6);
     
-    /* Luxury Shadows - Dark Theme with Coral Glow */
+    /* Luxury Shadows - Dark Theme with Emerald Glow */
     --shadow-soft: 0 4px 24px -4px hsla(0, 0%, 0%, 0.5);
     --shadow-elegant: 0 12px 40px -12px hsla(0, 0%, 0%, 0.6);
-    --shadow-gold: 0 0 40px -8px hsla(12, 76%, 61%, 0.4);
-    --shadow-glow: 0 0 80px hsla(12, 76%, 61%, 0.18);
+    --shadow-gold: 0 0 40px -8px hsla(160, 84%, 39%, 0.35);
+    --shadow-glow: 0 0 80px hsla(160, 84%, 39%, 0.15);
     --shadow-card: 0 25px 50px -12px hsla(0, 0%, 0%, 0.7);
 
     --sidebar-background: 0 0% 6%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 12 76% 61%;
-    --sidebar-primary-foreground: 0 0% 3%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 12%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 12 76% 61%;
+    --sidebar-ring: 160 84% 39%;
   }
 }
 
@@ -116,30 +116,30 @@
     @apply rounded-2xl;
   }
 
-  /* Premium gradient text - Coral */
+  /* Premium gradient text - Emerald */
   .gradient-text {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, hsl(var(--gold-light)) 0%, hsl(var(--gold)) 50%, hsl(var(--champagne)) 100%);
   }
 
-  /* Coral shimmer text */
+  /* Emerald shimmer text */
   .gold-text {
     color: hsl(var(--gold));
-    text-shadow: 0 0 30px hsla(12, 76%, 61%, 0.35);
+    text-shadow: 0 0 30px hsla(160, 84%, 39%, 0.35);
   }
 
   /* Feature card with luxury hover */
   .feature-card {
     @apply glass-card p-8 transition-all duration-500 ease-out relative overflow-hidden;
     box-shadow: var(--shadow-soft);
-    border: 1px solid hsla(12, 70%, 61%, 0.1);
+    border: 1px solid hsla(160, 80%, 39%, 0.1);
   }
 
   .feature-card::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, hsla(12, 76%, 61%, 0.04) 0%, transparent 50%);
+    background: linear-gradient(135deg, hsla(160, 84%, 39%, 0.04) 0%, transparent 50%);
     opacity: 0;
     transition: opacity 0.5s ease;
   }
@@ -147,7 +147,7 @@
   .feature-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-card), var(--shadow-glow);
-    border-color: hsla(12, 76%, 61%, 0.3);
+    border-color: hsla(160, 84%, 39%, 0.3);
   }
 
   .feature-card:hover::before {
@@ -157,17 +157,17 @@
   /* Upload zone - Dark Luxury */
   .upload-zone {
     @apply relative rounded-2xl border-2 border-dashed transition-all duration-300;
-    border-color: hsla(12, 70%, 61%, 0.25);
+    border-color: hsla(160, 80%, 39%, 0.25);
     background: hsla(0, 0%, 5%, 0.7);
   }
 
   .upload-zone:hover {
-    border-color: hsla(12, 76%, 61%, 0.5);
+    border-color: hsla(160, 84%, 39%, 0.5);
     background: hsla(0, 0%, 7%, 0.85);
     box-shadow: var(--shadow-gold);
   }
 
-  /* Coral button glow */
+  /* Emerald button glow */
   .btn-glow {
     @apply relative overflow-hidden transition-all duration-300;
   }
@@ -179,7 +179,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(45deg, transparent, hsla(12, 76%, 61%, 0.12), transparent);
+    background: linear-gradient(45deg, transparent, hsla(160, 84%, 39%, 0.12), transparent);
     transform: rotate(45deg) translateX(-100%);
     transition: transform 0.6s ease;
   }
@@ -192,10 +192,10 @@
     box-shadow: var(--shadow-gold);
   }
 
-  /* Coral gradient button */
+  /* Emerald gradient button */
   .btn-gold {
     background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-dark)) 100%);
-    color: hsl(var(--charcoal-deep));
+    color: hsl(var(--ivory));
     @apply font-semibold shadow-lg transition-all duration-300 relative overflow-hidden;
   }
 
@@ -220,7 +220,7 @@
     transform: translateY(-2px);
   }
 
-  /* Rose accent button */
+  /* Teal accent button */
   .btn-rose {
     background: linear-gradient(135deg, hsl(var(--rose-gold)) 0%, hsl(var(--rose-gold-light)) 100%);
     color: hsl(var(--charcoal-deep));
@@ -229,10 +229,10 @@
 
   /* Luxury header blur - Pure Black */
   .header-blur {
-    background: hsla(0, 0%, 3%, 0.9);
+    background: hsla(0, 0%, 3%, 0.92);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid hsla(12, 70%, 61%, 0.1);
+    border-bottom: 1px solid hsla(160, 80%, 39%, 0.1);
   }
 
   /* Section fade-in animation */
@@ -247,11 +247,11 @@
     background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.4), transparent);
   }
 
-  /* Coral icon container */
+  /* Emerald icon container */
   .gold-icon {
-    background: linear-gradient(135deg, hsla(12, 76%, 61%, 0.18) 0%, hsla(12, 76%, 61%, 0.06) 100%);
-    border: 1px solid hsla(12, 76%, 61%, 0.3);
-    box-shadow: 0 0 20px hsla(12, 76%, 61%, 0.12);
+    background: linear-gradient(135deg, hsla(160, 84%, 39%, 0.18) 0%, hsla(160, 84%, 39%, 0.06) 100%);
+    border: 1px solid hsla(160, 84%, 39%, 0.3);
+    box-shadow: 0 0 20px hsla(160, 84%, 39%, 0.12);
   }
 
   /* Sparkle particle effect */
@@ -272,9 +272,9 @@
     opacity: 0;
   }
   
-  /* Coral glow outline for cards */
+  /* Emerald glow outline for cards */
   .glow-outline::after {
-    background: linear-gradient(135deg, hsla(12, 76%, 61%, 0.35), transparent, hsla(12, 76%, 61%, 0.35));
+    background: linear-gradient(135deg, hsla(160, 84%, 39%, 0.35), transparent, hsla(160, 84%, 39%, 0.35));
   }
 
   /* Cinematic text reveal */
@@ -311,7 +311,7 @@
     font-weight: 700;
     font-size: 4rem;
     line-height: 1;
-    background: linear-gradient(180deg, hsl(var(--gold)) 0%, hsla(12, 76%, 61%, 0.3) 100%);
+    background: linear-gradient(180deg, hsl(var(--gold)) 0%, hsla(160, 84%, 39%, 0.3) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -387,8 +387,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px hsla(12, 76%, 61%, 0.25); }
-  50% { box-shadow: 0 0 40px hsla(12, 76%, 61%, 0.45); }
+  0%, 100% { box-shadow: 0 0 20px hsla(160, 84%, 39%, 0.25); }
+  50% { box-shadow: 0 0 40px hsla(160, 84%, 39%, 0.45); }
 }
 
 @keyframes gradient-shift {
@@ -411,7 +411,7 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, hsla(12, 76%, 61%, 0.35), transparent);
+    background: linear-gradient(90deg, transparent, hsla(160, 84%, 39%, 0.35), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
@@ -483,7 +483,7 @@
 
 /* Selection styling */
 ::selection {
-  background: hsla(12, 76%, 61%, 0.35);
+  background: hsla(160, 84%, 39%, 0.35);
   color: hsl(var(--cream));
 }
 
@@ -529,7 +529,7 @@ html, body {
   outline-offset: 2px;
 }
 
-/* Coral accent utilities */
-.coral-glow {
-  box-shadow: 0 0 30px hsla(12, 76%, 61%, 0.3);
+/* Emerald accent utilities */
+.emerald-glow {
+  box-shadow: 0 0 30px hsla(160, 84%, 39%, 0.3);
 }
