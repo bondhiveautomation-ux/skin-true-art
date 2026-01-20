@@ -45,19 +45,19 @@ const Info = () => {
     fetchArticles(true); // Fetch only published articles
   }, [fetchArticles]);
 
-  const brandName = headerContent.brand_name || "Creators Studio";
-  const whatsappMessage = encodeURIComponent(infoContent.whatsapp_message || "Hi, I'd like to request access to Creators Studio.");
+  const brandName = headerContent.brand_name || "BH Studio";
+  const whatsappMessage = encodeURIComponent(infoContent.whatsapp_message || "Hi, I'd like to request access to BH Studio.");
   
   // Info page content
   const pageBadge = infoContent.page_badge || "Knowledge Hub";
-  const pageTitle1 = infoContent.page_title_1 || "Creators Studio";
+  const pageTitle1 = infoContent.page_title_1 || "BH Studio";
   const pageTitle2 = infoContent.page_title_2 || "Knowledge Hub";
   const pageSubtitle = infoContent.page_subtitle || "Guides, insights, and best practices for creators using AI professionally.";
   const comingSoonText = infoContent.coming_soon_text || "More articles coming soon. Have a topic suggestion?";
   
   // Footer
   const footerTagline = infoContent.footer_tagline || "Private access platform";
-  const footerCopyright = (infoContent.footer_copyright || "© {year} Creators Studio. All rights reserved.")
+  const footerCopyright = (infoContent.footer_copyright || "© {year} BH Studio. All rights reserved.")
     .replace("{year}", new Date().getFullYear().toString());
 
   const handleWhatsAppClick = () => {
