@@ -6,11 +6,13 @@ import { Footer } from "@/components/landing/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useToolConfigs } from "@/hooks/useToolConfigs";
 import { getGemCost } from "@/lib/gemCosts";
 import { LucideIcon } from "lucide-react";
 
 interface ToolPageLayoutProps {
   children: ReactNode;
+  toolId?: string;
   toolName: string;
   toolDescription: string;
   gemCostKey: string;
@@ -20,6 +22,7 @@ interface ToolPageLayoutProps {
 
 export const ToolPageLayout = ({
   children,
+  toolId,
   toolName,
   toolDescription,
   gemCostKey,
@@ -30,6 +33,13 @@ export const ToolPageLayout = ({
   const { signOut } = useAuth();
   const { gems } = useGems();
   const { isAdmin } = useAdmin();
+  const { getToolConfig } = useToolConfigs();
+
+  // Get dynamic config from database if available
+  const dbConfig = toolId ? getToolConfig(toolId) : null;
+  const displayName = dbConfig?.name || toolName;
+  const displayDescription = dbConfig?.long_description || toolDescription;
+  const displayBadge = dbConfig?.badge || badge;
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -67,14 +77,14 @@ export const ToolPageLayout = ({
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/25 mb-6 backdrop-blur-sm">
               <Icon className="w-4 h-4 text-primary" />
               <span className="text-xs font-semibold text-primary uppercase tracking-widest">
-                {badge || toolName}
+                {displayBadge || displayName}
               </span>
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight mb-4">
-              {toolName}
+              {displayName}
             </h1>
             <p className="text-cream/50 max-w-xl mx-auto leading-relaxed font-light mb-6">
-              {toolDescription}
+              {displayDescription}
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/30 border border-border/30">
               <Diamond className="w-4 h-4 text-primary" />

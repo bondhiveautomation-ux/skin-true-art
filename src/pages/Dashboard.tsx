@@ -12,12 +12,33 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
 import { WelcomePopup } from "@/components/WelcomePopup";
+import { useToolConfigs } from "@/hooks/useToolConfigs";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { gems } = useGems();
   const { isAdmin } = useAdmin();
+  const { toolConfigs } = useToolConfigs();
+
+  // Merge database configs with static tool configs (db overrides static)
+  const mergedTools = TOOLS.map(staticTool => {
+    const dbConfig = toolConfigs?.find(t => t.tool_id === staticTool.id);
+    if (dbConfig && dbConfig.is_active) {
+      return {
+        ...staticTool,
+        name: dbConfig.name,
+        shortName: dbConfig.short_name,
+        description: dbConfig.description,
+        longDescription: dbConfig.long_description,
+        badge: dbConfig.badge || undefined,
+      };
+    }
+    // If not in DB or inactive, use static config (but check if explicitly hidden)
+    const isHidden = toolConfigs?.find(t => t.tool_id === staticTool.id && !t.is_active);
+    if (isHidden) return null;
+    return staticTool;
+  }).filter(Boolean) as typeof TOOLS;
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -68,7 +89,7 @@ const Dashboard = () => {
 
           {/* Tools Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {TOOLS.map((tool, index) => (
+            {mergedTools.map((tool, index) => (
               <ToolCard
                 key={tool.id}
                 name={tool.name}

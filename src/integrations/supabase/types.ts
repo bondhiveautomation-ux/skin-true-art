@@ -562,6 +562,48 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_configs: {
+        Row: {
+          badge: string | null
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          is_active: boolean
+          long_description: string
+          name: string
+          short_name: string
+          tool_id: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string
+          description: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          long_description: string
+          name: string
+          short_name: string
+          tool_id: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          long_description?: string
+          name?: string
+          short_name?: string
+          tool_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string
