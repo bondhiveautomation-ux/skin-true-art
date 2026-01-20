@@ -59,10 +59,10 @@ const SparkleParticles = () => {
           createParticle();
         }
 
-        // Emerald sparkle
+        // Purple/Magenta sparkle
         const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size * 2);
-        gradient.addColorStop(0, `hsla(160, 84%, 45%, ${particle.opacity})`);
-        gradient.addColorStop(1, `hsla(160, 84%, 39%, 0)`);
+        gradient.addColorStop(0, `hsla(280, 70%, 65%, ${particle.opacity})`);
+        gradient.addColorStop(1, `hsla(320, 80%, 60%, 0)`);
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
@@ -100,7 +100,7 @@ export const Hero = ({ onExplore }: HeroProps) => {
         {/* Deep dark gradient base */}
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal-deep via-charcoal to-background" />
         
-        {/* Subtle gold accent gradients - reduced on mobile for performance */}
+        {/* Subtle purple accent gradients - reduced on mobile for performance */}
         <div className="absolute top-0 left-1/4 w-[400px] sm:w-[800px] h-[400px] sm:h-[800px] bg-gradient-to-br from-gold/8 via-transparent to-transparent rounded-full blur-3xl" />
         <div className="hidden sm:block absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-gradient-to-tl from-rose-gold/5 via-transparent to-transparent rounded-full blur-3xl" />
         <div className="hidden sm:block absolute top-1/3 right-0 w-[400px] h-[600px] bg-gradient-to-l from-gold/5 to-transparent blur-3xl" />
