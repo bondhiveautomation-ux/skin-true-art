@@ -5,9 +5,9 @@ export const Footer = () => {
   const { content } = useContent("footer");
 
   // Defaults
-  const brandName = content.brand_name || "Creators Studio";
+  const brandName = content.brand_name || "BH Studio";
   const tagline = content.tagline || "Your personal AI studio for beauty & content";
-  const copyright = (content.copyright || "© {year} Creators Studio. Crafted with elegance. All rights reserved.")
+  const copyright = (content.copyright || "© {year} BH Studio. Crafted with elegance. All rights reserved.")
     .replace("{year}", new Date().getFullYear().toString());
   const linkPrivacy = content.link_privacy || "Privacy";
   const linkTerms = content.link_terms || "Terms";

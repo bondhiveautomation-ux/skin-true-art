@@ -22,9 +22,9 @@ const Home = () => {
   const { content: footerContent } = useContent("footer");
 
   // Home page content with defaults
-  const brandName = headerContent.brand_name || "Creators Studio";
+  const brandName = headerContent.brand_name || "BH Studio";
   const whatsappNumber = headerContent.whatsapp_number || "8801234567890";
-  const whatsappMessage = encodeURIComponent(homeContent.whatsapp_message || "Hi, I'd like to request access to Creators Studio.");
+  const whatsappMessage = encodeURIComponent(homeContent.whatsapp_message || "Hi, I'd like to request access to BH Studio.");
   
   // Hero section
   const heroBadge = homeContent.hero_badge || "Private Access Platform";
@@ -33,7 +33,7 @@ const Home = () => {
   const heroSubheadline = homeContent.hero_subheadline || "One platform. Multiple professional AI studios — built for makeup artists, creators, and modern brands.";
   const heroCtaSignin = homeContent.hero_cta_signin || "Sign In";
   const heroCtaAccess = homeContent.hero_cta_access || "Request Access";
-  const heroCtaLearnMore = homeContent.hero_cta_learn || "Learn How Creators Studio Works";
+  const heroCtaLearnMore = homeContent.hero_cta_learn || "Learn How BH Studio Works";
   
   // Feature groups section
   const featuresBadge = homeContent.features_badge || "The Studio Collection";
