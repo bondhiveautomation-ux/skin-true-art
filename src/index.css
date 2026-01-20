@@ -502,12 +502,37 @@
     min-height: 44px;
     min-width: 44px;
   }
+  
+  /* Disable minimum touch size for specific small elements */
+  .no-min-touch {
+    min-height: unset;
+    min-width: unset;
+  }
 }
 
 /* Premium Mobile Card Styling */
 @media (max-width: 640px) {
   .feature-card {
     @apply p-5;
+  }
+  
+  /* Compact glass cards on mobile */
+  .glass-card {
+    @apply p-4;
+  }
+}
+
+/* Extra small screen breakpoint (for step wizard) */
+@media (min-width: 400px) {
+  .xs\:inline {
+    display: inline;
+  }
+}
+
+/* Mobile-optimized animations - faster on mobile */
+@media (max-width: 640px) {
+  .animate-fade-in {
+    animation-duration: 0.3s;
   }
 }
 
@@ -530,4 +555,18 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* Slide in animation for mobile drawer */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
 }
