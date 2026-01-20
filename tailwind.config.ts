@@ -61,7 +61,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Fashion Luxury Gold Palette
+        // Purple/Magenta Luxury Palette
         gold: {
           DEFAULT: "hsl(var(--gold))",
           light: "hsl(var(--gold-light))",
@@ -69,7 +69,7 @@ export default {
           muted: "hsl(var(--gold-muted))",
         },
         champagne: "hsl(var(--champagne))",
-        // Rose / Blush Accents
+        // Rose / Pink Accents
         "rose-gold": {
           DEFAULT: "hsl(var(--rose-gold))",
           light: "hsl(var(--rose-gold-light))",
@@ -121,8 +121,8 @@ export default {
           "50%": { transform: "translateY(-10px)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px hsla(43, 74%, 49%, 0.2)" },
-          "50%": { boxShadow: "0 0 40px hsla(43, 74%, 49%, 0.4)" },
+          "0%, 100%": { boxShadow: "0 0 20px hsla(280, 70%, 60%, 0.2)" },
+          "50%": { boxShadow: "0 0 40px hsla(280, 70%, 60%, 0.4)" },
         },
       },
       animation: {
