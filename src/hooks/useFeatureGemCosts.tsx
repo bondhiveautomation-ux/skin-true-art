@@ -127,7 +127,7 @@ export const clearGemCostCache = () => {
 
 // Hardcoded defaults as fallback
 const DEFAULT_GEM_COSTS: Record<string, number> = {
-  "dress-change": 15,
+  
   "apply-makeup": 15,
   "generate-character-image": 15,
   "pose-transfer": 15,

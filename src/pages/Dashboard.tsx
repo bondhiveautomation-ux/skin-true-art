@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Upload, Loader2, Download, Copy, Search, Sparkles, Diamond } from "lucide-react";
+import { Upload, Loader2, Download, Copy, Sparkles, Diamond } from "lucide-react";
 import { MakeupDNAStudio } from "@/components/makeup/MakeupDNAStudio";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
-import { useDressLibrary, Dress } from "@/hooks/useDressLibrary";
+
 import { fileToNormalizedDataUrl } from "@/lib/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
@@ -19,7 +19,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ValueSection } from "@/components/landing/ValueSection";
 import { CTASection } from "@/components/landing/CTASection";
-import { ClassesPreview } from "@/components/landing/ClassesPreview";
+
 import { Footer } from "@/components/landing/Footer";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
@@ -121,14 +121,6 @@ const Dashboard = () => {
   const [generatedBackground, setGeneratedBackground] = useState<string | null>(null);
   const [isGeneratingBackground, setIsGeneratingBackground] = useState(false);
 
-  // Dress Change Studio states
-  const { activeDresses, loading: dressesLoading } = useDressLibrary();
-  const [dressChangeCategory, setDressChangeCategory] = useState<"male" | "female" | "kids">("female");
-  const [dressChangeUserImage, setDressChangeUserImage] = useState<string | null>(null);
-  const [selectedDress, setSelectedDress] = useState<Dress | null>(null);
-  const [dressChangeResult, setDressChangeResult] = useState<string | null>(null);
-  const [isChangingDress, setIsChangingDress] = useState(false);
-  const [dressSearchQuery, setDressSearchQuery] = useState("");
 
 
   // Scroll to section handler
@@ -661,84 +653,6 @@ const Dashboard = () => {
     setSwapInfluencerImage(null);
     setSwapReferenceImage(null);
     setSwapResult(null);
-  };
-
-  // ==================== DRESS CHANGE STUDIO ====================
-  const handleDressChangeUserImageUpload = createImageUploadHandler(setDressChangeUserImage, [
-    () => setDressChangeResult(null),
-    () => setSelectedDress(null),
-  ]);
-
-  const filteredDresses = activeDresses.filter((dress) => {
-    const matchesCategory = dress.category === dressChangeCategory;
-    const matchesSearch =
-      !dressSearchQuery ||
-      dress.name.toLowerCase().includes(dressSearchQuery.toLowerCase()) ||
-      dress.tags.some((tag) => tag.toLowerCase().includes(dressSearchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
-
-  const handleDressChange = async () => {
-    if (!dressChangeUserImage) {
-      toast({ title: "Missing Photo", description: "Please upload your photo first", variant: "destructive" });
-      return;
-    }
-    if (!selectedDress) {
-      toast({ title: "No Dress Selected", description: "Please select a dress from the library", variant: "destructive" });
-      return;
-    }
-    if (!hasEnoughGems("dress-change")) {
-      toast({ title: "Insufficient gems", description: `You need ${getGemCost("dress-change")} gems for this feature`, variant: "destructive" });
-      return;
-    }
-    const gemResult = await deductGems("dress-change");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
-    setIsChangingDress(true);
-    setDressChangeResult(null);
-    try {
-      const { data, error } = await supabase.functions.invoke("dress-change", {
-        body: {
-          userImage: dressChangeUserImage,
-          dressImageUrl: selectedDress.image_url,
-          category: dressChangeCategory,
-          userId: user?.id,
-        },
-      });
-      if (error) throw error;
-      if (data?.error) {
-        toast({ title: "Dress Change Failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      if (data?.generatedImageUrl) {
-        setDressChangeResult(data.generatedImageUrl);
-        await logGeneration("Dress Change Studio", [], [data.generatedImageUrl]);
-        toast({ title: "Dress Change Complete!", description: "Your new look has been generated successfully" });
-      }
-    } catch (error: any) {
-      toast({ title: "Dress Change Failed", description: error.message, variant: "destructive" });
-    } finally {
-      setIsChangingDress(false);
-    }
-  };
-
-  const handleDownloadDressChange = () => {
-    if (!dressChangeResult) return;
-    const link = document.createElement("a");
-    link.href = dressChangeResult;
-    link.download = "dress-change-result.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleResetDressChange = () => {
-    setDressChangeUserImage(null);
-    setSelectedDress(null);
-    setDressChangeResult(null);
-    setDressSearchQuery("");
   };
 
   // ==================== CINEMATIC STUDIO ====================
@@ -1513,190 +1427,6 @@ const Dashboard = () => {
         </div>
       </ToolSection>
 
-      {/* Dress Change Studio Section */}
-      <ToolSection
-        id="dress-change-studio"
-        title="Dress Change"
-        subtitle="Studio"
-        description="Try on outfits from our curated library while keeping your face and pose unchanged"
-      >
-        <div className="space-y-6">
-          {/* Step 1: Category Selection */}
-          <div className="flex items-center justify-center gap-4 pb-4 border-b border-border/50">
-            <span className="text-sm font-medium text-muted-foreground">Category:</span>
-            <div className="flex gap-2">
-              <Button
-                variant={dressChangeCategory === "female" ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setDressChangeCategory("female");
-                  setSelectedDress(null);
-                }}
-                className={dressChangeCategory === "female" ? "bg-foreground text-background" : ""}
-              >
-                Female
-              </Button>
-              <Button
-                variant={dressChangeCategory === "male" ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setDressChangeCategory("male");
-                  setSelectedDress(null);
-                }}
-                className={dressChangeCategory === "male" ? "bg-foreground text-background" : ""}
-              >
-                Male
-              </Button>
-              <Button
-                variant={dressChangeCategory === "kids" ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setDressChangeCategory("kids");
-                  setSelectedDress(null);
-                }}
-                className={dressChangeCategory === "kids" ? "bg-foreground text-background" : ""}
-              >
-                Kids
-              </Button>
-            </div>
-          </div>
-
-          {/* Step 2: Dress Picker Grid - Now shown first */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <label className="text-sm font-medium text-foreground">Step 1: Select a Dress</label>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name or tag..."
-                  value={dressSearchQuery}
-                  onChange={(e) => setDressSearchQuery(e.target.value)}
-                  className="pl-9 h-9"
-                />
-              </div>
-            </div>
-
-            {dressesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : filteredDresses.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No dresses available for {dressChangeCategory} category.</p>
-                <p className="text-sm mt-1">Admin needs to add dresses to the library.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {filteredDresses.map((dress) => (
-                  <button
-                    key={dress.id}
-                    onClick={() => setSelectedDress(dress)}
-                    disabled={isChangingDress}
-                    className={`group relative rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                      selectedDress?.id === dress.id
-                        ? "border-gold ring-2 ring-gold/30"
-                        : "border-border hover:border-gold/50"
-                    } ${isChangingDress ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                  >
-                    <div className="aspect-[3/4] relative">
-                      <img
-                        src={dress.image_url}
-                        alt={dress.name}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      {selectedDress?.id === dress.id && (
-                        <div className="absolute inset-0 bg-gold/10 flex items-center justify-center">
-                          <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center">
-                            <svg
-                              className="w-4 h-4 text-background"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-2 bg-card/80 backdrop-blur-sm">
-                      <p className="text-xs font-medium text-foreground truncate">{dress.name}</p>
-                      {dress.tags.length > 0 && (
-                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">
-                          {dress.tags.slice(0, 2).join(", ")}
-                        </p>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Step 3: Upload User Photo - Now shown after dress selection */}
-          {selectedDress && (
-            <div className="space-y-4 pt-4 border-t border-border/50">
-              <label className="block text-sm font-medium text-foreground text-center">
-                Step 2: Upload Your Photo
-              </label>
-              <div className="max-w-sm mx-auto">
-                <ImageUploader
-                  id="dress-change-user"
-                  image={dressChangeUserImage}
-                  onUpload={handleDressChangeUserImageUpload}
-                  onRemove={() => {
-                    setDressChangeUserImage(null);
-                    setDressChangeResult(null);
-                  }}
-                  label="Your Photo"
-                  description="Clear, full-body photo works best"
-                  aspectRatio="portrait"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Generate Button */}
-          <div className="flex flex-col items-center gap-2">
-            <LoadingButton
-              onClick={handleDressChange}
-              isLoading={isChangingDress}
-              loadingText="Generating..."
-              disabled={!dressChangeUserImage || !selectedDress}
-              size="lg"
-              className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
-            >
-              Generate Dress Change
-            </LoadingButton>
-            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-              <Diamond className="w-3.5 h-3.5 text-purple-400" />
-              <span>Costs {getGemCost("dress-change")} gems</span>
-            </div>
-          </div>
-
-          {/* Result */}
-          {dressChangeResult && (
-            <ResultDisplay
-              result={dressChangeResult}
-              originalImages={[
-                ...(dressChangeUserImage ? [{ src: dressChangeUserImage, label: "Original" }] : []),
-                ...(selectedDress ? [{ src: selectedDress.image_url, label: "Dress" }] : []),
-              ]}
-              onDownload={handleDownloadDressChange}
-              onRegenerate={handleDressChange}
-              onReset={handleResetDressChange}
-              isProcessing={isChangingDress}
-              resetLabel="Try Another Dress"
-            />
-          )}
-        </div>
-      </ToolSection>
-
       {/* Cinematic Studio Section */}
       <ToolSection
         id="cinematic-studio"
@@ -1937,7 +1667,7 @@ const Dashboard = () => {
       </ToolSection>
 
 
-      <ClassesPreview />
+      
 
       {/* Footer */}
       <Footer />

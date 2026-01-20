@@ -84,7 +84,7 @@ export const WelcomePopup = () => {
             </div>
             <div className="rounded-xl bg-card/50 border border-border/50 p-3 text-center">
               <Diamond className="w-5 h-5 text-purple-400 mx-auto mb-1" />
-              <p className="text-xs text-cream/70">Dress Change AI</p>
+              <p className="text-xs text-cream/70">Makeup Studio</p>
             </div>
           </div>
         </div>

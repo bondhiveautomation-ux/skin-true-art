@@ -22,10 +22,8 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Shirt,
   Settings2,
   MessageCircle,
-  GraduationCap,
   Download,
   Radio,
   Ban,
@@ -77,16 +75,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DressLibraryManager } from "@/components/admin/DressLibraryManager";
 import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
 import { PaymentInbox } from "@/components/admin/PaymentInbox";
-import { LeadsInbox } from "@/components/admin/LeadsInbox";
 import { PricingManager } from "@/components/admin/PricingManager";
 import { FeatureGemCostsManager } from "@/components/admin/FeatureGemCostsManager";
 import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
 import { ArticlesManager } from "@/components/admin/ArticlesManager";
-import { ClassesManager } from "@/components/admin/ClassesManager";
 import { GenerationCounter } from "@/components/admin/GenerationCounter";
 
 const Admin = () => {
@@ -241,11 +236,6 @@ const Admin = () => {
       description: "Swaps the face from one image onto another person's photo while maintaining natural lighting and proportions.",
       inputLabels: ["Source Face", "Target Photo"],
       outputLabel: "Swapped Result"
-    },
-    "Dress Change": {
-      description: "Changes the outfit on a person by replacing their current clothing with a new dress/outfit.",
-      inputLabels: ["Person Photo", "New Dress"],
-      outputLabel: "New Outfit"
     },
     "Pose Transfer": {
       description: "Transfers the pose from a reference image onto your character while preserving their identity.",
@@ -580,10 +570,6 @@ const Admin = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-card border-border z-50">
-                  <DropdownMenuItem onClick={() => setActiveTab("dress-library")} className="gap-2 cursor-pointer">
-                    <Shirt className="w-4 h-4" />
-                    Dresses
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setActiveTab("pricing")} className="gap-2 cursor-pointer">
                     <Diamond className="w-4 h-4" />
                     Pricing
@@ -599,14 +585,6 @@ const Admin = () => {
                   <DropdownMenuItem onClick={() => setActiveTab("articles")} className="gap-2 cursor-pointer">
                     <FileText className="w-4 h-4" />
                     Articles
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab("classes")} className="gap-2 cursor-pointer">
-                    <GraduationCap className="w-4 h-4" />
-                    Classes
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab("class-leads")} className="gap-2 cursor-pointer">
-                    <GraduationCap className="w-4 h-4" />
-                    Leads
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1166,9 +1144,6 @@ const Admin = () => {
             <PaymentInbox />
           </TabsContent>
 
-          <TabsContent value="dress-library">
-            <DressLibraryManager />
-          </TabsContent>
 
           <TabsContent value="pricing">
             <PricingManager />
@@ -1184,14 +1159,6 @@ const Admin = () => {
 
           <TabsContent value="articles">
             <ArticlesManager />
-          </TabsContent>
-
-          <TabsContent value="classes">
-            <ClassesManager />
-          </TabsContent>
-
-          <TabsContent value="class-leads">
-            <LeadsInbox />
           </TabsContent>
         </Tabs>
       </main>
