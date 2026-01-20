@@ -13,9 +13,13 @@ import CaptionStudio from "./pages/CaptionStudio";
 import PhotographyStudio from "./pages/PhotographyStudio";
 import BrandingStudio from "./pages/BrandingStudio";
 import Pricing from "./pages/Pricing";
-
 import Info from "./pages/Info";
 import NotFound from "./pages/NotFound";
+
+// Tool pages
+import CharacterGeneratorPage from "./pages/tools/CharacterGeneratorPage";
+import PromptExtractorPage from "./pages/tools/PromptExtractorPage";
+import DressExtractorPage from "./pages/tools/DressExtractorPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +44,10 @@ const App = () => (
             <Route path="/branding-studio" element={<ProtectedRoute><BrandingStudio /></ProtectedRoute>} />
             <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
             
+            {/* Tool pages */}
+            <Route path="/tools/character-generator" element={<ProtectedRoute><CharacterGeneratorPage /></ProtectedRoute>} />
+            <Route path="/tools/prompt-extractor" element={<ProtectedRoute><PromptExtractorPage /></ProtectedRoute>} />
+            <Route path="/tools/dress-extractor" element={<ProtectedRoute><DressExtractorPage /></ProtectedRoute>} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
