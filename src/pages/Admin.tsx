@@ -83,6 +83,7 @@ import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
 import { ArticlesManager } from "@/components/admin/ArticlesManager";
 import { GenerationCounter } from "@/components/admin/GenerationCounter";
+import ToolConfigsManager from "@/components/admin/ToolConfigsManager";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -585,6 +586,10 @@ const Admin = () => {
                   <DropdownMenuItem onClick={() => setActiveTab("articles")} className="gap-2 cursor-pointer">
                     <FileText className="w-4 h-4" />
                     Articles
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("tool-configs")} className="gap-2 cursor-pointer">
+                    <Settings2 className="w-4 h-4" />
+                    Tool Editor
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1159,6 +1164,10 @@ const Admin = () => {
 
           <TabsContent value="articles">
             <ArticlesManager />
+          </TabsContent>
+
+          <TabsContent value="tool-configs">
+            <ToolConfigsManager />
           </TabsContent>
         </Tabs>
       </main>

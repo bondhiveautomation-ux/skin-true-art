@@ -260,6 +260,7 @@ const BrandingStudioPage = () => {
 
   return (
     <ToolPageLayout
+      toolId={tool.id}
       toolName={tool.name}
       toolDescription={tool.longDescription}
       gemCostKey={tool.gemCostKey}
