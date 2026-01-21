@@ -52,7 +52,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, userId, dummyStyle = "standard", correctionFeedback } = await req.json();
+    const { image, userId, dummyStyle = "standard", extractionType = "single-full", correctionFeedback } = await req.json();
 
     if (!image) {
       return new Response(
@@ -75,15 +75,42 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log("Processing dress extraction, userId:", userId || "not provided", "style:", dummyStyle, "hasCorrectionFeedback:", !!correctionFeedback);
+    console.log("Processing dress extraction, userId:", userId || "not provided", "style:", dummyStyle, "extractionType:", extractionType, "hasCorrectionFeedback:", !!correctionFeedback);
+
+    // Define mannequin instructions based on extraction type
+    const MANNEQUIN_TYPES: Record<string, string> = {
+      "single-upper": `UPPER BODY MANNEQUIN ONLY:
+   - Show ONLY the upper body mannequin (torso, arms, hands)
+   - The mannequin should be CUT OFF at the waist/hip area - NO LEGS
+   - This is for tops, blouses, shirts, kurtas worn only on upper body
+   - Arms must be visible in a natural pose
+   - Hands must be visible and complete
+   - The bottom edge of the mannequin/image should end where the garment ends
+   - DO NOT show a naked mannequin below the garment - CUT THE MANNEQUIN OFF
+   - Think: bust form / upper torso display stand`,
+      
+      "single-full": `FULL-BODY MANNEQUIN:
+   - Show the COMPLETE full-body mannequin from head/neck to floor
+   - Both arms must be visible in a natural, elegant pose
+   - Both hands must be visible and complete
+   - Legs should be visible and properly proportioned
+   - The mannequin must show the ENTIRE garment - from top to bottom hem
+   - Position the dress naturally on the mannequin as in a catalog`,
+      
+      "couple": `TWO SEPARATE MANNEQUINS SIDE BY SIDE:
+   - There are TWO PEOPLE in the input image - extract BOTH outfits
+   - Show TWO mannequins side by side
+   - Each mannequin displays ONE outfit from the image
+   - Both mannequins should be full-body with visible arms and hands
+   - Position them symmetrically in the frame
+   - Ensure BOTH garments are equally prominent and well-lit
+   - If one is male and one is female outfit, use appropriate mannequin styles`
+    };
 
     // Define mannequin and background styles
     const DUMMY_STYLES: Record<string, { mannequin: string; background: string }> = {
       "standard": {
         mannequin: `Use a simple, minimal, professional mannequin/dummy:
-   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
-   - Arms must be visible in a natural pose (at sides or slightly away from body)
-   - Hands must be visible and complete
    - No facial features, no hair, no skin details
    - Clean white or grey mannequin body
    - Position the dress naturally on the mannequin as it would appear in a catalog`,
@@ -91,9 +118,6 @@ serve(async (req) => {
       },
       "premium-wood": {
         mannequin: `Use a premium, elegant mannequin/dummy:
-   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
-   - Arms must be visible in a natural, elegant pose
-   - Hands must be visible and complete
    - High-end boutique-style mannequin with a sophisticated matte finish
    - Warm beige or champagne-toned mannequin body
    - Elegant posture, professional catalog positioning
@@ -107,9 +131,6 @@ serve(async (req) => {
       },
       "luxury-marble": {
         mannequin: `Use a luxury, high-fashion mannequin/dummy:
-   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
-   - Arms must be visible in a graceful, editorial pose
-   - Hands must be visible and complete
    - Sleek, modern mannequin with a polished, glossy finish
    - Pure white or soft pearl-toned mannequin body
    - Graceful, editorial-style posture
@@ -123,8 +144,6 @@ serve(async (req) => {
       },
       "royal-velvet": {
         mannequin: `Use a regal, high-fashion mannequin/dummy:
-   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
-   - Arms positioned elegantly, hands visible and complete
    - Mannequin with a smooth, matte champagne or rose-gold finish
    - Elegant, statuesque posture befitting royalty
    - No facial features, no hair, no skin details`,
@@ -138,8 +157,6 @@ serve(async (req) => {
       },
       "garden-elegance": {
         mannequin: `Use an ethereal, romantic mannequin/dummy:
-   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
-   - Arms in a soft, graceful pose, hands visible and complete
    - Mannequin with a soft matte ivory or blush-toned finish
    - Feminine, gentle posture with elegant lines
    - No facial features, no hair, no skin details`,
@@ -153,8 +170,6 @@ serve(async (req) => {
       },
       "modern-minimal": {
         mannequin: `Use a sleek, contemporary mannequin/dummy:
-   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
-   - Arms in a clean, modern pose, hands visible and complete
    - Ultra-modern mannequin with a smooth matte black or charcoal finish
    - Sharp, geometric posture with clean lines
    - No facial features, no hair, no skin details`,
@@ -169,6 +184,7 @@ serve(async (req) => {
     };
 
     const selectedStyle = DUMMY_STYLES[dummyStyle] || DUMMY_STYLES["standard"];
+    const mannequinType = MANNEQUIN_TYPES[extractionType] || MANNEQUIN_TYPES["single-full"];
 
     // Build correction section if there's feedback from previous inspection
     const correctionSection = correctionFeedback ? `
@@ -182,139 +198,119 @@ Pay extra attention to whatever was wrong and make sure it is CORRECT this time.
 
 ` : "";
 
-    const systemPrompt = `You are the WORLD'S BEST garment extraction AI. Your extractions are used by professional fashion brands. ZERO ERRORS ALLOWED.
+    const systemPrompt = `You are the WORLD'S MOST PRECISE garment extraction AI. Your work is used by professional fashion brands where ACCURACY IS EVERYTHING.
 ${correctionSection}
 
-=== 🚨 ABSOLUTE GARMENT PRESERVATION LAW 🚨 ===
+=== 🚨🚨🚨 ABSOLUTE ZERO-TOLERANCE GARMENT PRESERVATION LAW 🚨🚨🚨 ===
 
-THE DRESS/GARMENT MUST NEVER, EVER CHANGE. THIS IS NON-NEGOTIABLE.
+THE DRESS/GARMENT IN YOUR OUTPUT MUST BE A PIXEL-PERFECT, FORENSIC-LEVEL EXACT COPY OF THE INPUT.
 
-You are NOT creating a new dress. You are PHOTOGRAPHICALLY EXTRACTING the EXACT dress from the input image.
-Think of yourself as a high-precision scanner - you capture EXACTLY what exists, nothing more, nothing less.
+You are a HIGH-PRECISION SCANNER, not a designer. You COPY, you do NOT create or interpret.
 
-FORBIDDEN MODIFICATIONS (instant rejection if any occur):
-❌ DO NOT change any colors - not even slightly
-❌ DO NOT alter patterns, prints, or embroidery designs
-❌ DO NOT modify the neckline shape or depth
-❌ DO NOT change sleeve style, length, or construction
-❌ DO NOT add or remove any design elements
-❌ DO NOT simplify or "clean up" complex designs
-❌ DO NOT change fabric texture or drape
-❌ DO NOT alter embellishments, beadwork, or sequin patterns
-❌ DO NOT modify the silhouette or cut of the garment
-❌ DO NOT change the length of the dress/skirt
+INSTANT REJECTION IF ANY OF THESE OCCUR:
+❌ Color changed even 1% - REJECTED
+❌ Pattern/print altered in any way - REJECTED  
+❌ Neckline shape different - REJECTED
+❌ Sleeve style modified - REJECTED
+❌ Any design element added that wasn't there - REJECTED
+❌ Any design element removed that was there - REJECTED
+❌ Fabric texture looks different - REJECTED
+❌ Embroidery/beadwork pattern changed - REJECTED
+❌ Silhouette/cut modified - REJECTED
+❌ Length changed - REJECTED
 
-The output garment must be a 100% IDENTICAL CLONE of the input garment.
-If a client places the input and output side by side, the ONLY difference should be:
-- Person removed, replaced with mannequin
-- Background changed to selected style
-- NOTHING ELSE
+THE GARMENT MUST BE 100% IDENTICAL. Period. No exceptions. No "improvements". No "enhancements".
 
-=== MISSION: PIXEL-PERFECT GARMENT REPLICATION ===
+=== MANNEQUIN TYPE FOR THIS REQUEST ===
+${mannequinType}
 
-You must extract the EXACT garment and place it on a mannequin. The output must be indistinguishable from a real photograph of that exact garment on a mannequin.
-
-=== STEP 1: FORENSIC NECKLINE ANALYSIS ===
-
-CRITICAL: The neckline is the #1 most scrutinized element. Get this wrong = REJECTED.
-
-Look at WHERE the fabric edge meets at the center front:
-- If the fabric forms a POINTED shape going DOWN into the chest = V-NECK
-- If the fabric forms a CURVED line across = ROUND NECK  
-- If the fabric forms a STRAIGHT horizontal line = SQUARE NECK
-- If the fabric dips in a curved heart shape = SWEETHEART
-
-MEASURE THE V-NECK DEPTH:
-- Shallow V (ends above bust line)
-- Medium V (ends at bust line)
-- Deep V (ends below bust line)
-
-YOUR OUTPUT NECKLINE MUST MATCH THE EXACT SAME SHAPE AND DEPTH.
-If original is V-neck, output MUST be V-neck with same angle and depth.
-DO NOT round off V-necks. DO NOT convert V to round.
-
-=== STEP 2: FORENSIC SLEEVE ANALYSIS ===
-
-CRITICAL: Sleeves are the #2 most scrutinized element.
-
-SLEEVE TYPE - Look at the SHAPE:
-- PUFF SLEEVE: Has volume/poof at the shoulder, then tapers down
-- BISHOP SLEEVE: Fitted at shoulder, billows out, gathered at cuff
-- BELL SLEEVE: Flares out continuously from shoulder to hem
-- FITTED SLEEVE: Follows the arm shape closely throughout
-
-CUFF STYLE - Look at the WRIST AREA:
-- ELASTIC GATHERED: Fabric is bunched/gathered at the wrist (visible gathering)
-- OPEN HEM: Sleeve just ends, no gathering
-- BUTTON CUFF: Has buttons at the wrist
-
-IF THE ORIGINAL HAS PUFF SLEEVES WITH ELASTIC CUFFS:
-- The sleeve MUST have volume at the shoulder
-- The sleeve MUST have visible gathering at the wrist
-- The sleeve must NOT be loose/flowing at the wrist
-- The sleeve must NOT be bishop style (billowing)
-
-=== STEP 3: REMOVE ONLY PROPS ===
-
-REMOVE (styling props that would fall off if you shook the dress):
-- Jewelry laying on the fabric
-- Decorative items placed for the photoshoot
-- Accessories not attached to the garment
-
-KEEP (sewn into the garment):
-- All fabric construction
-- Buttons, zippers
-- Any trim sewn into seams
-
-=== STEP 4: FABRIC & PRINT ACCURACY ===
-
-- EXACT same floral/print pattern
-- EXACT same colors (no color shifts)
-- EXACT same print scale
-- EXACT same fabric texture appearance
-
-=== STEP 5: MANNEQUIN PLACEMENT ===
+=== MANNEQUIN STYLE ===
 ${selectedStyle.mannequin}
 
-=== STEP 6: BACKGROUND ===
+=== BACKGROUND ===
 ${selectedStyle.background}
 
-=== ⚠️ CRITICAL: FULL-BODY MANNEQUIN REQUIREMENT ⚠️ ===
+=== FORENSIC GARMENT ANALYSIS PROTOCOL ===
 
-THIS IS MANDATORY - NO EXCEPTIONS:
-- The mannequin MUST have a COMPLETE FULL BODY with visible arms and hands
-- ARMS: Both arms must be visible in a natural pose (at sides or elegantly positioned)
-- HANDS: Both hands must be complete and visible
-- Even if the input image shows a cropped dress or partial view, YOU MUST show the COMPLETE mannequin
-- The mannequin body should extend from head/neck area down to the floor
-- NEVER crop the mannequin - show the entire figure
-- If the dress is sleeveless/short-sleeved, the mannequin's bare arms must still be fully visible
+Before generating, you MUST mentally analyze these elements and ensure EXACT replication:
 
-FAILURE TO SHOW COMPLETE MANNEQUIN WITH HANDS = AUTOMATIC REJECTION
+1. NECKLINE:
+   - What exact shape? (V, round, square, sweetheart, boat, off-shoulder, high neck, halter)
+   - What exact depth? (Shallow, medium, deep)
+   - Any collar or border details?
+   OUTPUT MUST MATCH EXACTLY.
 
-=== FINAL QA CHECKLIST (ALL MUST BE YES) ===
+2. SLEEVES:
+   - What type? (Sleeveless, cap, short, 3/4, full, puff, bishop, bell, fitted, flutter)
+   - What cuff style? (Open, gathered/elastic, buttoned, ruffled, none)
+   - Exact length?
+   OUTPUT MUST MATCH EXACTLY.
 
-□ Is the neckline the EXACT same shape? (V=V, Round=Round)
-□ Is the neckline the EXACT same depth?
-□ Are the sleeves the EXACT same type? (Puff=Puff, not Bishop)
-□ Are the cuffs the EXACT same style? (Elastic gathered=Elastic gathered, not open)
-□ Is the print pattern identical?
-□ Did I add ANY elements not in the original? (If yes, REMOVE THEM)
-□ Does the mannequin have VISIBLE ARMS AND HANDS? (MUST BE YES)
-□ Is the mannequin FULL-BODY from neck to floor? (MUST BE YES)
-${correctionFeedback ? `□ Did I fix the specific issue: "${correctionFeedback}"? (MUST BE YES)` : ""}
+3. COLOR & FABRIC:
+   - Exact color (use the SAME hex/shade - no color shifting!)
+   - Fabric type appearance (silk, cotton, chiffon, velvet, etc.)
+   - Sheen level (matte, satin, glossy)
+   OUTPUT MUST MATCH EXACTLY.
 
-If ANY answer is NO, your extraction will be REJECTED by the client.
+4. PATTERN/PRINT:
+   - Exact pattern type (solid, floral, geometric, abstract, etc.)
+   - Exact pattern scale and placement
+   - Exact colors in the pattern
+   OUTPUT MUST MATCH EXACTLY.
+
+5. EMBELLISHMENTS:
+   - All embroidery, beadwork, sequins, lace, borders
+   - Exact placement and pattern of embellishments
+   OUTPUT MUST MATCH EXACTLY.
+
+6. SILHOUETTE:
+   - Exact cut and shape (A-line, bodycon, empire, fit-and-flare, etc.)
+   - Waist placement and style
+   - Length (mini, knee, midi, ankle, floor)
+   OUTPUT MUST MATCH EXACTLY.
+
+=== WHAT TO REMOVE (ONLY loose styling props) ===
+
+- Jewelry laying on the fabric (not attached)
+- Decorative items placed for the photoshoot
+- Accessories not sewn into the garment
+- The person's body, face, hair
+
+=== WHAT TO KEEP (EVERYTHING that's part of the garment) ===
+
+- ALL fabric construction
+- ALL buttons, zippers, hooks
+- ALL trim sewn into seams
+- ALL attached embellishments
+- Belt loops if part of garment
+- Attached belts or sashes
+
+=== FINAL QUALITY VERIFICATION CHECKLIST ===
+
+Before outputting, confirm ALL are TRUE:
+□ Neckline shape = EXACT MATCH
+□ Neckline depth = EXACT MATCH  
+□ Sleeve type = EXACT MATCH
+□ Sleeve cuff = EXACT MATCH
+□ Color = EXACT MATCH (no color shift!)
+□ Pattern = EXACT MATCH
+□ Embellishments = EXACT MATCH
+□ Silhouette = EXACT MATCH
+□ Length = EXACT MATCH
+□ Mannequin type = Correct (upper/full/couple as specified)
+□ No elements added that weren't in original
+□ No elements removed that were in original
+${correctionFeedback ? `□ Previous issue FIXED: "${correctionFeedback}"` : ""}
+
+If ANY answer is NO, your output will be REJECTED and the client LOSES MONEY.
 
 === OUTPUT ===
 
-A professional e-commerce photograph showing the IDENTICAL garment on a FULL-BODY mannequin with visible arms and hands.
-The garment must be a 1:1 replica - same neckline shape, same sleeve construction, same everything.
-The mannequin must be complete with arms and hands visible, regardless of the input image framing.
-This is for a paying client. Errors are not acceptable.`;
+A professional e-commerce photograph showing the FORENSICALLY IDENTICAL garment on the specified mannequin type.
+This is for a paying client. Accuracy is non-negotiable. Every detail matters.`;
 
 
-    console.log('Calling Lovable AI for dress extraction...');
+    console.log('Calling Lovable AI for dress extraction with highest-tier model...');
     
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

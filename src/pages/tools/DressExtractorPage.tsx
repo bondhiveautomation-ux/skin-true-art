@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Diamond, Search, RefreshCw } from "lucide-react";
+import { Loader2, Diamond, Search, RefreshCw, User, Users } from "lucide-react";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
@@ -15,6 +15,8 @@ import { getGemCost, getGemCostAsync } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 import { fileToNormalizedDataUrl } from "@/lib/image";
 
+type ExtractionType = "single-upper" | "single-full" | "couple";
+
 const DressExtractorPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
@@ -28,6 +30,7 @@ const DressExtractorPage = () => {
   const [isExtractingDress, setIsExtractingDress] = useState(false);
   const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble" | "royal-velvet" | "garden-elegance" | "modern-minimal">("standard");
   const [dressMismatchFeedback, setDressMismatchFeedback] = useState<string | null>(null);
+  const [extractionType, setExtractionType] = useState<ExtractionType>("single-full");
   
   // Inspect feature state
   const [isInspecting, setIsInspecting] = useState(false);
@@ -122,7 +125,13 @@ const DressExtractorPage = () => {
       let lastErr: any = null;
       for (let attempt = 0; attempt < 2; attempt++) {
         const { data, error } = await supabase.functions.invoke("extract-dress-to-dummy", {
-          body: { image: uploadedInputUrl, userId: user?.id, dummyStyle, correctionFeedback: dressMismatchFeedback },
+          body: { 
+            image: uploadedInputUrl, 
+            userId: user?.id, 
+            dummyStyle, 
+            extractionType,
+            correctionFeedback: dressMismatchFeedback 
+          },
         });
 
         if (!error) {
@@ -270,6 +279,27 @@ const DressExtractorPage = () => {
     { id: "modern-minimal", name: "Modern Minimal", desc: "Contemporary industrial chic" },
   ];
 
+  const extractionTypes = [
+    { 
+      id: "single-upper" as ExtractionType, 
+      name: "Upper Body Only", 
+      desc: "Top/blouse only - upper mannequin",
+      icon: User
+    },
+    { 
+      id: "single-full" as ExtractionType, 
+      name: "Full Body", 
+      desc: "Full dress - complete mannequin",
+      icon: User
+    },
+    { 
+      id: "couple" as ExtractionType, 
+      name: "Couple (2 People)", 
+      desc: "Extract both outfits",
+      icon: Users
+    },
+  ];
+
   // Calculate remaining time for inspect
   const getInspectTimeRemaining = () => {
     if (!generationTimestamp) return null;
@@ -311,6 +341,31 @@ const DressExtractorPage = () => {
 
         {dressImage && !extractedDressImage && (
           <>
+            {/* Extraction Type Selection */}
+            <div className="space-y-4">
+              <h3 className="text-center text-sm font-medium text-cream/80">What's in your photo?</h3>
+              <div className="flex flex-wrap justify-center gap-3">
+                {extractionTypes.map((type) => {
+                  const IconComponent = type.icon;
+                  return (
+                    <button
+                      key={type.id}
+                      onClick={() => setExtractionType(type.id)}
+                      className={`px-5 py-4 rounded-xl border text-center transition-all duration-300 min-w-[140px] ${
+                        extractionType === type.id
+                          ? "border-primary/50 bg-primary/10 text-primary"
+                          : "border-border/30 bg-secondary/20 text-cream/70 hover:border-primary/30"
+                      }`}
+                    >
+                      <IconComponent className={`w-5 h-5 mx-auto mb-2 ${type.id === "couple" ? "" : ""}`} />
+                      <span className="block text-sm font-medium">{type.name}</span>
+                      <span className="block text-xs opacity-60 mt-0.5">{type.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Dummy Style Selection */}
             <div className="space-y-4">
               <h3 className="text-center text-sm font-medium text-cream/80">Choose Background Style</h3>
