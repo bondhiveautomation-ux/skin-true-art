@@ -120,6 +120,51 @@ serve(async (req) => {
    - Soft, diffused lighting creating a premium look
    - Polished, reflective floor surface for added luxury feel
    - Keep it realistic and tasteful, not gaudy`
+      },
+      "royal-velvet": {
+        mannequin: `Use a regal, high-fashion mannequin/dummy:
+   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
+   - Arms positioned elegantly, hands visible and complete
+   - Mannequin with a smooth, matte champagne or rose-gold finish
+   - Elegant, statuesque posture befitting royalty
+   - No facial features, no hair, no skin details`,
+        background: `Use a luxurious royal velvet background:
+   - Deep burgundy, royal purple, or midnight blue velvet draping
+   - Rich, plush fabric texture visible with subtle folds
+   - Warm, golden ambient lighting creating a regal atmosphere
+   - Hints of ornate gold trim or subtle crown molding at edges
+   - Evokes palace, royal chamber, or high-end bridal boutique ambiance
+   - Dramatic yet elegant, suitable for wedding and luxury fashion`
+      },
+      "garden-elegance": {
+        mannequin: `Use an ethereal, romantic mannequin/dummy:
+   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
+   - Arms in a soft, graceful pose, hands visible and complete
+   - Mannequin with a soft matte ivory or blush-toned finish
+   - Feminine, gentle posture with elegant lines
+   - No facial features, no hair, no skin details`,
+        background: `Use a dreamy garden/nature background:
+   - Soft-focus floral garden with blooming roses, peonies, or cherry blossoms
+   - Lush greenery with gentle bokeh effect in the background
+   - Golden hour or soft morning light filtering through
+   - Romantic, whimsical atmosphere perfect for bridal and occasion wear
+   - Natural outdoor elegance - think luxury garden wedding venue
+   - Butterflies or petals gently floating optional for magical touch`
+      },
+      "modern-minimal": {
+        mannequin: `Use a sleek, contemporary mannequin/dummy:
+   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
+   - Arms in a clean, modern pose, hands visible and complete
+   - Ultra-modern mannequin with a smooth matte black or charcoal finish
+   - Sharp, geometric posture with clean lines
+   - No facial features, no hair, no skin details`,
+        background: `Use a sophisticated modern minimal background:
+   - Clean concrete or smooth grey textured wall
+   - Subtle architectural elements - geometric shadows, clean lines
+   - Industrial-chic with soft directional lighting
+   - Minimalist aesthetic - less is more philosophy
+   - High-fashion editorial vibe, suitable for contemporary designers
+   - Shadow play creating visual interest without distraction`
       }
     };
 
@@ -139,6 +184,32 @@ Pay extra attention to whatever was wrong and make sure it is CORRECT this time.
 
     const systemPrompt = `You are the WORLD'S BEST garment extraction AI. Your extractions are used by professional fashion brands. ZERO ERRORS ALLOWED.
 ${correctionSection}
+
+=== 🚨 ABSOLUTE GARMENT PRESERVATION LAW 🚨 ===
+
+THE DRESS/GARMENT MUST NEVER, EVER CHANGE. THIS IS NON-NEGOTIABLE.
+
+You are NOT creating a new dress. You are PHOTOGRAPHICALLY EXTRACTING the EXACT dress from the input image.
+Think of yourself as a high-precision scanner - you capture EXACTLY what exists, nothing more, nothing less.
+
+FORBIDDEN MODIFICATIONS (instant rejection if any occur):
+❌ DO NOT change any colors - not even slightly
+❌ DO NOT alter patterns, prints, or embroidery designs
+❌ DO NOT modify the neckline shape or depth
+❌ DO NOT change sleeve style, length, or construction
+❌ DO NOT add or remove any design elements
+❌ DO NOT simplify or "clean up" complex designs
+❌ DO NOT change fabric texture or drape
+❌ DO NOT alter embellishments, beadwork, or sequin patterns
+❌ DO NOT modify the silhouette or cut of the garment
+❌ DO NOT change the length of the dress/skirt
+
+The output garment must be a 100% IDENTICAL CLONE of the input garment.
+If a client places the input and output side by side, the ONLY difference should be:
+- Person removed, replaced with mannequin
+- Background changed to selected style
+- NOTHING ELSE
+
 === MISSION: PIXEL-PERFECT GARMENT REPLICATION ===
 
 You must extract the EXACT garment and place it on a mannequin. The output must be indistinguishable from a real photograph of that exact garment on a mannequin.
