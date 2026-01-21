@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Diamond } from "lucide-react";
+import { Loader2, Diamond, Search, RefreshCw } from "lucide-react";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { ResultDisplay } from "@/components/ui/ResultDisplay";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
-import { getGemCost } from "@/lib/gemCosts";
+import { getGemCost, getGemCostAsync } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 import { fileToNormalizedDataUrl } from "@/lib/image";
 
 const DressExtractorPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, hasEnoughGems, refetchGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("dress-extractor")!;
 
@@ -26,6 +28,14 @@ const DressExtractorPage = () => {
   const [isExtractingDress, setIsExtractingDress] = useState(false);
   const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble" | "royal-velvet" | "garden-elegance" | "modern-minimal">("standard");
   const [dressMismatchFeedback, setDressMismatchFeedback] = useState<string | null>(null);
+  
+  // Inspect feature state
+  const [isInspecting, setIsInspecting] = useState(false);
+  const [inspectionResult, setInspectionResult] = useState<{ verdict: string; explanation: string; gemsRefunded: number } | null>(null);
+  const [showFeedbackInput, setShowFeedbackInput] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [generationTimestamp, setGenerationTimestamp] = useState<number | null>(null);
+  const [inputImageUrl, setInputImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -54,6 +64,11 @@ const DressExtractorPage = () => {
       .then((dataUrl) => {
         setDressImage(dataUrl);
         setExtractedDressImage(null);
+        setInspectionResult(null);
+        setShowFeedbackInput(false);
+        setFeedbackText("");
+        setGenerationTimestamp(null);
+        setInputImageUrl(null);
       })
       .catch((err) => {
         console.error("Failed to read image", err);
@@ -74,12 +89,11 @@ const DressExtractorPage = () => {
       toast({ title: "Insufficient gems", description: `You need ${getGemCost("extract-dress-to-dummy")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const gemResult = await deductGems("extract-dress-to-dummy");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
+    
     setIsExtractingDress(true);
+    setInspectionResult(null);
+    setShowFeedbackInput(false);
+    
     try {
       // Upload input image first to keep the request payload small and reduce network failures
       const inputPath = `${user?.id}/dress-extractor/input_${Date.now()}_${Math.random().toString(16).slice(2)}.${(dressFile.type.split("/")[1] || "png").toLowerCase()}`;
@@ -96,16 +110,19 @@ const DressExtractorPage = () => {
       }
 
       const { data: publicUrlData } = supabase.storage.from("temp-uploads").getPublicUrl(inputPath);
-      const inputImageUrl = publicUrlData?.publicUrl;
-      if (!inputImageUrl) {
+      const uploadedInputUrl = publicUrlData?.publicUrl;
+      if (!uploadedInputUrl) {
         throw new Error("Failed to prepare image for processing. Please try again.");
       }
+
+      // Store for inspect feature
+      setInputImageUrl(uploadedInputUrl);
 
       // Retry once on transient request failures
       let lastErr: any = null;
       for (let attempt = 0; attempt < 2; attempt++) {
         const { data, error } = await supabase.functions.invoke("extract-dress-to-dummy", {
-          body: { image: inputImageUrl, userId: user?.id, dummyStyle, correctionFeedback: dressMismatchFeedback },
+          body: { image: uploadedInputUrl, userId: user?.id, dummyStyle, correctionFeedback: dressMismatchFeedback },
         });
 
         if (!error) {
@@ -114,8 +131,15 @@ const DressExtractorPage = () => {
             return;
           }
           if (data?.extractedImage) {
+            // Only deduct gems AFTER successful generation
+            const gemResult = await deductGems("extract-dress-to-dummy");
+            if (!gemResult.success) {
+              console.error("Gem deduction failed after successful generation");
+            }
+            
             setExtractedDressImage(data.extractedImage);
             setDressMismatchFeedback(null);
+            setGenerationTimestamp(Date.now());
             toast({ title: "Dress extracted!", description: "The garment has been placed on the mannequin" });
           }
           lastErr = null;
@@ -136,6 +160,85 @@ const DressExtractorPage = () => {
     }
   };
 
+  // Check if inspect is still available (within 5 minutes)
+  const canInspect = () => {
+    if (!generationTimestamp) return false;
+    const fiveMinutesMs = 5 * 60 * 1000;
+    return Date.now() - generationTimestamp < fiveMinutesMs;
+  };
+
+  const handleInspect = async () => {
+    if (!inputImageUrl || !extractedDressImage) {
+      toast({ title: "Cannot inspect", description: "Missing original or generated image", variant: "destructive" });
+      return;
+    }
+    
+    if (!canInspect()) {
+      toast({ title: "Inspection expired", description: "Inspection is only available within 5 minutes of generation", variant: "destructive" });
+      return;
+    }
+
+    setIsInspecting(true);
+    
+    try {
+      const gemCost = await getGemCostAsync("extract-dress-to-dummy");
+      
+      const { data, error } = await supabase.functions.invoke("inspect-generation", {
+        body: {
+          inputImage: inputImageUrl,
+          outputImage: extractedDressImage,
+          featureName: "Dress Extractor",
+          userId: user?.id,
+          gemCost: gemCost
+        }
+      });
+
+      if (error) throw error;
+
+      setInspectionResult(data);
+      
+      if (data.verdict === "mismatch") {
+        setShowFeedbackInput(true);
+        if (data.gemsRefunded > 0) {
+          await refetchGems();
+          toast({ 
+            title: "Mismatch detected!", 
+            description: `${data.gemsRefunded} gems have been refunded. You can provide feedback and regenerate.`,
+          });
+        } else {
+          toast({ 
+            title: "Mismatch detected!", 
+            description: "You can provide feedback and regenerate.",
+          });
+        }
+      } else {
+        toast({ 
+          title: "Match confirmed", 
+          description: "The dress extraction looks correct!",
+        });
+      }
+    } catch (error: any) {
+      console.error("Inspection error:", error);
+      toast({ title: "Inspection failed", description: error.message || "Please try again", variant: "destructive" });
+    } finally {
+      setIsInspecting(false);
+    }
+  };
+
+  const handleRegenerateWithFeedback = async () => {
+    if (feedbackText.trim()) {
+      setDressMismatchFeedback(feedbackText.trim());
+    }
+    setShowFeedbackInput(false);
+    setInspectionResult(null);
+    setExtractedDressImage(null);
+    
+    // Trigger regeneration
+    setTimeout(() => {
+      handleExtractDress();
+    }, 100);
+  };
+
   const handleDownload = () => {
     if (!extractedDressImage) return;
     const link = document.createElement("a");
@@ -151,6 +254,11 @@ const DressExtractorPage = () => {
     setDressFile(null);
     setExtractedDressImage(null);
     setDressMismatchFeedback(null);
+    setInspectionResult(null);
+    setShowFeedbackInput(false);
+    setFeedbackText("");
+    setGenerationTimestamp(null);
+    setInputImageUrl(null);
   };
 
   const dummyStyles = [
@@ -161,6 +269,17 @@ const DressExtractorPage = () => {
     { id: "garden-elegance", name: "Garden Elegance", desc: "Dreamy floral garden" },
     { id: "modern-minimal", name: "Modern Minimal", desc: "Contemporary industrial chic" },
   ];
+
+  // Calculate remaining time for inspect
+  const getInspectTimeRemaining = () => {
+    if (!generationTimestamp) return null;
+    const fiveMinutesMs = 5 * 60 * 1000;
+    const elapsed = Date.now() - generationTimestamp;
+    const remaining = Math.max(0, fiveMinutesMs - elapsed);
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   return (
     <ToolPageLayout
@@ -182,6 +301,8 @@ const DressExtractorPage = () => {
               setDressImage(null);
               setDressFile(null);
               setExtractedDressImage(null);
+              setInspectionResult(null);
+              setShowFeedbackInput(false);
             }}
             label="Upload Photo with Dress"
             description="We'll extract the garment and display it on a mannequin"
@@ -233,15 +354,92 @@ const DressExtractorPage = () => {
 
         {/* Result */}
         {extractedDressImage && (
-          <ResultDisplay
-            result={extractedDressImage}
-            originalImages={dressImage ? [{ src: dressImage, label: "Original" }] : []}
-            onDownload={handleDownload}
-            onRegenerate={handleExtractDress}
-            onReset={handleReset}
-            isProcessing={isExtractingDress}
-            resetLabel="Extract Another"
-          />
+          <>
+            <ResultDisplay
+              result={extractedDressImage}
+              originalImages={dressImage ? [{ src: dressImage, label: "Original" }] : []}
+              onDownload={handleDownload}
+              onRegenerate={handleExtractDress}
+              onReset={handleReset}
+              isProcessing={isExtractingDress}
+              resetLabel="Extract Another"
+            />
+
+            {/* Inspect Feature */}
+            {!inspectionResult && canInspect() && (
+              <div className="flex flex-col items-center gap-3 p-4 bg-secondary/20 rounded-xl border border-border/30">
+                <p className="text-sm text-cream/70 text-center">
+                  Not happy with the result? Inspect within <span className="font-semibold text-primary">{getInspectTimeRemaining()}</span> to get a refund if there's a mismatch.
+                </p>
+                <Button
+                  onClick={handleInspect}
+                  disabled={isInspecting}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {isInspecting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Inspecting...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4" />
+                      Inspect Result
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Inspection Result */}
+            {inspectionResult && (
+              <div className={`p-4 rounded-xl border ${
+                inspectionResult.verdict === "mismatch" 
+                  ? "bg-destructive/10 border-destructive/30" 
+                  : "bg-primary/10 border-primary/30"
+              }`}>
+                <div className="text-center space-y-2">
+                  <p className={`font-semibold ${
+                    inspectionResult.verdict === "mismatch" ? "text-destructive" : "text-primary"
+                  }`}>
+                    {inspectionResult.verdict === "mismatch" ? "❌ Mismatch Detected" : "✅ Match Confirmed"}
+                  </p>
+                  <p className="text-sm text-cream/70">{inspectionResult.explanation}</p>
+                  {inspectionResult.gemsRefunded > 0 && (
+                    <p className="text-sm text-primary font-medium">
+                      💎 {inspectionResult.gemsRefunded} gems refunded!
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Feedback Input for Mismatch */}
+            {showFeedbackInput && (
+              <div className="space-y-4 p-4 bg-secondary/20 rounded-xl border border-border/30">
+                <div className="text-center">
+                  <h4 className="font-medium text-cream">Help us fix it!</h4>
+                  <p className="text-sm text-cream/60">Tell us what's wrong so we can regenerate it correctly.</p>
+                </div>
+                <Textarea
+                  placeholder="e.g., 'The neckline should be V-neck, not round' or 'The color should be red, not pink'"
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  className="min-h-[80px] bg-secondary/30 border-border/50 text-cream placeholder:text-cream/40 resize-none"
+                />
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleRegenerateWithFeedback}
+                    className="gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Regenerate with Feedback
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </ToolPageLayout>
