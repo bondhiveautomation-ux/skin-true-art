@@ -11,18 +11,18 @@ serve(async (req) => {
   }
 
   try {
-    const { influencerImage, referenceImage } = await req.json();
+    const { sourceImage, targetImage, userId } = await req.json();
 
-    if (!influencerImage) {
+    if (!sourceImage) {
       return new Response(
-        JSON.stringify({ error: "Missing influencer image" }),
+        JSON.stringify({ error: "Missing source face image" }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    if (!referenceImage) {
+    if (!targetImage) {
       return new Response(
-        JSON.stringify({ error: "Missing reference image" }),
+        JSON.stringify({ error: "Missing target image" }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -89,10 +89,10 @@ OUTPUT: Generate the face-swapped image.`;
             role: "user",
             content: [
               { type: "text", text: faceSwapPrompt },
-              { type: "text", text: "IMAGE 1 (Influencer - use this face):" },
-              { type: "image_url", image_url: { url: influencerImage } },
-              { type: "text", text: "IMAGE 2 (Reference - keep everything except the face):" },
-              { type: "image_url", image_url: { url: referenceImage } },
+              { type: "text", text: "IMAGE 1 (Source Face - use this face):" },
+              { type: "image_url", image_url: { url: sourceImage } },
+              { type: "text", text: "IMAGE 2 (Target - keep everything except the face):" },
+              { type: "image_url", image_url: { url: targetImage } },
               {
                 type: "text",
                 text: "Now generate the face-swapped result where IMAGE 2 has the face from IMAGE 1.",
@@ -143,7 +143,7 @@ OUTPUT: Generate the face-swapped image.`;
 
     const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
-    if (generatedImageUrl && generatedImageUrl === referenceImage) {
+    if (generatedImageUrl && generatedImageUrl === targetImage) {
       console.error("Model returned reference image unchanged");
       return new Response(
         JSON.stringify({ error: "Face swap failed. Please try a clearer face photo or different reference image." }),
