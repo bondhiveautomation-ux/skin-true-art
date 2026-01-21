@@ -81,6 +81,9 @@ serve(async (req) => {
     const DUMMY_STYLES: Record<string, { mannequin: string; background: string }> = {
       "standard": {
         mannequin: `Use a simple, minimal, professional mannequin/dummy:
+   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
+   - Arms must be visible in a natural pose (at sides or slightly away from body)
+   - Hands must be visible and complete
    - No facial features, no hair, no skin details
    - Clean white or grey mannequin body
    - Position the dress naturally on the mannequin as it would appear in a catalog`,
@@ -88,6 +91,9 @@ serve(async (req) => {
       },
       "premium-wood": {
         mannequin: `Use a premium, elegant mannequin/dummy:
+   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
+   - Arms must be visible in a natural, elegant pose
+   - Hands must be visible and complete
    - High-end boutique-style mannequin with a sophisticated matte finish
    - Warm beige or champagne-toned mannequin body
    - Elegant posture, professional catalog positioning
@@ -101,6 +107,9 @@ serve(async (req) => {
       },
       "luxury-marble": {
         mannequin: `Use a luxury, high-fashion mannequin/dummy:
+   - FULL-BODY MANNEQUIN with visible arms and hands - MANDATORY
+   - Arms must be visible in a graceful, editorial pose
+   - Hands must be visible and complete
    - Sleek, modern mannequin with a polished, glossy finish
    - Pure white or soft pearl-toned mannequin body
    - Graceful, editorial-style posture
@@ -199,6 +208,19 @@ ${selectedStyle.mannequin}
 === STEP 6: BACKGROUND ===
 ${selectedStyle.background}
 
+=== ⚠️ CRITICAL: FULL-BODY MANNEQUIN REQUIREMENT ⚠️ ===
+
+THIS IS MANDATORY - NO EXCEPTIONS:
+- The mannequin MUST have a COMPLETE FULL BODY with visible arms and hands
+- ARMS: Both arms must be visible in a natural pose (at sides or elegantly positioned)
+- HANDS: Both hands must be complete and visible
+- Even if the input image shows a cropped dress or partial view, YOU MUST show the COMPLETE mannequin
+- The mannequin body should extend from head/neck area down to the floor
+- NEVER crop the mannequin - show the entire figure
+- If the dress is sleeveless/short-sleeved, the mannequin's bare arms must still be fully visible
+
+FAILURE TO SHOW COMPLETE MANNEQUIN WITH HANDS = AUTOMATIC REJECTION
+
 === FINAL QA CHECKLIST (ALL MUST BE YES) ===
 
 □ Is the neckline the EXACT same shape? (V=V, Round=Round)
@@ -207,14 +229,17 @@ ${selectedStyle.background}
 □ Are the cuffs the EXACT same style? (Elastic gathered=Elastic gathered, not open)
 □ Is the print pattern identical?
 □ Did I add ANY elements not in the original? (If yes, REMOVE THEM)
+□ Does the mannequin have VISIBLE ARMS AND HANDS? (MUST BE YES)
+□ Is the mannequin FULL-BODY from neck to floor? (MUST BE YES)
 ${correctionFeedback ? `□ Did I fix the specific issue: "${correctionFeedback}"? (MUST BE YES)` : ""}
 
 If ANY answer is NO, your extraction will be REJECTED by the client.
 
 === OUTPUT ===
 
-A professional e-commerce photograph showing the IDENTICAL garment on a mannequin.
+A professional e-commerce photograph showing the IDENTICAL garment on a FULL-BODY mannequin with visible arms and hands.
 The garment must be a 1:1 replica - same neckline shape, same sleeve construction, same everything.
+The mannequin must be complete with arms and hands visible, regardless of the input image framing.
 This is for a paying client. Errors are not acceptable.`;
 
 
