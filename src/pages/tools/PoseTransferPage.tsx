@@ -99,8 +99,8 @@ const PoseTransferPage = () => {
         return;
       }
       
-      if (data?.resultImage) {
-        setResultImage(data.resultImage);
+      if (data?.generatedImageUrl) {
+        setResultImage(data.generatedImageUrl);
         toast({ title: "Pose transferred!", description: "Your character now has the new pose" });
       }
     } catch (error: any) {

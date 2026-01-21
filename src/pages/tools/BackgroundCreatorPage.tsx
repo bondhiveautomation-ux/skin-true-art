@@ -101,8 +101,8 @@ const BackgroundCreatorPage = () => {
         return;
       }
       
-      if (data?.resultImage) {
-        setResultImage(data.resultImage);
+      if (data?.result) {
+        setResultImage(data.result);
         toast({ title: "Background created!", description: "Your new background is ready" });
       }
     } catch (error: any) {
