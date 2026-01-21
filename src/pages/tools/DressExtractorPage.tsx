@@ -24,7 +24,7 @@ const DressExtractorPage = () => {
   const [dressImage, setDressImage] = useState<string | null>(null);
   const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
   const [isExtractingDress, setIsExtractingDress] = useState(false);
-  const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble">("standard");
+  const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble" | "royal-velvet" | "garden-elegance" | "modern-minimal">("standard");
   const [dressMismatchFeedback, setDressMismatchFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -112,6 +112,9 @@ const DressExtractorPage = () => {
     { id: "standard", name: "Standard", desc: "Clean white background" },
     { id: "premium-wood", name: "Premium Wood", desc: "Elegant wooden backdrop" },
     { id: "luxury-marble", name: "Luxury Marble", desc: "Sophisticated marble finish" },
+    { id: "royal-velvet", name: "Royal Velvet", desc: "Regal velvet draping" },
+    { id: "garden-elegance", name: "Garden Elegance", desc: "Dreamy floral garden" },
+    { id: "modern-minimal", name: "Modern Minimal", desc: "Contemporary industrial chic" },
   ];
 
   return (
