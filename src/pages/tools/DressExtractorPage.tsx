@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Diamond } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
@@ -13,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
+import { fileToNormalizedDataUrl } from "@/lib/image";
 
 const DressExtractorPage = () => {
   const navigate = useNavigate();
@@ -22,6 +21,7 @@ const DressExtractorPage = () => {
   const tool = getToolById("dress-extractor")!;
 
   const [dressImage, setDressImage] = useState<string | null>(null);
+  const [dressFile, setDressFile] = useState<File | null>(null);
   const [extractedDressImage, setExtractedDressImage] = useState<string | null>(null);
   const [isExtractingDress, setIsExtractingDress] = useState(false);
   const [dummyStyle, setDummyStyle] = useState<"standard" | "premium-wood" | "luxury-marble" | "royal-velvet" | "garden-elegance" | "modern-minimal">("standard");
@@ -48,16 +48,25 @@ const DressExtractorPage = () => {
       toast({ title: "Invalid file", description: "Please upload an image file", variant: "destructive" });
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setDressImage(e.target?.result as string);
-      setExtractedDressImage(null);
-    };
-    reader.readAsDataURL(file);
+
+    setDressFile(file);
+    fileToNormalizedDataUrl(file)
+      .then((dataUrl) => {
+        setDressImage(dataUrl);
+        setExtractedDressImage(null);
+      })
+      .catch((err) => {
+        console.error("Failed to read image", err);
+        toast({
+          title: "Upload failed",
+          description: "Could not read this image file.",
+          variant: "destructive",
+        });
+      });
   };
 
   const handleExtractDress = async () => {
-    if (!dressImage) {
+    if (!dressImage || !dressFile) {
       toast({ title: "No image uploaded", description: "Please upload an image first", variant: "destructive" });
       return;
     }
@@ -72,19 +81,54 @@ const DressExtractorPage = () => {
     }
     setIsExtractingDress(true);
     try {
-      const { data, error } = await supabase.functions.invoke("extract-dress-to-dummy", {
-        body: { image: dressImage, userId: user?.id, dummyStyle, correctionFeedback: dressMismatchFeedback },
-      });
-      if (error) throw error;
-      if (data?.error) {
-        toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
-        return;
+      // Upload input image first to keep the request payload small and reduce network failures
+      const inputPath = `${user?.id}/dress-extractor/input_${Date.now()}_${Math.random().toString(16).slice(2)}.${(dressFile.type.split("/")[1] || "png").toLowerCase()}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("temp-uploads")
+        .upload(inputPath, dressFile, {
+          contentType: dressFile.type || "image/png",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(`Failed to upload image. Please try again. (${uploadError.message})`);
       }
-      if (data?.extractedImage) {
-        setExtractedDressImage(data.extractedImage);
-        setDressMismatchFeedback(null);
-        toast({ title: "Dress extracted!", description: "The garment has been placed on the mannequin" });
+
+      const { data: publicUrlData } = supabase.storage.from("temp-uploads").getPublicUrl(inputPath);
+      const inputImageUrl = publicUrlData?.publicUrl;
+      if (!inputImageUrl) {
+        throw new Error("Failed to prepare image for processing. Please try again.");
       }
+
+      // Retry once on transient request failures
+      let lastErr: any = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { data, error } = await supabase.functions.invoke("extract-dress-to-dummy", {
+          body: { image: inputImageUrl, userId: user?.id, dummyStyle, correctionFeedback: dressMismatchFeedback },
+        });
+
+        if (!error) {
+          if (data?.error) {
+            toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
+            return;
+          }
+          if (data?.extractedImage) {
+            setExtractedDressImage(data.extractedImage);
+            setDressMismatchFeedback(null);
+            toast({ title: "Dress extracted!", description: "The garment has been placed on the mannequin" });
+          }
+          lastErr = null;
+          break;
+        }
+
+        lastErr = error;
+        const msg = (error as any)?.message || "";
+        if (!/Failed to send a request/i.test(msg) || attempt === 1) break;
+        await new Promise((r) => setTimeout(r, 600));
+      }
+
+      if (lastErr) throw lastErr;
     } catch (error: any) {
       toast({ title: "Extraction failed", description: error.message, variant: "destructive" });
     } finally {
@@ -104,6 +148,7 @@ const DressExtractorPage = () => {
 
   const handleReset = () => {
     setDressImage(null);
+    setDressFile(null);
     setExtractedDressImage(null);
     setDressMismatchFeedback(null);
   };
@@ -135,6 +180,7 @@ const DressExtractorPage = () => {
             onUpload={handleImageUpload}
             onRemove={() => {
               setDressImage(null);
+              setDressFile(null);
               setExtractedDressImage(null);
             }}
             label="Upload Photo with Dress"

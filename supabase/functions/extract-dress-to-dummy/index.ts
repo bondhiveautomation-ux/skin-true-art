@@ -383,6 +383,9 @@ This is for a paying client. Errors are not acceptable.`;
     }
 
     // Upload to storage and log generation if userId is provided
+    // Also prefer returning the storage URL (small payload) to avoid large base64 responses
+    let finalImageUrl = generatedImageUrl;
+
     if (userId) {
       try {
         let inputStorageUrl: string | null = null;
@@ -399,6 +402,11 @@ This is for a paying client. Errors are not acceptable.`;
         if (generatedImageUrl.startsWith('data:image')) {
           outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_dress_extract');
           console.log("Output image uploaded:", outputStorageUrl ? "success" : "failed");
+        }
+
+        // Prefer the stored output image URL when available (prevents huge response bodies)
+        if (outputStorageUrl) {
+          finalImageUrl = outputStorageUrl;
         }
 
         const inputImages = inputStorageUrl ? [inputStorageUrl] : [];
@@ -422,7 +430,7 @@ This is for a paying client. Errors are not acceptable.`;
     }
 
     return new Response(
-      JSON.stringify({ extractedImage: generatedImageUrl }),
+      JSON.stringify({ extractedImage: finalImageUrl }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
