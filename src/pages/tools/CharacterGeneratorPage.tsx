@@ -146,11 +146,6 @@ const CharacterGeneratorPage = () => {
       toast({ title: "Insufficient gems", description: `You need ${getGemCost("generate-character-image")} gems for this feature`, variant: "destructive" });
       return;
     }
-    const gemResult = await deductGems("generate-character-image");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
 
     setIsGeneratingImage(true);
     setGenerationProgress(0);
@@ -175,9 +170,19 @@ const CharacterGeneratorPage = () => {
       });
       if (error) throw error;
       if (data?.generatedImageUrl) {
+        // Only deduct gems AFTER successful generation
+        const gemResult = await deductGems("generate-character-image");
+        if (!gemResult.success) {
+          // Edge case: generation succeeded but gem deduction failed - still show the result
+          console.error("Gem deduction failed after successful generation");
+        }
+        
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
+      } else if (data?.error) {
+        // Generation failed with error response - no gems deducted
+        throw new Error(data.error);
       }
     } catch (error: any) {
       toast({ title: "Generation failed", description: error.message, variant: "destructive" });
