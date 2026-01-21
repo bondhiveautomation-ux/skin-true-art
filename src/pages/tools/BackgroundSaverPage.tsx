@@ -79,8 +79,8 @@ const BackgroundSaverPage = () => {
         return;
       }
       
-      if (data?.resultImage) {
-        setResultImage(data.resultImage);
+      if (data?.cleanBackground) {
+        setResultImage(data.cleanBackground);
         toast({ title: "Background cleaned!", description: "People have been removed from your image" });
       }
     } catch (error: any) {

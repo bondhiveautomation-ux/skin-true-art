@@ -99,8 +99,8 @@ const FaceSwapPage = () => {
         return;
       }
       
-      if (data?.resultImage) {
-        setResultImage(data.resultImage);
+      if (data?.generatedImageUrl) {
+        setResultImage(data.generatedImageUrl);
         toast({ title: "Face swapped!", description: "Your face swap is ready" });
       }
     } catch (error: any) {

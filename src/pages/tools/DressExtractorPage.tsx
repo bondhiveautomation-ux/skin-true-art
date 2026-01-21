@@ -80,8 +80,8 @@ const DressExtractorPage = () => {
         toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
         return;
       }
-      if (data?.extractedImageUrl) {
-        setExtractedDressImage(data.extractedImageUrl);
+      if (data?.extractedImage) {
+        setExtractedDressImage(data.extractedImage);
         setDressMismatchFeedback(null);
         toast({ title: "Dress extracted!", description: "The garment has been placed on the mannequin" });
       }
