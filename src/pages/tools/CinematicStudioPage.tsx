@@ -162,9 +162,11 @@ const CinematicStudioPage = () => {
         return;
       }
       
-      if (data?.resultImage) {
-        setResultImage(data.resultImage);
+      if (data?.result) {
+        setResultImage(data.result);
         toast({ title: "Cinematic transformation complete!", description: "Your photo has been transformed" });
+      } else {
+        toast({ title: "No result", description: "Failed to generate image. Please try again.", variant: "destructive" });
       }
     } catch (error: any) {
       toast({ title: "Processing failed", description: error.message, variant: "destructive" });
