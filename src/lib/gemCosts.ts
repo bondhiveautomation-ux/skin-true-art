@@ -21,6 +21,7 @@ export const GEM_COSTS = {
   "generate-caption": 1,
   "extract-image-prompt": 1,
   "refine-prompt": 1,
+  "prompt-engineer": 1,
 } as const;
 
 export type FeatureName = keyof typeof GEM_COSTS;
@@ -118,7 +119,7 @@ export const FEATURE_CATEGORIES = {
   "quick-tools": {
     label: "Quick Tools",
     cost: 1,
-    features: ["generate-caption", "extract-image-prompt", "refine-prompt"],
+    features: ["generate-caption", "extract-image-prompt", "refine-prompt", "prompt-engineer"],
   },
 } as const;
 

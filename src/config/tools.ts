@@ -10,7 +10,8 @@ import {
   Camera, 
   Type, 
   Wand2,
-  Sparkles
+  Sparkles,
+  Bot
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -171,6 +172,18 @@ export const TOOLS: ToolConfig[] = [
     gemCostKey: "apply-branding",
     gradient: "bg-gradient-to-br from-fuchsia-500/10 to-pink-500/5",
     badge: "Protect",
+  },
+  {
+    id: "prompt-engineer",
+    name: "AI Prompt Engineer",
+    shortName: "Prompt AI",
+    description: "Transform raw prompts into professional, high-quality prompts using a 5-agent AI pipeline.",
+    longDescription: "Our intelligent 5-agent system refines your prompts: the Detailer adds technical precision, the Contextualizer adds persona and examples, the Alignment Check prevents drift, the Polisher perfects grammar and tone, and the Final Output delivers a ready-to-use prompt.",
+    icon: Bot,
+    path: "/tools/prompt-engineer",
+    gemCostKey: "prompt-engineer",
+    gradient: "bg-gradient-to-br from-amber-500/10 to-orange-500/5",
+    badge: "AI Agents",
   },
 ];
 
