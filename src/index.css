@@ -570,3 +570,29 @@
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
 }
+
+/* Agent Pipeline Animations - AI Prompt Engineer Tool */
+@keyframes agent-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 hsla(45, 90%, 55%, 0.4);
+    border-color: hsla(45, 90%, 55%, 0.6);
+  }
+  50% { 
+    box-shadow: 0 0 20px 4px hsla(45, 90%, 55%, 0.3);
+    border-color: hsla(45, 90%, 55%, 1);
+  }
+}
+
+@keyframes agent-glow {
+  0%, 100% { background: hsla(45, 90%, 55%, 0.05); }
+  50% { background: hsla(45, 90%, 55%, 0.15); }
+}
+
+.agent-processing {
+  animation: agent-pulse 1.5s ease-in-out infinite, agent-glow 1.5s ease-in-out infinite;
+}
+
+.agent-completed {
+  border-color: hsl(142, 70%, 45%) !important;
+  background: hsla(142, 70%, 45%, 0.1) !important;
+}
