@@ -80,7 +80,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Processing video generation request with Kling 2.0...", { 
+    console.log("Processing video generation request with Kling v2.1 Master...", { 
       hasPrompt: !!prompt, 
       hasImage: !!startingImage, 
       aspectRatio,
@@ -126,7 +126,7 @@ serve(async (req) => {
       enhancedPrompt = `${enhancedPrompt}. ${cameraMotionMap[cameraMotion]}`;
     }
 
-    // Prepare the input for Kling 2.0
+    // Prepare the input for Kling v2.1 Master
     const input: Record<string, any> = {
       prompt: enhancedPrompt,
       duration: 5, // Kling supports 5 or 10 seconds
@@ -136,13 +136,13 @@ serve(async (req) => {
 
     // If starting image is provided (image-to-video)
     if (startingImage) {
-      input.start_image = startingImage;
+      input.image = startingImage;
     }
 
-    console.log("Calling Replicate API with Kling 2.0 model...");
+    console.log("Calling Replicate API with Kling v2.1 Master model...");
 
-    // Start the prediction with Kling 2.0
-    const predictionResponse = await fetch("https://api.replicate.com/v1/models/fofr/kling-video/predictions", {
+    // Start the prediction with Kling v2.1 Master (supports both text-to-video and image-to-video)
+    const predictionResponse = await fetch("https://api.replicate.com/v1/models/kwaivgi/kling-v2.1-master/predictions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_API_KEY}`,
@@ -215,7 +215,7 @@ serve(async (req) => {
       );
     }
 
-    // Kling 2.0 returns the video URL directly
+    // Kling v2.1 returns the video URL directly
     const videoUrl = prediction.output;
     
     if (!videoUrl) {
@@ -226,7 +226,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Video generated successfully with Kling 2.0:", videoUrl);
+    console.log("Video generated successfully with Kling v2.1:", videoUrl);
 
     // Save video and log generation if userId is provided
     if (userId) {
