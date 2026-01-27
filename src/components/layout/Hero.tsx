@@ -120,14 +120,19 @@ export const Hero = ({ onExplore }: HeroProps) => {
         </div>
 
         {/* Main headline - Editorial Serif */}
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-cream leading-[1.15] sm:leading-[1.1] tracking-tight mb-5 sm:mb-8 section-animate delay-1 px-2">
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-cream leading-[1.15] sm:leading-[1.1] tracking-tight mb-2 sm:mb-3 section-animate delay-1 px-2">
           {headline1}
           <br />
           <span className="gradient-text">{headline2}</span>
         </h1>
+        
+        {/* Bangla subheading */}
+        <p className="font-bangla text-sm sm:text-base md:text-lg text-cream/60 mb-4 sm:mb-6 section-animate delay-1 px-2">
+          যেখানে ফ্যাশন AI-এর সাথে মিলিত হয়
+        </p>
 
         {/* Sub-headline */}
-        <p className="text-sm sm:text-base md:text-lg text-cream/60 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed section-animate delay-2 font-light px-4">
+        <p className="text-sm sm:text-base md:text-lg text-cream/50 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed section-animate delay-2 font-light px-4">
           {subheadline}
         </p>
 

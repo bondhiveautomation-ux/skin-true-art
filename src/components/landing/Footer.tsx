@@ -22,7 +22,7 @@ export const Footer = () => {
         <div className="flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:justify-between">
           {/* Brand */}
           <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2 sm:mb-3">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-1 sm:mb-2">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg gold-icon flex items-center justify-center">
                 <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold" />
               </div>
@@ -32,6 +32,9 @@ export const Footer = () => {
             </div>
             <p className="text-[11px] sm:text-xs text-cream/40 font-light">
               {tagline}
+            </p>
+            <p className="font-bangla text-[10px] sm:text-[11px] text-cream/50 mt-1">
+              সৌন্দর্য ও কন্টেন্টের জন্য আপনার ব্যক্তিগত AI স্টুডিও
             </p>
           </div>
 

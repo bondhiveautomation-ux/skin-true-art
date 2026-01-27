@@ -109,7 +109,10 @@ export const FeaturesSection = ({ id, onFeatureClick }: FeaturesSectionProps) =>
             <br />
             <span className="gradient-text">{headline2}</span>
           </h2>
-          <p className="mt-5 sm:mt-8 text-base sm:text-lg text-cream/50 max-w-2xl mx-auto section-animate delay-2 leading-relaxed font-light px-2">
+          <p className="font-bangla text-sm sm:text-base text-cream/60 mt-2 section-animate delay-1">
+            AI-চালিত সৃজনশীল টুলস
+          </p>
+          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-cream/50 max-w-2xl mx-auto section-animate delay-2 leading-relaxed font-light px-2">
             {subheadline}
           </p>
         </div>
