@@ -150,6 +150,17 @@ const ToolConfigsManager = () => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label className="text-cream/70">Preview Image URL</Label>
+                    <Input
+                      value={(getFieldValue(tool, 'preview_image_url') as string) || ''}
+                      onChange={(e) => handleFieldChange(tool.id, 'preview_image_url', e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="bg-secondary/30 border-gold/20"
+                    />
+                    <p className="text-xs text-cream/40">Card thumbnail image. Leave empty for default.</p>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label className="text-cream/70">Short Description (Dashboard Cards)</Label>
                     <Textarea
                       value={getFieldValue(tool, 'description') as string}

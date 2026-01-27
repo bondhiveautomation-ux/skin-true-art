@@ -3,73 +3,21 @@ import { LucideIcon, Diamond } from "lucide-react";
 import { getGemCost } from "@/lib/gemCosts";
 import { cn } from "@/lib/utils";
 
-// Tool preview images - before/after representations
-const TOOL_PREVIEWS: Record<string, { before: string; after: string; gradient: string }> = {
-  "Character Generator": {
-    before: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop",
-    gradient: "from-purple-600/20 to-pink-600/20"
-  },
-  "Prompt Extractor": {
-    before: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=400&h=500&fit=crop",
-    gradient: "from-blue-600/20 to-cyan-600/20"
-  },
-  "Dress Extractor": {
-    before: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=500&fit=crop",
-    gradient: "from-rose-600/20 to-orange-600/20"
-  },
-  "Background Saver": {
-    before: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=400&h=500&fit=crop",
-    gradient: "from-green-600/20 to-emerald-600/20"
-  },
-  "Pose Transfer": {
-    before: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=500&fit=crop",
-    gradient: "from-amber-600/20 to-yellow-600/20"
-  },
-  "Makeup Studio": {
-    before: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=400&h=500&fit=crop",
-    gradient: "from-pink-600/20 to-rose-600/20"
-  },
-  "Face Swap Studio": {
-    before: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop",
-    gradient: "from-indigo-600/20 to-purple-600/20"
-  },
-  "Cinematic Studio": {
-    before: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=500&fit=crop",
-    gradient: "from-violet-600/20 to-fuchsia-600/20"
-  },
-  "Background Creator": {
-    before: "https://images.unsplash.com/photo-1557683316-973673baf926?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=500&fit=crop",
-    gradient: "from-teal-600/20 to-cyan-600/20"
-  },
-  "Photography Studio": {
-    before: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=500&fit=crop",
-    gradient: "from-sky-600/20 to-blue-600/20"
-  },
-  "Caption Studio": {
-    before: "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400&h=500&fit=crop",
-    gradient: "from-orange-600/20 to-red-600/20"
-  },
-  "Branding Studio": {
-    before: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=500&fit=crop",
-    gradient: "from-fuchsia-600/20 to-pink-600/20"
-  },
-  "AI Prompt Engineer": {
-    before: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=500&fit=crop",
-    after: "https://images.unsplash.com/photo-1676299081847-824916de030a?w=400&h=500&fit=crop",
-    gradient: "from-amber-600/20 to-orange-600/20"
-  },
+// Default fallback preview images
+const DEFAULT_PREVIEWS: Record<string, string> = {
+  "Character Generator": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop",
+  "Prompt Extractor": "https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=400&h=500&fit=crop",
+  "Dress Extractor": "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=500&fit=crop",
+  "Background Saver": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=400&h=500&fit=crop",
+  "Pose Transfer": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=500&fit=crop",
+  "Makeup Studio": "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=400&h=500&fit=crop",
+  "Face Swap Studio": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop",
+  "Cinematic Studio": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=500&fit=crop",
+  "Background Creator": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=500&fit=crop",
+  "Photography Studio": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=500&fit=crop",
+  "Caption Studio": "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400&h=500&fit=crop",
+  "Branding Studio": "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=500&fit=crop",
+  "AI Prompt Engineer": "https://images.unsplash.com/photo-1676299081847-824916de030a?w=400&h=500&fit=crop",
 };
 
 // Bangla tool names
@@ -95,6 +43,7 @@ interface VisualToolCardProps {
   path: string;
   gemCostKey: string;
   delay?: number;
+  previewImageUrl?: string | null;
 }
 
 export const VisualToolCard = ({
@@ -103,11 +52,14 @@ export const VisualToolCard = ({
   path,
   gemCostKey,
   delay = 0,
+  previewImageUrl,
 }: VisualToolCardProps) => {
   const navigate = useNavigate();
-  const preview = TOOL_PREVIEWS[name];
   const banglaName = BANGLA_NAMES[name] || name;
   const gemCost = getGemCost(gemCostKey);
+  
+  // Use database image if provided, otherwise fall back to defaults
+  const imageUrl = previewImageUrl || DEFAULT_PREVIEWS[name] || "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop";
 
   return (
     <button
@@ -118,43 +70,21 @@ export const VisualToolCard = ({
         "transition-all duration-300 ease-out",
         "hover:scale-[1.04] hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10",
         "active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-        "animate-fade-in min-h-[220px] sm:min-h-[280px] w-full"
+        "min-h-[220px] sm:min-h-[280px] w-full"
       )}
       style={{ animationDelay: `${delay * 60}ms` }}
     >
-      {/* Visual Preview Area - 70% of card */}
+      {/* Visual Preview Area */}
       <div className="absolute inset-0">
-        {/* Before image (desktop: visible, fades on hover) */}
-        {preview && (
-          <>
-            <img
-              src={preview.after}
-              alt={name}
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100"
-              loading="lazy"
-            />
-            <img
-              src={preview.before}
-              alt={name}
-              className="hidden sm:block absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-              loading="lazy"
-            />
-          </>
-        )}
+        <img
+          src={imageUrl}
+          alt={name}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
         
         {/* Gradient overlay for text legibility */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent",
-          "group-hover:from-black/95 group-hover:via-black/50 transition-all duration-300"
-        )} />
-        
-        {/* Decorative gradient based on tool */}
-        {preview && (
-          <div className={cn(
-            "absolute inset-0 bg-gradient-to-br opacity-30 group-hover:opacity-50 transition-opacity duration-300",
-            preview.gradient
-          )} />
-        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
       </div>
 
       {/* Gem Cost Badge - Fixed top-right */}
