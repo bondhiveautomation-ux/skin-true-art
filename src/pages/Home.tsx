@@ -23,7 +23,7 @@ const Home = () => {
 
   // Home page content with defaults
   const brandName = headerContent.brand_name || "BH Studio";
-  const whatsappNumber = headerContent.whatsapp_number || "8801234567890";
+  const whatsappNumber = headerContent.whatsapp_number || "17059884080";
   const whatsappMessage = encodeURIComponent(homeContent.whatsapp_message || "Hi, I'd like to request access to BH Studio.");
   
   // Hero section
