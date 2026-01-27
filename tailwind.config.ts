@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+        bangla: ['Hind Siliguri', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
