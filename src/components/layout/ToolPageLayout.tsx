@@ -10,6 +10,23 @@ import { useToolConfigs } from "@/hooks/useToolConfigs";
 import { getGemCost } from "@/lib/gemCosts";
 import { LucideIcon } from "lucide-react";
 
+// Bangla descriptions for each tool
+const BANGLA_DESCRIPTIONS: Record<string, string> = {
+  "Character Generator": "আপনার চরিত্রের মুখ ও পরিচয় সম্পূর্ণ সামঞ্জস্যপূর্ণ রেখে নতুন ছবি তৈরি করুন। পেশাদার মানের ক্যারেক্টার ইমেজ জেনারেট করুন।",
+  "Prompt Extractor": "যেকোনো ছবি থেকে বিস্তারিত AI প্রম্পট বের করুন একই রকম ভিজ্যুয়াল তৈরি করতে। ছবির স্টাইল ও ডিটেইলস ক্যাপচার করুন।",
+  "Dress Extractor": "যেকোনো ছবি থেকে পোশাক আলাদা করুন এবং প্রিমিয়াম ব্যাকগ্রাউন্ডে মার্জিত ম্যানেকুইনে প্রদর্শন করুন। ই-কমার্স প্রোডাক্ট ডিসপ্লে ও ফ্যাশন ক্যাটালগের জন্য আদর্শ।",
+  "Background Saver": "ব্যাকগ্রাউন্ড অক্ষত রেখে ছবি থেকে অবাঞ্ছিত মানুষ মুছে ফেলুন। পরিষ্কার, পেশাদার ব্যাকগ্রাউন্ড পান।",
+  "Pose Transfer": "আপনার চরিত্রের পরিচয় অক্ষত রেখে রেফারেন্স ছবি থেকে পোজ ট্রান্সফার করুন। যেকোনো পোজে আপনার মডেল দেখুন।",
+  "Makeup Studio": "AI নির্ভুলতার সাথে পোর্ট্রেটে পেশাদার মেকআপ স্টাইল প্রয়োগ করুন। বিভিন্ন লুক টেস্ট করুন।",
+  "Face Swap Studio": "পেশাদার মানের সাথে ছবির মধ্যে নিখুঁতভাবে মুখ অদলবদল করুন। ন্যাচারাল রেজাল্ট পান।",
+  "Cinematic Studio": "এক ক্লিকে ছবিকে অসাধারণ সিনেমাটিক শটে রূপান্তর করুন। মুভি-স্টাইল ভিজ্যুয়াল তৈরি করুন।",
+  "Background Creator": "আপনার প্রোডাক্ট ফটোগ্রাফির জন্য সুন্দর AI ব্যাকগ্রাউন্ড তৈরি করুন। প্রফেশনাল প্রোডাক্ট শট পান।",
+  "Photography Studio": "সাধারণ ছবিকে DSLR-মানের পেশাদার ছবিতে রূপান্তর করুন। স্টুডিও কোয়ালিটি ফটো পান।",
+  "Caption Studio": "বাংলা বা ইংরেজিতে হাই-কনভার্টিং প্রোডাক্ট ক্যাপশন তৈরি করুন। সোশ্যাল মিডিয়ার জন্য আদর্শ।",
+  "Branding Studio": "আপনার ব্র্যান্ড রক্ষা করতে পেশাদারভাবে লোগো ও ওয়াটারমার্ক যুক্ত করুন। ব্র্যান্ড আইডেন্টিটি বজায় রাখুন।",
+  "AI Prompt Engineer": "৫-এজেন্ট AI পাইপলাইন ব্যবহার করে সাধারণ প্রম্পটকে পেশাদার প্রম্পটে রূপান্তর করুন। সেরা রেজাল্ট পান।",
+};
+
 interface ToolPageLayoutProps {
   children: ReactNode;
   toolId?: string;
@@ -38,8 +55,10 @@ export const ToolPageLayout = ({
   // Get dynamic config from database if available
   const dbConfig = toolId ? getToolConfig(toolId) : null;
   const displayName = dbConfig?.name || toolName;
-  const displayDescription = dbConfig?.long_description || toolDescription;
   const displayBadge = dbConfig?.badge || badge;
+  
+  // Get Bangla description - prioritize from mapping, fallback to English
+  const banglaDescription = BANGLA_DESCRIPTIONS[displayName] || BANGLA_DESCRIPTIONS[toolName] || toolDescription;
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -91,9 +110,9 @@ export const ToolPageLayout = ({
               {displayName}
             </h1>
             
-            {/* Description - Hidden on mobile, shown on tablet+ */}
-            <p className="hidden sm:block text-cream/50 max-w-xl mx-auto leading-relaxed font-light mb-6">
-              {displayDescription}
+            {/* Description in Bangla - Hidden on mobile, shown on tablet+ */}
+            <p className="hidden sm:block font-bangla text-cream/50 max-w-xl mx-auto leading-relaxed font-light mb-6">
+              {banglaDescription}
             </p>
             
             {/* Gem cost badge */}
