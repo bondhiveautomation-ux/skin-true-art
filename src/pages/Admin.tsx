@@ -35,7 +35,9 @@ import {
   X,
   FileText,
   BarChart3,
-  MoreHorizontal
+  MoreHorizontal,
+  Video,
+  Play
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -273,6 +275,26 @@ const Admin = () => {
       inputLabels: ["Outfit Photo"],
       outputLabel: "On Dummy"
     },
+    "Videography Studio": {
+      description: "Generates AI videos from text prompts or animates still images into 4-5 second video clips using Google Veo 3.1.",
+      inputLabels: ["Starting Image (optional)"],
+      outputLabel: "Generated Video"
+    },
+    "Dress Extractor": {
+      description: "Extracts a dress/outfit from a photo and places it on a mannequin for e-commerce display.",
+      inputLabels: ["Outfit Photo"],
+      outputLabel: "On Mannequin"
+    },
+    "Photography Studio": {
+      description: "Enhances photos to professional DSLR quality with improved lighting, sharpness, and composition.",
+      inputLabels: ["Original Photo"],
+      outputLabel: "Enhanced Photo"
+    },
+    "Branding Studio": {
+      description: "Applies logos and watermarks to images for brand protection and marketing.",
+      inputLabels: ["Product Image", "Logo"],
+      outputLabel: "Branded Image"
+    },
   };
 
   const getInputImageLabel = (featureName: string, index: number, totalInputs: number): string => {
@@ -456,9 +478,18 @@ const Admin = () => {
     }
   };
 
-  const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => {
-    // Check if it's a valid displayable image source
-    const isValidSrc = src && (src.startsWith('http') || src.startsWith('data:image'));
+  // Helper to check if URL is a video
+  const isVideoUrl = (url: string): boolean => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+    const lowerUrl = url.toLowerCase();
+    return videoExtensions.some(ext => lowerUrl.includes(ext)) || lowerUrl.includes('video');
+  };
+
+  const MediaThumbnail = ({ src, alt, isOutput = false }: { src: string; alt: string; isOutput?: boolean }) => {
+    // Check if it's a valid displayable source
+    const isValidSrc = src && (src.startsWith('http') || src.startsWith('data:'));
+    const isVideo = isVideoUrl(src);
     
     if (!isValidSrc) {
       return (
@@ -472,42 +503,67 @@ const Admin = () => {
       <Dialog>
         <DialogTrigger asChild>
           <button className="relative group overflow-hidden rounded-lg border border-border hover:border-gold/50 transition-all">
-            <img 
-              src={src} 
-              alt={alt}
-              className="w-16 h-16 object-cover transition-transform group-hover:scale-110"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            {isVideo ? (
+              <div className="w-16 h-16 bg-charcoal flex items-center justify-center relative">
+                <Video className="w-6 h-6 text-gold" />
+                <div className="absolute bottom-0.5 right-0.5 bg-gold/90 rounded px-1">
+                  <Play className="w-2.5 h-2.5 text-charcoal" />
+                </div>
+              </div>
+            ) : (
+              <img 
+                src={src} 
+                alt={alt}
+                className="w-16 h-16 object-cover transition-transform group-hover:scale-110"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            )}
             <div className="absolute inset-0 bg-charcoal/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <ExternalLink className="w-4 h-4 text-cream" />
             </div>
           </button>
         </DialogTrigger>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{alt}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {isVideo ? <Video className="w-5 h-5 text-gold" /> : <Image className="w-5 h-5" />}
+              {alt}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center gap-4">
-            <img 
-              src={src} 
-              alt={alt}
-              className="max-h-[60vh] object-contain rounded-lg"
-            />
+            {isVideo ? (
+              <video 
+                src={src}
+                controls
+                autoPlay
+                loop
+                className="max-h-[60vh] w-full rounded-lg bg-black"
+              />
+            ) : (
+              <img 
+                src={src} 
+                alt={alt}
+                className="max-h-[60vh] object-contain rounded-lg"
+              />
+            )}
             <Button 
-              onClick={() => handleDownloadImage(src, `${alt.replace(/\s+/g, '_')}.png`)}
+              onClick={() => handleDownloadImage(src, `${alt.replace(/\s+/g, '_')}.${isVideo ? 'mp4' : 'png'}`)}
               variant="outline"
               className="gap-2"
             >
               <Download className="w-4 h-4" />
-              Download Image
+              Download {isVideo ? 'Video' : 'Image'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
     );
   };
+
+  // Legacy alias for backward compatibility
+  const ImageThumbnail = MediaThumbnail;
 
   return (
     <div className="min-h-screen bg-background">
@@ -1116,20 +1172,20 @@ const Admin = () => {
                                     )}
                                   </div>
                                   
-                                  {/* Output Images */}
+                                  {/* Output Media (Images/Videos) */}
                                   <div>
                                     <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                       <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                      Output Images ({h.output_images.length})
+                                      Output ({h.output_images.length}) {h.feature_name === "Videography Studio" && <Video className="w-3 h-3 text-gold" />}
                                     </h4>
                                     {h.output_images.length > 0 ? (
                                       <div className="flex flex-wrap gap-2">
-                                        {h.output_images.map((img, idx) => (
-                                          <ImageThumbnail key={idx} src={img} alt={`Output ${idx + 1}`} />
+                                        {h.output_images.map((media, idx) => (
+                                          <MediaThumbnail key={idx} src={media} alt={`Output ${idx + 1}`} isOutput />
                                         ))}
                                       </div>
                                     ) : (
-                                      <p className="text-sm text-muted-foreground">No output images recorded</p>
+                                      <p className="text-sm text-muted-foreground">No output recorded</p>
                                     )}
                                   </div>
                                 </div>
