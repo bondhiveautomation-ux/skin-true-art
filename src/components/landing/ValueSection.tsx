@@ -59,6 +59,9 @@ export const ValueSection = () => {
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight section-animate delay-1">
             {headline1} <span className="gradient-text">{headline2}</span>
           </h2>
+          <p className="font-bangla text-base sm:text-lg text-cream/60 mt-2 section-animate delay-1">
+            অনায়াস সৌন্দর্য
+          </p>
           <p className="mt-6 text-lg text-cream/50 max-w-xl mx-auto section-animate delay-2 font-light">
             {subheadline}
           </p>

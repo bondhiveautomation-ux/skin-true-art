@@ -79,9 +79,12 @@ const Dashboard = () => {
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-xs font-semibold text-primary uppercase tracking-widest">AI Tools</span>
             </div>
-            <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-3 sm:mb-6">
+            <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-2 sm:mb-3">
               Your Creative <span className="gradient-text">Arsenal</span>
             </h2>
+            <p className="font-bangla text-sm sm:text-base text-cream/60 mb-3 sm:mb-6">
+              আপনার সৃজনশীল অস্ত্রাগার
+            </p>
             <p className="text-sm sm:text-lg text-cream/50 max-w-2xl mx-auto leading-relaxed font-light px-2">
               Professional AI tools for content creation and brand building.
             </p>

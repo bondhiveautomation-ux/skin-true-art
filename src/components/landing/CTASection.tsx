@@ -39,9 +39,12 @@ export const CTASection = ({ onGetStarted }: CTASectionProps) => {
           <Crown className="w-9 h-9 text-gold" />
         </div>
 
-        <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-8 section-animate delay-1">
+        <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-cream tracking-tight mb-2 sm:mb-3 section-animate delay-1">
           {headline1} <span className="gradient-text">{headline2}</span>?
         </h2>
+        <p className="font-bangla text-base sm:text-lg text-cream/60 mb-6 sm:mb-8 section-animate delay-1">
+          আপনি কি প্রস্তুত?
+        </p>
         
         <p className="text-lg sm:text-xl text-cream/50 mb-14 max-w-2xl mx-auto leading-relaxed section-animate delay-2 font-light">
           {subheadline}
