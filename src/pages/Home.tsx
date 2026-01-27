@@ -215,10 +215,15 @@ const Home = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-cream leading-[1.1] tracking-tight mb-6">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-cream leading-[1.1] tracking-tight mb-3">
             {heroHeadline1}{" "}
             <span className="gradient-text">{heroHeadline2}</span>
           </h1>
+          
+          {/* Bangla subheading */}
+          <p className="font-bangla text-base sm:text-lg text-cream/60 mb-6">
+            সৌন্দর্য, ফ্যাশন ও কন্টেন্ট তৈরির জন্য আপনার ব্যক্তিগত AI স্টুডিও
+          </p>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-cream/50 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
@@ -268,10 +273,13 @@ const Home = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-6 backdrop-blur-sm">
               <span className="text-xs font-semibold text-gold uppercase tracking-widest">{featuresBadge}</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight mb-4">
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight mb-2">
               {featuresHeadline1}{" "}
               <span className="gradient-text">{featuresHeadline2}</span>
             </h2>
+            <p className="font-bangla text-sm sm:text-base text-cream/60 mb-4">
+              পেশাদার AI টুলস, একটি প্ল্যাটফর্ম
+            </p>
             <p className="text-base sm:text-lg text-cream/50 max-w-xl mx-auto font-light">
               {featuresSubheadline}
             </p>
@@ -279,29 +287,45 @@ const Home = () => {
 
           {/* Feature Groups Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {featureGroups.map((group) => (
-              <div
-                key={group.title}
-                className="group p-6 sm:p-8 rounded-2xl bg-card/30 border border-gold/10 backdrop-blur-sm hover:border-gold/25 transition-all duration-500"
-              >
-                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-cream mb-3 group-hover:text-gold transition-colors duration-300">
-                  {group.title}
-                </h3>
-                <p className="text-sm text-cream/50 mb-5 leading-relaxed">
-                  {group.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {group.tools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="px-3 py-1.5 text-xs font-medium text-gold/70 bg-gold/5 border border-gold/15 rounded-full"
-                    >
-                      {tool}
-                    </span>
-                  ))}
+            {featureGroups.map((group, index) => {
+              // Bangla translations for feature group titles
+              const banglaTitles: Record<string, string> = {
+                "Identity & Character Control": "পরিচয় ও চরিত্র নিয়ন্ত্রণ",
+                "Fashion & Look Transformation": "ফ্যাশন ও লুক রূপান্তর",
+                "Professional Content Creation": "পেশাদার কন্টেন্ট তৈরি",
+                "Branding & Marketing": "ব্র্যান্ডিং ও মার্কেটিং"
+              };
+              const banglaTitle = banglaTitles[group.title] || "";
+              
+              return (
+                <div
+                  key={group.title}
+                  className="group p-6 sm:p-8 rounded-2xl bg-card/30 border border-gold/10 backdrop-blur-sm hover:border-gold/25 transition-all duration-500"
+                >
+                  <h3 className="font-serif text-xl sm:text-2xl font-semibold text-cream mb-1 group-hover:text-gold transition-colors duration-300">
+                    {group.title}
+                  </h3>
+                  {banglaTitle && (
+                    <p className="font-bangla text-sm text-cream/60 mb-3">
+                      {banglaTitle}
+                    </p>
+                  )}
+                  <p className="text-sm text-cream/50 mb-5 leading-relaxed">
+                    {group.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {group.tools.map((tool) => (
+                      <span
+                        key={tool}
+                        className="px-3 py-1.5 text-xs font-medium text-gold/70 bg-gold/5 border border-gold/15 rounded-full"
+                      >
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -314,9 +338,12 @@ const Home = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-6 backdrop-blur-sm">
               <span className="text-xs font-semibold text-gold uppercase tracking-widest">{audiencesBadge}</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight">
-              {audiencesHeadline} <span className="gradient-text">BondHive Studio</span>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight mb-2">
+              {audiencesHeadline} <span className="gradient-text">BH Studio</span>?
             </h2>
+            <p className="font-bangla text-sm sm:text-base text-cream/60">
+              ক্রিয়েটরদের জন্য তৈরি
+            </p>
           </div>
 
           {/* Audience Cards */}
@@ -351,9 +378,12 @@ const Home = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/25 mb-6 backdrop-blur-sm">
               <span className="text-xs font-semibold text-gold uppercase tracking-widest">{valueBadge}</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight">
-              {valueHeadline} <span className="gradient-text">BondHive Studio</span>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-cream tracking-tight mb-2">
+              {valueHeadline} <span className="gradient-text">BH Studio</span>?
             </h2>
+            <p className="font-bangla text-sm sm:text-base text-cream/60">
+              আমাদের প্রতিশ্রুতি
+            </p>
           </div>
 
           {/* Value Pillars */}
@@ -384,7 +414,7 @@ const Home = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo & Tagline */}
             <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
                 <div className="w-7 h-7 rounded-lg gold-icon flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 text-gold" />
                 </div>
@@ -394,6 +424,9 @@ const Home = () => {
               </div>
               <p className="text-xs text-cream/40">
                 {footerTagline}
+              </p>
+              <p className="font-bangla text-[10px] text-cream/50 mt-1">
+                সৌন্দর্য ও কন্টেন্টের জন্য আপনার ব্যক্তিগত AI স্টুডিও
               </p>
             </div>
 
