@@ -11,7 +11,8 @@ import {
   Type, 
   Wand2,
   Sparkles,
-  Bot
+  Bot,
+  Video
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -184,6 +185,18 @@ export const TOOLS: ToolConfig[] = [
     gemCostKey: "prompt-engineer",
     gradient: "bg-gradient-to-br from-amber-500/10 to-orange-500/5",
     badge: "AI Agents",
+  },
+  {
+    id: "videography-studio",
+    name: "Videography Studio",
+    shortName: "Video",
+    description: "Generate stunning 5-second videos from text or animate images with AI.",
+    longDescription: "Create professional AI videos using cutting-edge Kling v2 Master model. Text-to-video or image-to-video with cinematic presets, camera controls, and multiple aspect ratios.",
+    icon: Video,
+    path: "/tools/videography-studio",
+    gemCostKey: "generate-video",
+    gradient: "bg-gradient-to-br from-red-500/10 to-orange-500/5",
+    badge: "Video AI",
   },
 ];
 
