@@ -80,7 +80,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Processing video generation request with Kling v2.1 Master...", { 
+    console.log("Processing video generation request with Google Veo 3.1...", { 
       hasPrompt: !!prompt, 
       hasImage: !!startingImage, 
       aspectRatio,
@@ -126,12 +126,11 @@ serve(async (req) => {
       enhancedPrompt = `${enhancedPrompt}. ${cameraMotionMap[cameraMotion]}`;
     }
 
-    // Prepare the input for Kling v2.1 Master
+    // Prepare the input for Google Veo 3.1
     const input: Record<string, any> = {
       prompt: enhancedPrompt,
-      duration: 5, // Kling supports 5 or 10 seconds
+      duration: 5,
       aspect_ratio: aspectRatio,
-      negative_prompt: "blurry, distorted, low quality, watermark, text overlay, flickering, jittery, artifacts, glitchy"
     };
 
     // If starting image is provided (image-to-video)
@@ -139,10 +138,10 @@ serve(async (req) => {
       input.image = startingImage;
     }
 
-    console.log("Calling Replicate API with Kling v2.1 Master model...");
+    console.log("Calling Replicate API with Google Veo 3.1 model...");
 
-    // Start the prediction with Kling v2.1 Master (supports both text-to-video and image-to-video)
-    const predictionResponse = await fetch("https://api.replicate.com/v1/models/kwaivgi/kling-v2.1-master/predictions", {
+    // Start the prediction with Google Veo 3.1
+    const predictionResponse = await fetch("https://api.replicate.com/v1/models/google/veo-3.1/predictions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_API_KEY}`,
@@ -215,7 +214,7 @@ serve(async (req) => {
       );
     }
 
-    // Kling v2.1 returns the video URL directly
+    // Veo 3.1 returns the video URL directly
     const videoUrl = prediction.output;
     
     if (!videoUrl) {
@@ -226,7 +225,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Video generated successfully with Kling v2.1:", videoUrl);
+    console.log("Video generated successfully with Google Veo 3.1:", videoUrl);
 
     // Save video and log generation if userId is provided
     if (userId) {
