@@ -17,6 +17,7 @@ import { useContent } from "@/hooks/useSiteContent";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import UserInbox from "@/components/user/UserInbox";
 import { GemBalance } from "@/components/gems/GemBalance";
+import { UserBadge, getUserBadgeType } from "@/components/dashboard/UserBadge";
 
 const STUDIOS = [
   { name: "Photography Studio", path: "/photography-studio", icon: Camera },
@@ -31,9 +32,11 @@ interface NavbarProps {
   userEmail?: string;
   credits?: number | null;
   isAdmin?: boolean;
+  subscriptionType?: string | null;
 }
 
-export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: NavbarProps) => {
+export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin, subscriptionType }: NavbarProps) => {
+  const badgeType = getUserBadgeType(isAdmin || false, subscriptionType);
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -162,7 +165,8 @@ export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin }: N
                 </div>
               )}
               {userEmail && (
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-3 shrink-0">
+                  <UserBadge type={badgeType} />
                   <UserInbox />
                   <span className="text-sm text-cream/50 truncate max-w-[120px] xl:max-w-[150px]">
                     {userEmail}
