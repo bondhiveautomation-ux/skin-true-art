@@ -614,8 +614,30 @@ After completing, provide a brief 2-sentence creative director's note explaining
     const creativeBrief = data.choices?.[0]?.message?.content || "";
 
     if (!enhancedImageUrl) {
-      console.error("No image in response:", JSON.stringify(data).substring(0, 500));
-      throw new Error("No enhanced image generated from AI");
+      // Log detailed response for debugging
+      const responsePreview = JSON.stringify(data).substring(0, 800);
+      console.error("No image in AI response. Full response preview:", responsePreview);
+      
+      // Check for common reasons
+      const finishReason = data.choices?.[0]?.finish_reason;
+      const textContent = data.choices?.[0]?.message?.content || "";
+      
+      console.error("Finish reason:", finishReason);
+      console.error("Text content:", textContent.substring(0, 300));
+      
+      // Provide specific error messages based on likely cause
+      if (finishReason === "content_filter" || textContent.toLowerCase().includes("cannot") || textContent.toLowerCase().includes("unable")) {
+        return new Response(
+          JSON.stringify({ error: "The AI couldn't process this image. Try a different photo or adjust settings." }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Generic retry message for other cases
+      return new Response(
+        JSON.stringify({ error: "Image generation failed. Please try again — this sometimes happens with complex images." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log("DLR Studio enhancement complete");
