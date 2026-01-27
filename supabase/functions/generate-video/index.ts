@@ -80,7 +80,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Processing video generation request...", { 
+    console.log("Processing video generation request with Google Veo 3.1...", { 
       hasPrompt: !!prompt, 
       hasImage: !!startingImage, 
       aspectRatio,
@@ -107,7 +107,7 @@ serve(async (req) => {
       enhancedPrompt = `${enhancedPrompt}. Style: ${presetEnhancements[videoPreset]}`;
     }
 
-    // Add camera motion instructions
+    // Add camera motion instructions for Veo 3.1
     const cameraMotionMap: Record<string, string> = {
       none: "",
       static: "Camera: completely static, no camera movement",
@@ -126,16 +126,20 @@ serve(async (req) => {
       enhancedPrompt = `${enhancedPrompt}. ${cameraMotionMap[cameraMotion]}`;
     }
 
-    // Use Kling v2 Master (top-tier model on Replicate for video generation)
-    // This is one of the best video generation models available
-    const modelVersion = "kwaivgi/kling-v2-master";
-    
-    // Prepare the input for the model
+    // Map aspect ratio to Veo 3.1 supported formats
+    // Veo 3.1 supports: 16:9 (landscape), 9:16 (portrait)
+    let veoAspectRatio = "16:9";
+    if (aspectRatio === "9:16" || aspectRatio === "3:4") {
+      veoAspectRatio = "9:16";
+    }
+
+    // Prepare the input for Google Veo 3.1
     const input: Record<string, any> = {
       prompt: enhancedPrompt,
-      duration: 5, // Fixed 5 seconds as requested
-      aspect_ratio: aspectRatio,
-      negative_prompt: "blurry, distorted, low quality, watermark, text overlay, flickering, jittery, artifacts"
+      duration: 4, // Veo 3.1 supports 4, 6, or 8 seconds - using 4 for faster generation
+      aspect_ratio: veoAspectRatio,
+      resolution: "720p", // 720p or 1080p
+      negative_prompt: "blurry, distorted, low quality, watermark, text overlay, flickering, jittery, artifacts, glitchy"
     };
 
     // If starting image is provided (image-to-video)
@@ -143,20 +147,17 @@ serve(async (req) => {
       input.image = startingImage;
     }
 
-    console.log("Calling Replicate API with Kling v2 Master model...");
+    console.log("Calling Replicate API with Google Veo 3.1 model...");
 
-    // Start the prediction
-    const predictionResponse = await fetch("https://api.replicate.com/v1/predictions", {
+    // Start the prediction with Google Veo 3.1
+    const predictionResponse = await fetch("https://api.replicate.com/v1/models/google/veo-3.1/predictions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_API_KEY}`,
         "Content-Type": "application/json",
         "Prefer": "wait"
       },
-      body: JSON.stringify({
-        version: "ad0bfa09f8c0866b0e78e5e90ba56bc9e9dce78df6c3c1c4cc91b3dc56c4da80",
-        input
-      })
+      body: JSON.stringify({ input })
     });
 
     if (!predictionResponse.ok) {
@@ -188,7 +189,7 @@ serve(async (req) => {
 
     // Poll for completion if not using "Prefer: wait" or if still processing
     let attempts = 0;
-    const maxAttempts = 120; // 5 minutes max (2.5 seconds per poll)
+    const maxAttempts = 180; // 7.5 minutes max (2.5 seconds per poll) - Veo 3.1 can take longer
     
     while (prediction.status !== "succeeded" && prediction.status !== "failed" && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 2500));
@@ -222,7 +223,9 @@ serve(async (req) => {
       );
     }
 
-    const videoUrl = prediction.output;
+    // Veo 3.1 returns { video: url, audio: url } or just the video URL
+    const outputData = prediction.output;
+    const videoUrl = typeof outputData === 'object' && outputData.video ? outputData.video : outputData;
     
     if (!videoUrl) {
       console.error("No video URL in response:", prediction);
@@ -232,7 +235,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Video generated successfully:", videoUrl);
+    console.log("Video generated successfully with Veo 3.1:", videoUrl);
 
     // Save video and log generation if userId is provided
     if (userId) {
