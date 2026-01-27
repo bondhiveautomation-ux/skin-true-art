@@ -28,7 +28,7 @@ import {
   X
 } from "lucide-react";
 
-const WHATSAPP_NUMBER = "8801234567890"; // Replace with actual WhatsApp number
+const WHATSAPP_NUMBER = "17059884080";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen,
