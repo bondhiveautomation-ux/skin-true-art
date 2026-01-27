@@ -84,7 +84,7 @@ export const QuickStartProgress = ({
                     isCompleted
                       ? "bg-primary/20 border-primary text-primary"
                       : isActive
-                      ? "bg-primary border-primary text-primary-foreground animate-pulse"
+                      ? "bg-primary border-primary text-primary-foreground"
                       : "bg-card/50 border-border/50 text-cream/40"
                   )}
                 >

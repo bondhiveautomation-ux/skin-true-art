@@ -124,9 +124,9 @@ const Dashboard = () => {
       {/* Welcome popup for new users */}
       <WelcomePopup />
       
-      {/* Quick Start Progress Bar */}
+      {/* Quick Start Progress Bar - Below Navbar, not fixed */}
       {user && !quickStartComplete && (
-        <div className="fixed top-16 sm:top-20 left-0 right-0 z-40">
+        <div className="pt-16 sm:pt-20">
           <QuickStartProgress
             currentStep={quickStartStep}
             isComplete={quickStartComplete}
