@@ -44,13 +44,14 @@ const Dashboard = () => {
         description: dbConfig.description,
         longDescription: dbConfig.long_description,
         badge: dbConfig.badge || undefined,
+        previewImageUrl: dbConfig.preview_image_url || null,
       };
     }
     // If not in DB or inactive, use static config (but check if explicitly hidden)
     const isHidden = toolConfigs?.find(t => t.tool_id === staticTool.id && !t.is_active);
     if (isHidden) return null;
-    return staticTool;
-  }).filter(Boolean) as typeof TOOLS;
+    return { ...staticTool, previewImageUrl: null };
+  }).filter(Boolean) as (typeof TOOLS[number] & { previewImageUrl: string | null })[];
 
   // Smooth scroll to tools section with animation
   const scrollToTools = () => {
@@ -191,6 +192,7 @@ const Dashboard = () => {
                 path={tool.path}
                 gemCostKey={tool.gemCostKey}
                 delay={index}
+                previewImageUrl={tool.previewImageUrl}
               />
             ))}
           </div>

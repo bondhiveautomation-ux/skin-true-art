@@ -572,6 +572,7 @@ export type Database = {
           is_active: boolean
           long_description: string
           name: string
+          preview_image_url: string | null
           short_name: string
           tool_id: string
           updated_at: string
@@ -585,6 +586,7 @@ export type Database = {
           is_active?: boolean
           long_description: string
           name: string
+          preview_image_url?: string | null
           short_name: string
           tool_id: string
           updated_at?: string
@@ -598,6 +600,7 @@ export type Database = {
           is_active?: boolean
           long_description?: string
           name?: string
+          preview_image_url?: string | null
           short_name?: string
           tool_id?: string
           updated_at?: string
