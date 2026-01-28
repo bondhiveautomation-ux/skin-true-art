@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { ReactNode, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Diamond } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -48,10 +48,16 @@ export const ToolPageLayout = ({
   badge,
 }: ToolPageLayoutProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signOut } = useAuth();
   const { gems } = useGems();
   const { isAdmin } = useAdmin();
   const { getToolConfig } = useToolConfigs();
+
+  // Scroll to top when tool page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [location.pathname]);
 
   // Get dynamic config from database if available
   const dbConfig = toolId ? getToolConfig(toolId) : null;
