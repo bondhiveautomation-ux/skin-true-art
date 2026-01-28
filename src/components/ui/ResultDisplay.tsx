@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Download, Search, Loader2 } from "lucide-react";
 import { Button } from "./button";
 
@@ -17,6 +18,8 @@ interface ResultDisplayProps {
   isInspecting?: boolean;
   inspectTimeRemaining?: number; // seconds remaining
   inspectDisabled?: boolean;
+  // Auto-scroll to result when it appears
+  autoScroll?: boolean;
 }
 
 export const ResultDisplay = ({
@@ -34,15 +37,27 @@ export const ResultDisplay = ({
   isInspecting = false,
   inspectTimeRemaining,
   inspectDisabled = false,
+  autoScroll = true,
 }: ResultDisplayProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Auto-scroll to result when it appears
+  useEffect(() => {
+    if (autoScroll && result && containerRef.current) {
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+    }
+  }, [result, autoScroll]);
+
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+    <div ref={containerRef} className="space-y-4 sm:space-y-6 animate-fade-in scroll-mt-24">
       <h3 className="text-base sm:text-lg font-serif font-medium text-cream text-center">
         Result
       </h3>
@@ -92,7 +107,7 @@ export const ResultDisplay = ({
             variant="outline"
             size="sm"
             disabled={isInspecting || inspectDisabled}
-            className="w-full sm:w-auto h-10 sm:h-11 text-sm border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:text-orange-300"
+            className="w-full sm:w-auto h-10 sm:h-11 text-sm border-warning/50 text-warning hover:bg-warning/10 hover:text-warning"
           >
             {isInspecting ? (
               <>
@@ -107,7 +122,7 @@ export const ResultDisplay = ({
             )}
           </Button>
           {inspectTimeRemaining !== undefined && inspectTimeRemaining > 0 && !inspectDisabled && (
-            <p className="text-xs text-orange-400/70">
+            <p className="text-xs text-warning/70">
               ⏱ {formatTime(inspectTimeRemaining)} remaining to inspect
             </p>
           )}
