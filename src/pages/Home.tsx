@@ -173,13 +173,12 @@ const Home = () => {
                 {heroCtaSignin}
               </Button>
               <Button
-                onClick={handleWhatsAppClick}
+                onClick={() => navigate("/auth")}
                 variant="gold"
                 size="sm"
                 className="btn-glow"
               >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                {heroCtaAccess}
+                Sign Up Free
               </Button>
             </nav>
 
@@ -194,11 +193,11 @@ const Home = () => {
                 {heroCtaSignin}
               </Button>
               <Button
-                onClick={handleWhatsAppClick}
+                onClick={() => navigate("/auth")}
                 variant="gold"
                 size="sm"
               >
-                <MessageCircle className="w-4 h-4" />
+                Sign Up
               </Button>
             </div>
           </div>
@@ -238,17 +237,16 @@ const Home = () => {
               size="xl"
               className="btn-glow w-full sm:w-auto"
             >
-              {heroCtaSignin}
+              Sign Up Free
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button
-              onClick={handleWhatsAppClick}
+              onClick={() => navigate("/auth")}
               variant="luxury"
               size="xl"
               className="w-full sm:w-auto"
             >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              {heroCtaAccess}
+              {heroCtaSignin}
             </Button>
           </div>
 
