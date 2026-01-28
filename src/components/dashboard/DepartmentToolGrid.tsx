@@ -78,21 +78,6 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
           </Badge>
         </div>
 
-        {/* Tool Icon */}
-        <div className="absolute top-3 left-3 z-10">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 backdrop-blur-sm border border-primary/30 flex items-center justify-center">
-            <Icon className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-
-        {/* Tool Badge */}
-        {tool.badge && (
-          <div className="absolute top-14 left-3 z-10">
-            <Badge variant="secondary" className="bg-gold/20 text-gold border-gold/30 text-xs">
-              {tool.badge}
-            </Badge>
-          </div>
-        )}
 
         {/* Tool Name - Bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
