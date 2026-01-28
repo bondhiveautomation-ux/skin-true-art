@@ -82,7 +82,7 @@ const LogoGeneratorPage = () => {
   const [showLowBalance, setShowLowBalance] = useState(false);
 
   const gemCost = getGemCost("generate-logo");
-  const totalCost = gemCost * parseInt(numVariations);
+  const totalCost = gemCost; // Fixed 15 gems regardless of variations
   const currentBalance = gems ?? 0;
 
   const togglePersonality = (value: string) => {
@@ -208,7 +208,7 @@ const LogoGeneratorPage = () => {
   return (
     <ToolPageLayout
       toolId="logo-generator"
-      toolName="Luxury Logo Generator"
+      toolName="Logo Studio"
       toolDescription="Create unique, luxurious, timeless logos for your brand with AI precision."
       gemCostKey="generate-logo"
       icon={Crown}

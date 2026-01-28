@@ -200,7 +200,7 @@ export const TOOLS: ToolConfig[] = [
   },
   {
     id: "logo-generator",
-    name: "Luxury Logo Generator",
+    name: "Logo Studio",
     shortName: "Logo",
     description: "Create unique, luxurious, timeless logos for your brand with AI precision.",
     longDescription: "Generate agency-quality luxury logos in minutes. Choose from multiple style options, typography directions, and color palettes to create a premium brand identity.",
