@@ -82,12 +82,6 @@ const CaptionStudioPage = () => {
       return;
     }
 
-    const result = await deductGems("generate-caption");
-    if (!result.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
-
     setIsGenerating(true);
     setGeneratedCaptions([]);
 
@@ -111,6 +105,12 @@ const CaptionStudioPage = () => {
       }
 
       if (data?.captions) {
+        // Deduct gems only after successful generation
+        const result = await deductGems("generate-caption");
+        if (!result.success) {
+          toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+          return;
+        }
         setGeneratedCaptions(data.captions);
         toast({ title: "Caption generated!", description: generateVariations ? "2 variations created" : "Your caption is ready" });
       }

@@ -61,16 +61,17 @@ const PromptExtractorPage = () => {
       toast({ title: "Insufficient gems", description: `You need ${getGemCost("extract-image-prompt")} gem for this feature`, variant: "destructive" });
       return;
     }
-    const gemResult = await deductGems("extract-image-prompt");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
     setIsExtracting(true);
     try {
       const { data, error } = await supabase.functions.invoke("extract-image-prompt", { body: { image: extractorImage } });
       if (error) throw error;
       if (data?.prompt) {
+        // Deduct gems only AFTER successful extraction
+        const gemResult = await deductGems("extract-image-prompt");
+        if (!gemResult.success) {
+          toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+          return;
+        }
         setExtractedPrompt(data.prompt);
         toast({ title: "Prompt extracted", description: "Image analyzed successfully" });
       }
