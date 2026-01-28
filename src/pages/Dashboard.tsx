@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
@@ -7,23 +6,18 @@ import { Footer } from "@/components/landing/Footer";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ValueSection } from "@/components/landing/ValueSection";
 import { CTASection } from "@/components/landing/CTASection";
-import { VisualToolCard } from "@/components/dashboard/VisualToolCard";
+import { DepartmentToolGrid } from "@/components/dashboard/DepartmentToolGrid";
 import { WhatsAppFloat } from "@/components/dashboard/WhatsAppFloat";
 import { QuickStartProgress } from "@/components/dashboard/QuickStartProgress";
-import { UserBadge, getUserBadgeType } from "@/components/dashboard/UserBadge";
-import { TOOLS } from "@/config/tools";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
 import { WelcomePopup } from "@/components/WelcomePopup";
-import { useToolConfigs } from "@/hooks/useToolConfigs";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { gems, subscriptionType } = useGems();
   const { isAdmin } = useAdmin();
-  const { toolConfigs } = useToolConfigs();
   const toolsRef = useRef<HTMLElement>(null);
   const [toolsVisible, setToolsVisible] = useState(false);
   
@@ -32,26 +26,6 @@ const Dashboard = () => {
     return localStorage.getItem("bh_quickstart_complete") === "true";
   });
   const [quickStartStep, setQuickStartStep] = useState(1);
-
-  // Merge database configs with static tool configs (db overrides static)
-  const mergedTools = TOOLS.map(staticTool => {
-    const dbConfig = toolConfigs?.find(t => t.tool_id === staticTool.id);
-    if (dbConfig && dbConfig.is_active) {
-      return {
-        ...staticTool,
-        name: dbConfig.name,
-        shortName: dbConfig.short_name,
-        description: dbConfig.description,
-        longDescription: dbConfig.long_description,
-        badge: dbConfig.badge || undefined,
-        previewImageUrl: dbConfig.preview_image_url || null,
-      };
-    }
-    // If not in DB or inactive, use static config (but check if explicitly hidden)
-    const isHidden = toolConfigs?.find(t => t.tool_id === staticTool.id && !t.is_active);
-    if (isHidden) return null;
-    return { ...staticTool, previewImageUrl: null };
-  }).filter(Boolean) as (typeof TOOLS[number] & { previewImageUrl: string | null })[];
 
   // Smooth scroll to tools section with animation
   const scrollToTools = () => {
@@ -117,8 +91,6 @@ const Dashboard = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Get user badge type
-  const badgeType = getUserBadgeType(isAdmin, subscriptionType);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -152,7 +124,7 @@ const Dashboard = () => {
       {/* Hero Section */}
       <Hero onExplore={scrollToTools} />
 
-      {/* Tools Showcase Section - Visual-First Grid */}
+      {/* Tools Showcase Section - Department-Based Grid */}
       <section 
         ref={toolsRef}
         id="tools" 
@@ -164,7 +136,7 @@ const Dashboard = () => {
         <div className="hidden sm:block absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-primary/5 to-transparent rounded-full blur-3xl" />
         <div className="absolute inset-0 noise-texture" />
 
-        <div className={`relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-700 ${toolsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className={`relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-700 ${toolsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {/* Section header */}
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-primary/10 border border-primary/25 mb-4 sm:mb-6 backdrop-blur-sm">
@@ -182,20 +154,8 @@ const Dashboard = () => {
             </p>
           </div>
 
-          {/* Visual Tools Grid - Single column on mobile, 2-3-4 on larger */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-            {mergedTools.map((tool, index) => (
-              <VisualToolCard
-                key={tool.id}
-                name={tool.name}
-                icon={tool.icon}
-                path={tool.path}
-                gemCostKey={tool.gemCostKey}
-                delay={index}
-                previewImageUrl={tool.previewImageUrl}
-              />
-            ))}
-          </div>
+          {/* Department-Based Tool Grid */}
+          <DepartmentToolGrid />
         </div>
       </section>
 
