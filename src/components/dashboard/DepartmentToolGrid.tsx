@@ -35,11 +35,11 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
   const activeDepartments = departments?.filter(d => d.is_active) || [];
   
   const getToolsForDepartment = (deptId: string) => {
-    return toolConfigs?.filter(t => (t as any).department_id === deptId && t.is_active) || [];
+    return toolConfigs?.filter(t => t.department_id === deptId && t.is_active) || [];
   };
 
   const getUnassignedActiveTools = () => {
-    return toolConfigs?.filter(t => !(t as any).department_id && t.is_active) || [];
+    return toolConfigs?.filter(t => !t.department_id && t.is_active) || [];
   };
 
   const renderToolCard = (tool: ToolConfigDB) => {
