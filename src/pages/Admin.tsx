@@ -86,6 +86,8 @@ import AdminInbox from "@/components/admin/AdminInbox";
 import { ArticlesManager } from "@/components/admin/ArticlesManager";
 import { GenerationCounter } from "@/components/admin/GenerationCounter";
 import ToolConfigsManager from "@/components/admin/ToolConfigsManager";
+import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
+import { FolderOpen } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -646,6 +648,10 @@ const Admin = () => {
                   <DropdownMenuItem onClick={() => setActiveTab("tool-configs")} className="gap-2 cursor-pointer">
                     <Settings2 className="w-4 h-4" />
                     Tool Editor
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("departments")} className="gap-2 cursor-pointer">
+                    <FolderOpen className="w-4 h-4" />
+                    Departments
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1224,6 +1230,10 @@ const Admin = () => {
 
           <TabsContent value="tool-configs">
             <ToolConfigsManager />
+          </TabsContent>
+
+          <TabsContent value="departments">
+            <DepartmentsManager />
           </TabsContent>
         </Tabs>
       </main>

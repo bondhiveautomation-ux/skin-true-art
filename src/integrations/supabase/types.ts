@@ -602,6 +602,7 @@ export type Database = {
         Row: {
           badge: string | null
           created_at: string
+          department_id: string | null
           description: string
           display_order: number
           id: string
@@ -616,6 +617,7 @@ export type Database = {
         Insert: {
           badge?: string | null
           created_at?: string
+          department_id?: string | null
           description: string
           display_order?: number
           id?: string
@@ -630,6 +632,7 @@ export type Database = {
         Update: {
           badge?: string | null
           created_at?: string
+          department_id?: string | null
           description?: string
           display_order?: number
           id?: string
@@ -639,6 +642,47 @@ export type Database = {
           preview_image_url?: string | null
           short_name?: string
           tool_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_configs_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "tool_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_departments: {
+        Row: {
+          bangla_name: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bangla_name: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bangla_name?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
           updated_at?: string
         }
         Relationships: []

@@ -15,6 +15,7 @@ export interface ToolConfigDB {
   created_at: string;
   updated_at: string;
   preview_image_url: string | null;
+  department_id: string | null;
 }
 
 export const useToolConfigs = () => {
