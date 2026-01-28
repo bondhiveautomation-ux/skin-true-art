@@ -424,6 +424,42 @@ export type Database = {
         }
         Relationships: []
       }
+      logo_generations: {
+        Row: {
+          brand_name: string
+          created_at: string
+          id: string
+          images_json: Json
+          inputs_json: Json
+          selected_image_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          id?: string
+          images_json?: Json
+          inputs_json?: Json
+          selected_image_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          id?: string
+          images_json?: Json
+          inputs_json?: Json
+          selected_image_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           admin_notes: string | null
