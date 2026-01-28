@@ -53,7 +53,7 @@ interface GeneratedLogo {
 
 const LogoGeneratorPage = () => {
   const { user } = useAuth();
-  const { gems, refetchGems } = useGems();
+  const { gems, deductGems, refetchGems } = useGems();
   const isMobile = useIsMobile();
 
   // Form state
@@ -171,8 +171,14 @@ const LogoGeneratorPage = () => {
         throw new Error(data.error || "Generation failed");
       }
 
+      // Deduct gems only after successful generation
+      const gemResult = await deductGems("generate-logo");
+      if (!gemResult.success) {
+        toast({ title: "Couldn't charge gems", description: "Please try again.", variant: "destructive" });
+        return;
+      }
+
       setGeneratedLogos(data.images);
-      await refetchGems();
 
       toast({
         title: "লোগো তৈরি সম্পন্ন! ✨",

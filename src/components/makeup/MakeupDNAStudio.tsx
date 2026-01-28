@@ -389,12 +389,6 @@ export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneratio
       return;
     }
     
-    const gemResult = await deductGems("apply-makeup");
-    if (!gemResult.success) {
-      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-      return;
-    }
-    
     setIsApplying(true);
     setResultImage(null);
     
@@ -415,6 +409,13 @@ export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneratio
       }
       
       if (data?.generatedImageUrl) {
+        // Deduct gems only AFTER successful generation
+        const gemResult = await deductGems("apply-makeup");
+        if (!gemResult.success) {
+          toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+          return;
+        }
+        
         setResultImage(data.generatedImageUrl);
         await onLogGeneration("Makeup DNA Studio", [], [data.generatedImageUrl]);
         toast({ title: "Makeup Applied!", description: "Your professional look has been created" });
