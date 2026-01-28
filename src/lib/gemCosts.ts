@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 // Default gem costs per feature (fallback if DB unavailable)
 export const GEM_COSTS = {
   // High-Impact Features - 15 Gems
-  
   "apply-makeup": 15,
   "generate-character-image": 15,
   "pose-transfer": 15,
@@ -11,6 +10,7 @@ export const GEM_COSTS = {
   "cinematic-transform": 15,
   "extract-dress-to-dummy": 15,
   "generate-background": 15,
+  "generate-logo": 15,
   
   // Studio Utility Features - 12 Gems
   "enhance-photo": 12,
@@ -111,7 +111,7 @@ export const FEATURE_CATEGORIES = {
   "high-impact": {
     label: "High-Impact Features",
     cost: 15,
-    features: ["apply-makeup", "generate-character-image", "pose-transfer", "face-swap", "cinematic-transform", "extract-dress-to-dummy", "generate-background"],
+    features: ["apply-makeup", "generate-character-image", "pose-transfer", "face-swap", "cinematic-transform", "extract-dress-to-dummy", "generate-background", "generate-logo"],
   },
   "studio-utility": {
     label: "Studio Utility Features", 

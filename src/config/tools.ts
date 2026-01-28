@@ -198,6 +198,18 @@ export const TOOLS: ToolConfig[] = [
     gradient: "bg-gradient-to-br from-red-500/10 to-orange-500/5",
     badge: "Video AI",
   },
+  {
+    id: "logo-generator",
+    name: "Luxury Logo Generator",
+    shortName: "Logo",
+    description: "Create unique, luxurious, timeless logos for your brand with AI precision.",
+    longDescription: "Generate agency-quality luxury logos in minutes. Choose from multiple style options, typography directions, and color palettes to create a premium brand identity.",
+    icon: Sparkles,
+    path: "/tools/logo-generator",
+    gemCostKey: "generate-logo",
+    gradient: "bg-gradient-to-br from-gold/10 to-amber-500/5",
+    badge: "Brand AI",
+  },
 ];
 
 export const getToolByPath = (path: string): ToolConfig | undefined => {
