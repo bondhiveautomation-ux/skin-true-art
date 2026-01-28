@@ -60,11 +60,11 @@ export const DepartmentsManager = () => {
   };
 
   const getToolsInDepartment = (deptId: string) => {
-    return toolConfigs?.filter(t => (t as any).department_id === deptId) || [];
+    return toolConfigs?.filter(t => t.department_id === deptId) || [];
   };
 
   const getUnassignedTools = () => {
-    return toolConfigs?.filter(t => !(t as any).department_id) || [];
+    return toolConfigs?.filter(t => !t.department_id) || [];
   };
 
   if (isLoading) return <div className="text-cream/60">Loading departments...</div>;
