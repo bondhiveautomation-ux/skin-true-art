@@ -63,9 +63,17 @@ CRITICAL - IMAGE ORIENTATION:
 - If the image is landscape, output must be landscape
 - Maintain the EXACT same dimensions and aspect ratio
 
+CRITICAL - LOGO TRANSPARENCY:
+- The logo provided has TRANSPARENT areas (PNG with alpha channel)
+- You MUST preserve the logo's transparency exactly as provided
+- DO NOT add any background behind the logo
+- DO NOT fill in transparent areas with white or any other color
+- The logo should appear floating on the image with NO rectangular background
+- Apply the logo with ${settings.transparency}% opacity while keeping its original transparent areas
+
 LOGO PLACEMENT:
 - Place the logo in the ${positionMap[settings.position as keyof typeof positionMap]}
-- Logo opacity/transparency: ${settings.transparency}%
+- Logo opacity/transparency: ${settings.transparency}% (apply this to the entire logo while preserving its alpha channel)
 - Logo size: ${settings.logoSize}% of the image width
 - Safe margin from edges: ${settings.safeMargin ? "Yes, keep 2-3% padding from edges" : "No, can touch edges"}
 - Logo style: ${styleMap[settings.logoStyle as keyof typeof styleMap]}
@@ -77,7 +85,8 @@ ABSOLUTE RULES - YOU MUST FOLLOW:
 4. DO NOT alter the original image content (faces, products, background)
 5. Keep the logo sharp and clear
 6. Ensure logo is visible against any background
-7. Output image must have IDENTICAL orientation to input image`;
+7. Output image must have IDENTICAL orientation to input image
+8. PRESERVE the logo's transparent background - no white or colored box behind logo`;
 
     if (settings.brandBorder) {
       prompt += `\n\nBRAND BORDER: Add a thin, elegant premium border (gold/cream color, 1-2px) around the entire image.`;

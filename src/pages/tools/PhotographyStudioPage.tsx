@@ -121,14 +121,37 @@ const PhotographyStudioPage = () => {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!enhancedImage) return;
-    const link = document.createElement('a');
-    link.href = enhancedImage;
-    link.download = 'enhanced-photo.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    try {
+      // Handle both base64 data URLs and external URLs
+      if (enhancedImage.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = enhancedImage;
+        link.download = 'enhanced-photo.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // For external URLs, fetch and create blob
+        const response = await fetch(enhancedImage);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'enhanced-photo.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+      toast({ title: "Downloaded!", description: "Image saved successfully" });
+    } catch (error) {
+      // Fallback: open in new tab
+      window.open(enhancedImage, '_blank');
+      toast({ title: "Download", description: "Image opened in new tab - right click to save" });
+    }
   };
 
   const handleReset = () => {

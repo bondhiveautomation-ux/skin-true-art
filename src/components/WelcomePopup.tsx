@@ -67,7 +67,7 @@ export const WelcomePopup = () => {
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Diamond className="w-8 h-8 text-purple-400" />
                 <span className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  100
+                  50
                 </span>
                 <span className="text-lg text-cream/70">Gems</span>
               </div>
