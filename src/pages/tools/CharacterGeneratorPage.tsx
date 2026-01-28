@@ -27,8 +27,6 @@ const CharacterGeneratorPage = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [characterImage, setCharacterImage] = useState<string | null>(null);
-  const [characterLeftProfile, setCharacterLeftProfile] = useState<string | null>(null);
-  const [characterRightProfile, setCharacterRightProfile] = useState<string | null>(null);
   const [productImage, setProductImage] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [selectedCameraAngle, setSelectedCameraAngle] = useState<string>("");
@@ -110,20 +108,6 @@ const CharacterGeneratorPage = () => {
   const handleProductImageUpload = createImageUploadHandler(setProductImage, [() => setSelectedPreset("")]);
   const handleBackgroundImageUpload = createImageUploadHandler(setBackgroundImage, [() => setSelectedPose("")]);
 
-  const handleProfileImageUpload = (side: "left" | "right") => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Invalid file", description: "Please upload an image file", variant: "destructive" });
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (side === "left") setCharacterLeftProfile(e.target?.result as string);
-      else setCharacterRightProfile(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleGenerateImage = async () => {
     if (!characterImage) {
@@ -157,8 +141,6 @@ const CharacterGeneratorPage = () => {
       const { data, error } = await supabase.functions.invoke("generate-character-image", {
         body: {
           characterImage,
-          characterLeftProfile: characterLeftProfile || undefined,
-          characterRightProfile: characterRightProfile || undefined,
           prompt: generationPrompt.trim(),
           productImage,
           preset: selectedPreset,
@@ -207,8 +189,6 @@ const CharacterGeneratorPage = () => {
 
   const handleResetGenerator = () => {
     setCharacterImage(null);
-    setCharacterLeftProfile(null);
-    setCharacterRightProfile(null);
     setGeneratedImage(null);
     setGenerationPrompt("");
     setProductImage(null);
@@ -278,41 +258,21 @@ const CharacterGeneratorPage = () => {
         {/* Character Upload Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-cream text-center">Upload Character Reference</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            <div className="md:col-span-1">
-              <ImageUploader
-                id="character-main"
-                image={characterImage}
-                onUpload={handleCharacterImageUpload}
-                onRemove={() => setCharacterImage(null)}
-                label="Main Photo"
-                description="Front-facing photo"
-                aspectRatio="portrait"
-              />
-            </div>
-            <div>
-              <ImageUploader
-                id="character-left"
-                image={characterLeftProfile}
-                onUpload={handleProfileImageUpload("left")}
-                onRemove={() => setCharacterLeftProfile(null)}
-                label="Left Profile"
-                description="Optional side view"
-                aspectRatio="portrait"
-              />
-            </div>
-            <div>
-              <ImageUploader
-                id="character-right"
-                image={characterRightProfile}
-                onUpload={handleProfileImageUpload("right")}
-                onRemove={() => setCharacterRightProfile(null)}
-                label="Right Profile"
-                description="Optional side view"
-                aspectRatio="portrait"
-              />
-            </div>
+          <div className="max-w-xs mx-auto">
+            <ImageUploader
+              id="character-main"
+              image={characterImage}
+              onUpload={handleCharacterImageUpload}
+              onRemove={() => setCharacterImage(null)}
+              label="Main Photo"
+              description="Front-facing photo"
+              aspectRatio="portrait"
+            />
           </div>
+          {/* Bangla guidance for better AI results */}
+          <p className="text-sm text-cream/60 text-center font-bangla max-w-md mx-auto">
+            সামনে থেকে তোলা পরিষ্কার ছবি দিন। মুখ স্পষ্ট দেখা যাওয়া উচিত, ব্যাকগ্রাউন্ড সাদা বা হালকা রঙের হলে ভালো ফলাফল পাবেন।
+          </p>
         </div>
 
         {characterImage && (
