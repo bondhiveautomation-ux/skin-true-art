@@ -8,7 +8,6 @@ import { ValueSection } from "@/components/landing/ValueSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { DepartmentToolGrid } from "@/components/dashboard/DepartmentToolGrid";
 import { WhatsAppFloat } from "@/components/dashboard/WhatsAppFloat";
-import { QuickStartProgress } from "@/components/dashboard/QuickStartProgress";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -21,11 +20,6 @@ const Dashboard = () => {
   const toolsRef = useRef<HTMLElement>(null);
   const [toolsVisible, setToolsVisible] = useState(false);
   
-  // Quick start progress - check localStorage for completion
-  const [quickStartComplete, setQuickStartComplete] = useState(() => {
-    return localStorage.getItem("bh_quickstart_complete") === "true";
-  });
-  const [quickStartStep, setQuickStartStep] = useState(1);
 
   // Smooth scroll to tools section with animation
   const scrollToTools = () => {
@@ -96,20 +90,6 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Welcome popup for new users */}
       <WelcomePopup />
-      
-      {/* Quick Start Progress Bar - Below Navbar, not fixed */}
-      {user && !quickStartComplete && (
-        <div className="pt-16 sm:pt-20">
-          <QuickStartProgress
-            currentStep={quickStartStep}
-            isComplete={quickStartComplete}
-            onDismiss={() => {
-              setQuickStartComplete(true);
-              localStorage.setItem("bh_quickstart_complete", "true");
-            }}
-          />
-        </div>
-      )}
       
       {/* Navigation */}
       <Navbar 
