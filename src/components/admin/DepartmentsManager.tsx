@@ -67,6 +67,11 @@ export const DepartmentsManager = () => {
     return toolConfigs?.filter(t => !t.department_id) || [];
   };
 
+  const getAvailableToolsForDepartment = (deptId: string) => {
+    // Show all tools except ones already in this department
+    return toolConfigs?.filter(t => t.department_id !== deptId) || [];
+  };
+
   if (isLoading) return <div className="text-cream/60">Loading departments...</div>;
 
   return (
@@ -214,13 +219,13 @@ export const DepartmentsManager = () => {
                       <SelectValue placeholder="Add tool..." />
                     </SelectTrigger>
                     <SelectContent className="bg-charcoal border-gold/20 z-50">
-                      {getUnassignedTools().map(tool => (
+                      {getAvailableToolsForDepartment(dept.id).map(tool => (
                         <SelectItem key={tool.id} value={tool.id} className="text-cream">
-                          {tool.name}
+                          {tool.name} {tool.department_id && <span className="text-cream/40">(from other dept)</span>}
                         </SelectItem>
                       ))}
-                      {getUnassignedTools().length === 0 && (
-                        <div className="px-2 py-1 text-cream/40 text-sm">All tools assigned</div>
+                      {getAvailableToolsForDepartment(dept.id).length === 0 && (
+                        <div className="px-2 py-1 text-cream/40 text-sm">No other tools available</div>
                       )}
                     </SelectContent>
                   </Select>
