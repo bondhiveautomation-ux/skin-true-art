@@ -136,8 +136,8 @@ export const Hero = ({ onExplore }: HeroProps) => {
           {subheadline}
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 section-animate delay-3 px-4 w-full max-w-md sm:max-w-none mx-auto">
+        {/* CTA Button */}
+        <div className="flex items-center justify-center section-animate delay-3 px-4 w-full max-w-md sm:max-w-none mx-auto">
           <Button 
             onClick={onExplore}
             variant="gold"
@@ -146,14 +146,6 @@ export const Hero = ({ onExplore }: HeroProps) => {
           >
             {ctaPrimary}
             <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            onClick={onExplore}
-            variant="luxury"
-            size="lg"
-            className="w-full sm:w-auto sm:min-w-[200px] h-11 sm:h-12"
-          >
-            {ctaSecondary}
           </Button>
         </div>
 
