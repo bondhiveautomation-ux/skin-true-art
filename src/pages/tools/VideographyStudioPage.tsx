@@ -154,7 +154,7 @@ const VideographyStudioPage = () => {
 
       if (data?.generatedVideoUrl) {
         setGeneratedVideoUrl(data.generatedVideoUrl);
-        toast({ title: "Video generated!", description: "Your 8-second video with audio is ready" });
+        toast({ title: "Video generated!", description: "Your 6-second video with audio is ready" });
         // Log generation
         await logGeneration("generate-video", startingImage ? [startingImage] : [], [data.generatedVideoUrl], user?.id);
       } else {
@@ -401,7 +401,7 @@ const VideographyStudioPage = () => {
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20">
             <Video className="w-4 h-4 text-gold" />
-            <span className="text-sm text-gold font-medium">8 Second Video with Audio</span>
+            <span className="text-sm text-gold font-medium">6 Second Video with Audio</span>
           </div>
         </div>
 
