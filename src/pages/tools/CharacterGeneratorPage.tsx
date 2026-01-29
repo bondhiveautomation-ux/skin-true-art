@@ -164,6 +164,8 @@ const CharacterGeneratorPage = () => {
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
+        // Log generation
+        logGeneration("generate-character-image", [characterImage], [data.generatedImageUrl]);
       } else if (data?.error) {
         // Generation failed - refund gems
         await refundGems("generate-character-image");

@@ -20,6 +20,28 @@ import { toast } from "@/hooks/use-toast";
 import { getGemCost } from "@/lib/gemCosts";
 import { Sparkles, Download, Check, Loader2, Crown, Palette, Type, Target, Globe } from "lucide-react";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 const BRAND_PERSONALITIES = [
   { value: "authority", label: "Authority", bangla: "কর্তৃত্ব" },
   { value: "elegance", label: "Elegance", bangla: "কমনীয়তা" },
@@ -181,6 +203,13 @@ const LogoGeneratorPage = () => {
       }
 
       setGeneratedLogos(data.images);
+      // Log generation
+      await logGeneration(
+        "generate-logo", 
+        [], 
+        data.images.map((img: GeneratedLogo) => img.url), 
+        user?.id
+      );
 
       toast({
         title: "লোগো তৈরি সম্পন্ন! ✨",

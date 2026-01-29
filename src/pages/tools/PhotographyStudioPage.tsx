@@ -14,6 +14,28 @@ import { useGems } from "@/hooks/useGems";
 import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 type PhotoType = "product" | "portrait" | "lifestyle";
 type StylePreset = "clean_studio" | "luxury_brand" | "soft_natural" | "dark_premium" | "ecommerce_white" | "royal_monochrome" | "instagram_editorial";
 type BackgroundOption = "keep_original" | "clean_studio" | "premium_lifestyle" | "royal_bridal_chamber" | "garden_pavilion" | "palace_corridor";
@@ -117,6 +139,8 @@ const PhotographyStudioPage = () => {
       if (data?.enhancedImage) {
         setEnhancedImage(data.enhancedImage);
         toast({ title: "Photo enhanced!", description: "Your professional-quality image is ready" });
+        // Log generation
+        await logGeneration("enhance-photo", [originalImage!], [data.enhancedImage], user?.id);
       } else {
         await refundGems("enhance-photo");
         toast({ title: "Enhancement failed", description: "No result received", variant: "destructive" });

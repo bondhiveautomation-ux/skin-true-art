@@ -17,6 +17,28 @@ import { useGems } from "@/hooks/useGems";
 import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 type AspectRatio = "16:9" | "9:16" | "1:1" | "4:3" | "3:4" | "21:9";
 type CameraMotion = "none" | "static" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "zoom_in" | "zoom_out" | "dolly_in" | "orbit" | "crane_up";
 type VideoPreset = "cinematic" | "commercial" | "social" | "artistic" | "documentary" | "fashion" | "product" | "nature";
@@ -133,6 +155,8 @@ const VideographyStudioPage = () => {
       if (data?.generatedVideoUrl) {
         setGeneratedVideoUrl(data.generatedVideoUrl);
         toast({ title: "Video generated!", description: "Your 5-second video is ready" });
+        // Log generation
+        await logGeneration("generate-video", startingImage ? [startingImage] : [], [data.generatedVideoUrl], user?.id);
       } else {
         await refundGems("generate-video");
         toast({ title: "Generation failed", description: "No result received", variant: "destructive" });

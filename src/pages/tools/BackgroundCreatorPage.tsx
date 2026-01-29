@@ -13,6 +13,28 @@ import { useGems } from "@/hooks/useGems";
 import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 type BackgroundPreset = "studio_white" | "luxury_marble" | "nature_garden" | "urban_street" | "custom";
 
 const BackgroundCreatorPage = () => {
@@ -108,6 +130,8 @@ const BackgroundCreatorPage = () => {
       if (data?.result) {
         setResultImage(data.result);
         toast({ title: "Background created!", description: "Your new background is ready" });
+        // Log generation
+        await logGeneration("generate-background", [uploadedImage!], [data.result], user?.id);
       } else {
         await refundGems("generate-background");
         toast({ title: "Processing failed", description: "No result received", variant: "destructive" });

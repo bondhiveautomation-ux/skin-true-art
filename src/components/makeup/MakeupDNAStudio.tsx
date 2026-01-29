@@ -419,7 +419,7 @@ export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneratio
       
       if (data?.generatedImageUrl) {
         setResultImage(data.generatedImageUrl);
-        await onLogGeneration("Makeup DNA Studio", [], [data.generatedImageUrl]);
+        await onLogGeneration("apply-makeup", [targetImage!], [data.generatedImageUrl]);
         toast({ title: "Makeup Applied!", description: "Your professional look has been created" });
       } else {
         await refundGems("apply-makeup");
