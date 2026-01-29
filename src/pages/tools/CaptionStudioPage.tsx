@@ -22,6 +22,28 @@ import { useGems } from "@/hooks/useGems";
 import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 type Language = "bangla" | "english";
 type CaptionLength = "short" | "medium" | "long";
 type ToneStyle = "bold_salesy" | "elegant_premium" | "friendly_casual" | "minimal_clean";
@@ -116,6 +138,8 @@ const CaptionStudioPage = () => {
       if (data?.captions) {
         setGeneratedCaptions(data.captions);
         toast({ title: "Caption generated!", description: generateVariations ? "2 variations created" : "Your caption is ready" });
+        // Log generation
+        await logGeneration("generate-caption", productImage ? [productImage] : [], [], user?.id);
       } else {
         await refundGems("generate-caption");
         toast({ title: "Generation failed", description: "No captions received", variant: "destructive" });

@@ -20,6 +20,28 @@ import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 import { fileToNormalizedDataUrl } from "@/lib/image";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 type LogoStyle = "clean" | "watermark" | "badge";
 type CTAPreset = "none" | "order-now" | "inbox-now" | "limited-stock" | "new-arrival" | "free-delivery" | "custom";
@@ -194,6 +216,8 @@ const BrandingStudioPage = () => {
       if (data?.resultImage) {
         setResult(data.resultImage);
         toast.success("Branding applied!");
+        // Log generation
+        await logGeneration("apply-branding", [postImage!, logoImage!], [data.resultImage], user?.id);
       } else {
         await refundGems("apply-branding");
         toast.error("No result received");
@@ -246,6 +270,8 @@ const BrandingStudioPage = () => {
           results[i] = { ...results[i], status: "error" };
         } else if (data?.resultImage) {
           results[i] = { ...results[i], status: "done", result: data.resultImage };
+          // Log generation for batch
+          await logGeneration("apply-branding", [postBase64, logoImage!], [data.resultImage], user?.id);
         } else {
           await refundGems("apply-branding");
           results[i] = { ...results[i], status: "error" };

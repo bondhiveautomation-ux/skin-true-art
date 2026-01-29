@@ -15,6 +15,28 @@ import { getGemCost, getGemCostAsync } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 import { fileToNormalizedDataUrl } from "@/lib/image";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 type ExtractionType = "single-upper" | "single-full" | "couple";
 
 const DressExtractorPage = () => {
@@ -155,6 +177,8 @@ const DressExtractorPage = () => {
             setDressMismatchFeedback(null);
             setGenerationTimestamp(Date.now());
             toast({ title: "Dress extracted!", description: "The garment has been placed on the mannequin" });
+            // Log generation
+            await logGeneration("extract-dress-to-dummy", [uploadedInputUrl], [data.extractedImage], user?.id);
           } else {
             await refundGems("extract-dress-to-dummy");
             toast({ title: "Extraction failed", description: "No result received", variant: "destructive" });

@@ -16,6 +16,28 @@ import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Helper function to log generation
+const logGeneration = async (
+  featureName: string,
+  inputImages: string[] = [],
+  outputImages: string[] = [],
+  userId?: string
+) => {
+  if (!userId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
+  try {
+    await supabase.rpc("log_generation", {
+      p_user_id: userId,
+      p_feature_name: featureName,
+      p_input_images: onlyUrls(inputImages),
+      p_output_images: onlyUrls(outputImages),
+    });
+  } catch (error) {
+    console.error("Failed to log generation:", error);
+  }
+};
+
 const CINEMATIC_PRESETS = [
   { id: "over-shoulder", name: "Over-the-Shoulder Grace", emoji: "🔄" },
   { id: "birds-eye", name: "Bird's-Eye Bridal Symphony", emoji: "🦅" },
@@ -169,6 +191,8 @@ const CinematicStudioPage = () => {
       if (data?.result) {
         setResultImage(data.result);
         toast({ title: "Cinematic transformation complete!", description: "Your photo has been transformed" });
+        // Log generation
+        await logGeneration("cinematic-transform", [uploadedImage!], [data.result], user?.id);
       } else {
         await refundGems("cinematic-transform");
         toast({ title: "No result", description: "Failed to generate image. Please try again.", variant: "destructive" });
