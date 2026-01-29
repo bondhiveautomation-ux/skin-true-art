@@ -1,21 +1,23 @@
 import { supabase } from "@/integrations/supabase/client";
 
 // Default gem costs per feature (fallback if DB unavailable)
+// IMPORTANT: These should match database values in feature_gem_costs table
 export const GEM_COSTS = {
-  // High-Impact Features - 15 Gems
-  "apply-makeup": 15,
-  "generate-character-image": 15,
-  "pose-transfer": 15,
-  "face-swap": 15,
-  "cinematic-transform": 15,
-  "extract-dress-to-dummy": 15,
-  "generate-background": 15,
+  // High-Impact Features - 5 Gems (matches DB)
+  "apply-makeup": 5,
+  "generate-character-image": 5,
+  "pose-transfer": 5,
+  "face-swap": 5,
+  "cinematic-transform": 5,
+  "extract-dress-to-dummy": 5,
+  "dress-change": 5, // Alias for dress extractor
+  "generate-background": 5,
   "generate-logo": 15,
   
-  // Studio Utility Features - 12 Gems
-  "enhance-photo": 12,
-  "apply-branding": 12,
-  "remove-people-from-image": 12,
+  // Studio Utility Features - 3 Gems (matches DB)
+  "enhance-photo": 3,
+  "apply-branding": 3,
+  "remove-people-from-image": 3,
   
   // Quick Tools - 1 Gem
   "generate-caption": 1,
@@ -24,6 +26,9 @@ export const GEM_COSTS = {
   
   // Prompt Engineer - 5 Gems
   "prompt-engineer": 5,
+  
+  // Video Generation - 200 Gems
+  "generate-video": 200,
 } as const;
 
 export type FeatureName = keyof typeof GEM_COSTS;
@@ -110,12 +115,17 @@ export const preloadGemCosts = async (): Promise<void> => {
 export const FEATURE_CATEGORIES = {
   "high-impact": {
     label: "High-Impact Features",
+    cost: 5,
+    features: ["apply-makeup", "generate-character-image", "pose-transfer", "face-swap", "cinematic-transform", "extract-dress-to-dummy", "generate-background"],
+  },
+  "premium": {
+    label: "Premium Features",
     cost: 15,
-    features: ["apply-makeup", "generate-character-image", "pose-transfer", "face-swap", "cinematic-transform", "extract-dress-to-dummy", "generate-background", "generate-logo"],
+    features: ["generate-logo"],
   },
   "studio-utility": {
     label: "Studio Utility Features", 
-    cost: 12,
+    cost: 3,
     features: ["enhance-photo", "apply-branding", "remove-people-from-image"],
   },
   "quick-tools": {
@@ -127,6 +137,11 @@ export const FEATURE_CATEGORIES = {
     label: "Prompt Engineer",
     cost: 5,
     features: ["prompt-engineer"],
+  },
+  "video-generation": {
+    label: "Video Generation",
+    cost: 200,
+    features: ["generate-video"],
   },
 } as const;
 

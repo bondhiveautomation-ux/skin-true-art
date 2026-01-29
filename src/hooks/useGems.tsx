@@ -26,8 +26,8 @@ export const useGems = () => {
     }
 
     try {
-      // Pre-load gem costs from DB
-      await preloadGemCosts();
+      // Pre-load gem costs from DB (non-blocking)
+      preloadGemCosts().catch(console.error);
       
       const { data, error } = await supabase.rpc('get_user_gems', {
         p_user_id: user.id
@@ -37,10 +37,13 @@ export const useGems = () => {
       
       if (data && data.length > 0) {
         const gemData = data[0] as GemsData;
-        setGems(gemData.gems_balance ?? 0);
+        const balance = gemData.gems_balance ?? 0;
+        console.log('[useGems] Fetched balance:', balance); // Debug log
+        setGems(balance);
         setSubscriptionType(gemData.subscription_type);
         setSubscriptionExpiresAt(gemData.subscription_expires_at);
       } else {
+        console.log('[useGems] No data, setting to 0');
         setGems(0);
       }
     } catch (error) {
@@ -62,10 +65,14 @@ export const useGems = () => {
   }, [gems]);
 
   const deductGems = useCallback(async (featureName: string): Promise<{ success: boolean; newBalance: number }> => {
-    if (!user?.id) return { success: false, newBalance: 0 };
+    if (!user?.id) {
+      console.error('[useGems] No user ID for deduction');
+      return { success: false, newBalance: 0 };
+    }
 
     // Use async version to ensure we have the latest cost from DB
     const cost = await getGemCostAsync(featureName);
+    console.log(`[useGems] Deducting ${cost} gems for ${featureName}`);
     
     try {
       const { data, error } = await supabase.rpc('deduct_gems', {
@@ -74,12 +81,17 @@ export const useGems = () => {
         p_gem_cost: cost
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[useGems] Deduction error:', error);
+        throw error;
+      }
 
       if (data === -1) {
+        console.warn('[useGems] Insufficient gems');
         return { success: false, newBalance: gems ?? 0 }; // Not enough gems
       }
 
+      console.log(`[useGems] Deduction successful, new balance: ${data}`);
       setGems(data);
       return { success: true, newBalance: data };
     } catch (error) {
@@ -89,10 +101,14 @@ export const useGems = () => {
   }, [user?.id, gems]);
 
   const refundGems = useCallback(async (featureName: string): Promise<{ success: boolean; newBalance: number }> => {
-    if (!user?.id) return { success: false, newBalance: 0 };
+    if (!user?.id) {
+      console.error('[useGems] No user ID for refund');
+      return { success: false, newBalance: 0 };
+    }
 
     // Use async version to ensure we have the latest cost from DB
     const cost = await getGemCostAsync(featureName);
+    console.log(`[useGems] Refunding ${cost} gems for ${featureName}`);
     
     try {
       const { data, error } = await supabase.rpc('add_gems', {
@@ -101,9 +117,13 @@ export const useGems = () => {
         p_transaction_type: 'refund'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[useGems] Refund error:', error);
+        throw error;
+      }
 
       const newBalance = data as number;
+      console.log(`[useGems] Refund successful, new balance: ${newBalance}`);
       setGems(newBalance);
       return { success: true, newBalance };
     } catch (error) {
