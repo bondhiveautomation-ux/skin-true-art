@@ -53,7 +53,7 @@ interface GeneratedLogo {
 
 const LogoGeneratorPage = () => {
   const { user } = useAuth();
-  const { gems, deductGems, refetchGems } = useGems();
+  const { gems, deductGems, refundGems, refetchGems } = useGems();
   const isMobile = useIsMobile();
 
   // Form state
@@ -141,6 +141,14 @@ const LogoGeneratorPage = () => {
     setGeneratedLogos([]);
     setSelectedLogo(null);
 
+    // Deduct gems immediately
+    const gemResult = await deductGems("generate-logo");
+    if (!gemResult.success) {
+      setIsGenerating(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-logo", {
         body: {
@@ -168,14 +176,8 @@ const LogoGeneratorPage = () => {
       if (error) throw error;
 
       if (!data.success) {
+        await refundGems("generate-logo");
         throw new Error(data.error || "Generation failed");
-      }
-
-      // Deduct gems only after successful generation
-      const gemResult = await deductGems("generate-logo");
-      if (!gemResult.success) {
-        toast({ title: "Couldn't charge gems", description: "Please try again.", variant: "destructive" });
-        return;
       }
 
       setGeneratedLogos(data.images);
@@ -185,6 +187,7 @@ const LogoGeneratorPage = () => {
         description: `${data.images.length} luxury logo concepts generated`,
       });
     } catch (error: any) {
+      await refundGems("generate-logo");
       console.error("Logo generation error:", error);
       toast({
         title: "জেনারেশন ব্যর্থ",

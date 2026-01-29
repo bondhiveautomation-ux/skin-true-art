@@ -84,7 +84,7 @@ const CTA_PRESETS: { value: CTAPreset; label: string }[] = [
 const BrandingStudioPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { gems, deductGems, hasEnoughGems } = useGems();
+  const { gems, deductGems, refundGems, hasEnoughGems } = useGems();
   const tool = getToolById("branding-studio")!;
 
   const [mode, setMode] = useState<"single" | "batch">("single");
@@ -171,24 +171,35 @@ const BrandingStudioPage = () => {
     }
 
     setProcessing(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("apply-branding");
+    if (!gemResult.success) {
+      setProcessing(false);
+      toast.error("Insufficient gems");
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("apply-branding", {
         body: { postImage, logoImage, settings, userId: user?.id }
       });
 
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      // Deduct gems only AFTER successful generation
-      const gemResult = await deductGems("apply-branding");
-      if (!gemResult.success) {
-        toast.error("Insufficient gems");
-        return;
+      if (data?.error) {
+        await refundGems("apply-branding");
+        throw new Error(data.error);
       }
 
-      setResult(data.resultImage);
-      toast.success("Branding applied!");
+      if (data?.resultImage) {
+        setResult(data.resultImage);
+        toast.success("Branding applied!");
+      } else {
+        await refundGems("apply-branding");
+        toast.error("No result received");
+      }
     } catch (error) {
+      await refundGems("apply-branding");
       toast.error("Failed to apply branding");
     } finally {
       setProcessing(false);
@@ -216,6 +227,14 @@ const BrandingStudioPage = () => {
       results[i] = { ...results[i], status: "processing" };
       setBatchImages([...results]);
 
+      // Deduct gems first for each image
+      const gemResult = await deductGems("apply-branding");
+      if (!gemResult.success) {
+        results[i] = { ...results[i], status: "error" };
+        setBatchImages([...results]);
+        continue;
+      }
+
       try {
         const postBase64 = await fileToNormalizedDataUrl(img.file);
         const { data, error } = await supabase.functions.invoke("apply-branding", {
@@ -223,17 +242,16 @@ const BrandingStudioPage = () => {
         });
 
         if (error || data?.error) {
+          await refundGems("apply-branding");
           results[i] = { ...results[i], status: "error" };
-        } else {
-          // Deduct gems only AFTER successful generation
-          const gemResult = await deductGems("apply-branding");
-          if (!gemResult.success) {
-            results[i] = { ...results[i], status: "error" };
-            continue;
-          }
+        } else if (data?.resultImage) {
           results[i] = { ...results[i], status: "done", result: data.resultImage };
+        } else {
+          await refundGems("apply-branding");
+          results[i] = { ...results[i], status: "error" };
         }
       } catch {
+        await refundGems("apply-branding");
         results[i] = { ...results[i], status: "error" };
       }
       setBatchImages([...results]);

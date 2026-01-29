@@ -15,7 +15,7 @@ import { getToolById } from "@/config/tools";
 const BackgroundSaverPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("background-saver")!;
 
@@ -63,27 +63,35 @@ const BackgroundSaverPage = () => {
     }
     
     setIsProcessing(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("remove-people-from-image");
+    if (!gemResult.success) {
+      setIsProcessing(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("remove-people-from-image", { 
         body: { image: uploadedImage, userId: user?.id } 
       });
       if (error) throw error;
       if (data?.error) {
+        await refundGems("remove-people-from-image");
         toast({ title: "Processing failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      
-      const gemResult = await deductGems("remove-people-from-image");
-      if (!gemResult.success) {
-        toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
         return;
       }
       
       if (data?.cleanBackground) {
         setResultImage(data.cleanBackground);
         toast({ title: "Background cleaned!", description: "People have been removed from your image" });
+      } else {
+        await refundGems("remove-people-from-image");
+        toast({ title: "Processing failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("remove-people-from-image");
       toast({ title: "Processing failed", description: error.message, variant: "destructive" });
     } finally {
       setIsProcessing(false);

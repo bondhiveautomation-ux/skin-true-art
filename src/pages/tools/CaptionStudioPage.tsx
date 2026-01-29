@@ -29,7 +29,7 @@ type ToneStyle = "bold_salesy" | "elegant_premium" | "friendly_casual" | "minima
 const CaptionStudioPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("caption-studio")!;
 
@@ -85,6 +85,14 @@ const CaptionStudioPage = () => {
     setIsGenerating(true);
     setGeneratedCaptions([]);
 
+    // Deduct gems immediately
+    const gemResult = await deductGems("generate-caption");
+    if (!gemResult.success) {
+      setIsGenerating(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-caption", {
         body: {
@@ -100,21 +108,20 @@ const CaptionStudioPage = () => {
 
       if (error) throw error;
       if (data?.error) {
+        await refundGems("generate-caption");
         toast({ title: "Generation failed", description: data.error, variant: "destructive" });
         return;
       }
 
       if (data?.captions) {
-        // Deduct gems only after successful generation
-        const result = await deductGems("generate-caption");
-        if (!result.success) {
-          toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-          return;
-        }
         setGeneratedCaptions(data.captions);
         toast({ title: "Caption generated!", description: generateVariations ? "2 variations created" : "Your caption is ready" });
+      } else {
+        await refundGems("generate-caption");
+        toast({ title: "Generation failed", description: "No captions received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("generate-caption");
       toast({ title: "Generation failed", description: error.message, variant: "destructive" });
     } finally {
       setIsGenerating(false);

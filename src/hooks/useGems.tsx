@@ -88,6 +88,30 @@ export const useGems = () => {
     }
   }, [user?.id, gems]);
 
+  const refundGems = useCallback(async (featureName: string): Promise<{ success: boolean; newBalance: number }> => {
+    if (!user?.id) return { success: false, newBalance: 0 };
+
+    // Use async version to ensure we have the latest cost from DB
+    const cost = await getGemCostAsync(featureName);
+    
+    try {
+      const { data, error } = await supabase.rpc('add_gems', {
+        p_user_id: user.id,
+        p_gems: cost,
+        p_transaction_type: 'refund'
+      });
+
+      if (error) throw error;
+
+      const newBalance = data as number;
+      setGems(newBalance);
+      return { success: true, newBalance };
+    } catch (error) {
+      console.error("Error refunding gems:", error);
+      return { success: false, newBalance: gems ?? 0 };
+    }
+  }, [user?.id, gems]);
+
   const hasEnoughGems = (featureName: string): boolean => {
     if (gems === null) return false;
     return gems >= getGemCost(featureName);
@@ -99,6 +123,7 @@ export const useGems = () => {
     subscriptionType,
     subscriptionExpiresAt,
     deductGems,
+    refundGems,
     hasEnoughGems,
     checkSufficientGems,
     refetchGems: fetchGems,

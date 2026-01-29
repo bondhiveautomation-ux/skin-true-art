@@ -18,7 +18,7 @@ type BackgroundPreset = "studio_white" | "luxury_marble" | "nature_garden" | "ur
 const BackgroundCreatorPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("background-creator")!;
 
@@ -80,6 +80,15 @@ const BackgroundCreatorPage = () => {
     }
     
     setIsProcessing(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("generate-background");
+    if (!gemResult.success) {
+      setIsProcessing(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-background", { 
         body: { 
@@ -91,21 +100,20 @@ const BackgroundCreatorPage = () => {
       });
       if (error) throw error;
       if (data?.error) {
+        await refundGems("generate-background");
         toast({ title: "Processing failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      
-      const gemResult = await deductGems("generate-background");
-      if (!gemResult.success) {
-        toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
         return;
       }
       
       if (data?.result) {
         setResultImage(data.result);
         toast({ title: "Background created!", description: "Your new background is ready" });
+      } else {
+        await refundGems("generate-background");
+        toast({ title: "Processing failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("generate-background");
       toast({ title: "Processing failed", description: error.message, variant: "destructive" });
     } finally {
       setIsProcessing(false);

@@ -22,7 +22,7 @@ type SkinFinishIntensity = "light" | "medium" | "pro";
 const PhotographyStudioPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("photography-studio")!;
   const comparisonRef = useRef<HTMLDivElement>(null);
@@ -84,6 +84,14 @@ const PhotographyStudioPage = () => {
     setIsEnhancing(true);
     setEnhancedImage(null);
 
+    // Deduct gems immediately
+    const gemResult = await deductGems("enhance-photo");
+    if (!gemResult.success) {
+      setIsEnhancing(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("enhance-photo", {
         body: {
@@ -101,20 +109,20 @@ const PhotographyStudioPage = () => {
 
       if (error) throw error;
       if (data?.error) {
+        await refundGems("enhance-photo");
         toast({ title: "Enhancement failed", description: data.error, variant: "destructive" });
         return;
       }
 
       if (data?.enhancedImage) {
-        const charge = await deductGems("enhance-photo");
-        if (!charge.success) {
-          toast({ title: "Couldn't charge gems", description: "Please try again.", variant: "destructive" });
-          return;
-        }
         setEnhancedImage(data.enhancedImage);
         toast({ title: "Photo enhanced!", description: "Your professional-quality image is ready" });
+      } else {
+        await refundGems("enhance-photo");
+        toast({ title: "Enhancement failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("enhance-photo");
       toast({ title: "Enhancement failed", description: error.message, variant: "destructive" });
     } finally {
       setIsEnhancing(false);

@@ -15,7 +15,7 @@ import { getToolById } from "@/config/tools";
 const PromptExtractorPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("prompt-extractor")!;
 
@@ -61,21 +61,29 @@ const PromptExtractorPage = () => {
       toast({ title: "Insufficient gems", description: `You need ${getGemCost("extract-image-prompt")} gem for this feature`, variant: "destructive" });
       return;
     }
+    
     setIsExtracting(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("extract-image-prompt");
+    if (!gemResult.success) {
+      setIsExtracting(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("extract-image-prompt", { body: { image: extractorImage } });
       if (error) throw error;
       if (data?.prompt) {
-        // Deduct gems only AFTER successful extraction
-        const gemResult = await deductGems("extract-image-prompt");
-        if (!gemResult.success) {
-          toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-          return;
-        }
         setExtractedPrompt(data.prompt);
         toast({ title: "Prompt extracted", description: "Image analyzed successfully" });
+      } else {
+        await refundGems("extract-image-prompt");
+        toast({ title: "Extraction failed", description: "No prompt generated", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("extract-image-prompt");
       toast({ title: "Extraction failed", description: error.message, variant: "destructive" });
     } finally {
       setIsExtracting(false);

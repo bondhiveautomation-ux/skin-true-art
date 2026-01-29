@@ -64,7 +64,7 @@ const STEPS = [
 const CinematicStudioPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("cinematic-studio")!;
   const isMobile = useIsMobile();
@@ -140,6 +140,15 @@ const CinematicStudioPage = () => {
     }
     
     setIsProcessing(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("cinematic-transform");
+    if (!gemResult.success) {
+      setIsProcessing(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("cinematic-transform", { 
         body: { 
@@ -152,13 +161,8 @@ const CinematicStudioPage = () => {
       });
       if (error) throw error;
       if (data?.error) {
+        await refundGems("cinematic-transform");
         toast({ title: "Processing failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      
-      const gemResult = await deductGems("cinematic-transform");
-      if (!gemResult.success) {
-        toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
         return;
       }
       
@@ -166,9 +170,11 @@ const CinematicStudioPage = () => {
         setResultImage(data.result);
         toast({ title: "Cinematic transformation complete!", description: "Your photo has been transformed" });
       } else {
+        await refundGems("cinematic-transform");
         toast({ title: "No result", description: "Failed to generate image. Please try again.", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("cinematic-transform");
       toast({ title: "Processing failed", description: error.message, variant: "destructive" });
     } finally {
       setIsProcessing(false);
