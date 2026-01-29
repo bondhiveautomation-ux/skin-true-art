@@ -26,9 +26,6 @@ export const GEM_COSTS = {
   
   // Prompt Engineer - 5 Gems
   "prompt-engineer": 5,
-  
-  // Video Generation - 200 Gems
-  "generate-video": 200,
 } as const;
 
 export type FeatureName = keyof typeof GEM_COSTS;
@@ -137,11 +134,6 @@ export const FEATURE_CATEGORIES = {
     label: "Prompt Engineer",
     cost: 5,
     features: ["prompt-engineer"],
-  },
-  "video-generation": {
-    label: "Video Generation",
-    cost: 200,
-    features: ["generate-video"],
   },
 } as const;
 
