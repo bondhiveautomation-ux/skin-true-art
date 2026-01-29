@@ -129,7 +129,7 @@ serve(async (req) => {
     // Prepare the input for Google Veo 3.1
     const input: Record<string, any> = {
       prompt: enhancedPrompt,
-      duration: 8, // Veo 3.1 supports 4, 6, or 8 seconds
+      duration: 6, // Veo 3.1 supports 4, 6, or 8 seconds
       aspect_ratio: aspectRatio,
       resolution: "1080p",
       generate_audio: true,
