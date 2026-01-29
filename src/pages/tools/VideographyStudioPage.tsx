@@ -24,7 +24,7 @@ type VideoPreset = "cinematic" | "commercial" | "social" | "artistic" | "documen
 const VideographyStudioPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("videography-studio")!;
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -103,6 +103,14 @@ const VideographyStudioPage = () => {
     setIsGenerating(true);
     setGeneratedVideoUrl(null);
 
+    // Deduct gems immediately
+    const gemResult = await deductGems("generate-video");
+    if (!gemResult.success) {
+      setIsGenerating(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-video", {
         body: {
@@ -117,20 +125,20 @@ const VideographyStudioPage = () => {
 
       if (error) throw error;
       if (data?.error) {
+        await refundGems("generate-video");
         toast({ title: "Generation failed", description: data.error, variant: "destructive" });
         return;
       }
 
       if (data?.generatedVideoUrl) {
-        const charge = await deductGems("generate-video");
-        if (!charge.success) {
-          toast({ title: "Couldn't charge gems", description: "Please try again.", variant: "destructive" });
-          return;
-        }
         setGeneratedVideoUrl(data.generatedVideoUrl);
         toast({ title: "Video generated!", description: "Your 5-second video is ready" });
+      } else {
+        await refundGems("generate-video");
+        toast({ title: "Generation failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("generate-video");
       toast({ title: "Generation failed", description: error.message, variant: "destructive" });
     } finally {
       setIsGenerating(false);

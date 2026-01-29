@@ -15,7 +15,7 @@ import { getToolById } from "@/config/tools";
 const PoseTransferPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("pose-transfer")!;
 
@@ -79,6 +79,15 @@ const PoseTransferPage = () => {
     }
     
     setIsProcessing(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("pose-transfer");
+    if (!gemResult.success) {
+      setIsProcessing(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("pose-transfer", { 
         body: { 
@@ -89,21 +98,20 @@ const PoseTransferPage = () => {
       });
       if (error) throw error;
       if (data?.error) {
+        await refundGems("pose-transfer");
         toast({ title: "Processing failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      
-      const gemResult = await deductGems("pose-transfer");
-      if (!gemResult.success) {
-        toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
         return;
       }
       
       if (data?.generatedImageUrl) {
         setResultImage(data.generatedImageUrl);
         toast({ title: "Pose transferred!", description: "Your character now has the new pose" });
+      } else {
+        await refundGems("pose-transfer");
+        toast({ title: "Processing failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("pose-transfer");
       toast({ title: "Processing failed", description: error.message, variant: "destructive" });
     } finally {
       setIsProcessing(false);

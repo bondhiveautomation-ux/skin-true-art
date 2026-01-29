@@ -18,7 +18,7 @@ import { getToolById } from "@/config/tools";
 const CharacterGeneratorPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("character-generator")!;
 
@@ -137,6 +137,15 @@ const CharacterGeneratorPage = () => {
       setGenerationProgress((prev) => (prev >= 90 ? prev : prev + Math.random() * 15));
     }, 500);
 
+    // Deduct gems immediately
+    const gemResult = await deductGems("generate-character-image");
+    if (!gemResult.success) {
+      clearInterval(progressInterval);
+      setIsGeneratingImage(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-character-image", {
         body: {
@@ -152,21 +161,21 @@ const CharacterGeneratorPage = () => {
       });
       if (error) throw error;
       if (data?.generatedImageUrl) {
-        // Only deduct gems AFTER successful generation
-        const gemResult = await deductGems("generate-character-image");
-        if (!gemResult.success) {
-          // Edge case: generation succeeded but gem deduction failed - still show the result
-          console.error("Gem deduction failed after successful generation");
-        }
-        
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
       } else if (data?.error) {
-        // Generation failed with error response - no gems deducted
+        // Generation failed - refund gems
+        await refundGems("generate-character-image");
         throw new Error(data.error);
+      } else {
+        // No result - refund gems
+        await refundGems("generate-character-image");
+        throw new Error("No image was generated");
       }
     } catch (error: any) {
+      // Refund gems on any error
+      await refundGems("generate-character-image");
       toast({ title: "Generation failed", description: error.message, variant: "destructive" });
     } finally {
       clearInterval(progressInterval);

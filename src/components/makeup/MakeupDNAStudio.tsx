@@ -281,7 +281,7 @@ interface MakeupDNAStudioProps {
 
 export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneration }) => {
   const { user } = useAuth();
-  const { hasEnoughGems, deductGems } = useGems();
+  const { hasEnoughGems, deductGems, refundGems } = useGems();
   
   // Image states
   const [targetImage, setTargetImage] = useState<string | null>(null);
@@ -392,6 +392,14 @@ export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneratio
     setIsApplying(true);
     setResultImage(null);
     
+    // Deduct gems immediately
+    const gemResult = await deductGems("apply-makeup");
+    if (!gemResult.success) {
+      setIsApplying(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke('apply-makeup', {
         body: { 
@@ -404,23 +412,21 @@ export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneratio
       
       if (error) throw error;
       if (data?.error) {
+        await refundGems("apply-makeup");
         toast({ title: "Application Failed", description: data.error, variant: "destructive" });
         return;
       }
       
       if (data?.generatedImageUrl) {
-        // Deduct gems only AFTER successful generation
-        const gemResult = await deductGems("apply-makeup");
-        if (!gemResult.success) {
-          toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
-          return;
-        }
-        
         setResultImage(data.generatedImageUrl);
         await onLogGeneration("Makeup DNA Studio", [], [data.generatedImageUrl]);
         toast({ title: "Makeup Applied!", description: "Your professional look has been created" });
+      } else {
+        await refundGems("apply-makeup");
+        toast({ title: "Application Failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("apply-makeup");
       toast({ title: "Application Failed", description: error.message, variant: "destructive" });
     } finally {
       setIsApplying(false);

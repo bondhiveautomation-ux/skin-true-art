@@ -20,7 +20,7 @@ type ExtractionType = "single-upper" | "single-full" | "couple";
 const DressExtractorPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems, refetchGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems, refetchGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("dress-extractor")!;
 
@@ -97,6 +97,14 @@ const DressExtractorPage = () => {
     setInspectionResult(null);
     setShowFeedbackInput(false);
     
+    // Deduct gems immediately
+    const gemResult = await deductGems("extract-dress-to-dummy");
+    if (!gemResult.success) {
+      setIsExtractingDress(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       // Upload input image first to keep the request payload small and reduce network failures
       const inputPath = `${user?.id}/dress-extractor/input_${Date.now()}_${Math.random().toString(16).slice(2)}.${(dressFile.type.split("/")[1] || "png").toLowerCase()}`;
@@ -109,12 +117,14 @@ const DressExtractorPage = () => {
         });
 
       if (uploadError) {
+        await refundGems("extract-dress-to-dummy");
         throw new Error(`Failed to upload image. Please try again. (${uploadError.message})`);
       }
 
       const { data: publicUrlData } = supabase.storage.from("temp-uploads").getPublicUrl(inputPath);
       const uploadedInputUrl = publicUrlData?.publicUrl;
       if (!uploadedInputUrl) {
+        await refundGems("extract-dress-to-dummy");
         throw new Error("Failed to prepare image for processing. Please try again.");
       }
 
@@ -136,20 +146,18 @@ const DressExtractorPage = () => {
 
         if (!error) {
           if (data?.error) {
+            await refundGems("extract-dress-to-dummy");
             toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
             return;
           }
           if (data?.extractedImage) {
-            // Only deduct gems AFTER successful generation
-            const gemResult = await deductGems("extract-dress-to-dummy");
-            if (!gemResult.success) {
-              console.error("Gem deduction failed after successful generation");
-            }
-            
             setExtractedDressImage(data.extractedImage);
             setDressMismatchFeedback(null);
             setGenerationTimestamp(Date.now());
             toast({ title: "Dress extracted!", description: "The garment has been placed on the mannequin" });
+          } else {
+            await refundGems("extract-dress-to-dummy");
+            toast({ title: "Extraction failed", description: "No result received", variant: "destructive" });
           }
           lastErr = null;
           break;
@@ -161,8 +169,12 @@ const DressExtractorPage = () => {
         await new Promise((r) => setTimeout(r, 600));
       }
 
-      if (lastErr) throw lastErr;
+      if (lastErr) {
+        await refundGems("extract-dress-to-dummy");
+        throw lastErr;
+      }
     } catch (error: any) {
+      await refundGems("extract-dress-to-dummy");
       toast({ title: "Extraction failed", description: error.message, variant: "destructive" });
     } finally {
       setIsExtractingDress(false);

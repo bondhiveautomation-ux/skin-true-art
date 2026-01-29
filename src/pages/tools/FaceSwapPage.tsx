@@ -15,7 +15,7 @@ import { getToolById } from "@/config/tools";
 const FaceSwapPage = () => {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
-  const { deductGems, hasEnoughGems } = useGems();
+  const { deductGems, refundGems, hasEnoughGems } = useGems();
   const { toast } = useToast();
   const tool = getToolById("face-swap")!;
 
@@ -79,6 +79,15 @@ const FaceSwapPage = () => {
     }
     
     setIsProcessing(true);
+    
+    // Deduct gems immediately
+    const gemResult = await deductGems("face-swap");
+    if (!gemResult.success) {
+      setIsProcessing(false);
+      toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("face-swap", { 
         body: { 
@@ -89,21 +98,20 @@ const FaceSwapPage = () => {
       });
       if (error) throw error;
       if (data?.error) {
+        await refundGems("face-swap");
         toast({ title: "Processing failed", description: data.error, variant: "destructive" });
-        return;
-      }
-      
-      const gemResult = await deductGems("face-swap");
-      if (!gemResult.success) {
-        toast({ title: "Insufficient gems", description: "Please top up your gems to continue", variant: "destructive" });
         return;
       }
       
       if (data?.generatedImageUrl) {
         setResultImage(data.generatedImageUrl);
         toast({ title: "Face swapped!", description: "Your face swap is ready" });
+      } else {
+        await refundGems("face-swap");
+        toast({ title: "Processing failed", description: "No result received", variant: "destructive" });
       }
     } catch (error: any) {
+      await refundGems("face-swap");
       toast({ title: "Processing failed", description: error.message, variant: "destructive" });
     } finally {
       setIsProcessing(false);
