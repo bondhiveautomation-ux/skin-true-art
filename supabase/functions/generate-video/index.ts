@@ -129,16 +129,18 @@ serve(async (req) => {
     // Prepare the input for Google Veo 3.1
     const input: Record<string, any> = {
       prompt: enhancedPrompt,
-      duration: 5,
+      duration: 8, // Veo 3.1 supports 4, 6, or 8 seconds
       aspect_ratio: aspectRatio,
+      resolution: "1080p",
+      generate_audio: true,
     };
 
-    // If starting image is provided (image-to-video)
+    // If starting image is provided (image-to-video), use first_frame parameter
     if (startingImage) {
-      input.image = startingImage;
+      input.first_frame = startingImage;
     }
 
-    console.log("Calling Replicate API with Google Veo 3.1 model...");
+    console.log("Calling Replicate API with Google Veo 3.1 model...", JSON.stringify(input, null, 2));
 
     // Start the prediction with Google Veo 3.1
     const predictionResponse = await fetch("https://api.replicate.com/v1/models/google/veo-3.1/predictions", {
