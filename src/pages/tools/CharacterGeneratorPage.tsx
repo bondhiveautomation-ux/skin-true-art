@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Diamond } from "lucide-react";
+import { Loader2, Diamond, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
@@ -35,6 +35,12 @@ const CharacterGeneratorPage = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [isRefiningPrompt, setIsRefiningPrompt] = useState(false);
+  
+  // Couple Mode states
+  const [isCoupleMode, setIsCoupleMode] = useState(false);
+  const [coupleImage, setCoupleImage] = useState<string | null>(null);
+  const [maleDressImage, setMaleDressImage] = useState<string | null>(null);
+  const [femaleDressImage, setFemaleDressImage] = useState<string | null>(null);
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -88,25 +94,68 @@ const CharacterGeneratorPage = () => {
 
   const handleProductImageUpload = createImageUploadHandler(setProductImage, [() => setSelectedPreset("")]);
   const handleBackgroundImageUpload = createImageUploadHandler(setBackgroundImage, [() => setSelectedPose("")]);
+  
+  // Couple mode handlers
+  const handleCoupleImageUpload = createImageUploadHandler(setCoupleImage, [
+    () => setGeneratedImage(null),
+    () => setMaleDressImage(null),
+    () => setFemaleDressImage(null),
+  ]);
+  const handleMaleDressUpload = createImageUploadHandler(setMaleDressImage);
+  const handleFemaleDressUpload = createImageUploadHandler(setFemaleDressImage);
+  
+  // Reset when switching modes
+  const handleModeSwitch = (couple: boolean) => {
+    setIsCoupleMode(couple);
+    setGeneratedImage(null);
+    if (couple) {
+      // Clear single mode states
+      setCharacterImage(null);
+      setProductImage(null);
+      setSelectedPreset("");
+      setBackgroundImage(null);
+      setSelectedPose("");
+    } else {
+      // Clear couple mode states
+      setCoupleImage(null);
+      setMaleDressImage(null);
+      setFemaleDressImage(null);
+    }
+    setGenerationPrompt("");
+  };
 
 
   const handleGenerateImage = async () => {
-    if (!characterImage) {
-      toast({ title: "No character image", description: "Please upload a character reference image first", variant: "destructive" });
-      return;
+    // Couple mode validation
+    if (isCoupleMode) {
+      if (!coupleImage) {
+        toast({ title: "No couple photo", description: "Please upload a photo of the couple first", variant: "destructive" });
+        return;
+      }
+      if (!maleDressImage || !femaleDressImage) {
+        toast({ title: "Missing dress images", description: "Please upload both dress images (male and female)", variant: "destructive" });
+        return;
+      }
+    } else {
+      // Single mode validation
+      if (!characterImage) {
+        toast({ title: "No character image", description: "Please upload a character reference image first", variant: "destructive" });
+        return;
+      }
+      if (productImage && !selectedPreset) {
+        toast({ title: "No preset selected", description: "Please select a styling preset for the product", variant: "destructive" });
+        return;
+      }
+      if (backgroundImage && !selectedPose) {
+        toast({ title: "No pose selected", description: "Please select a character pose for the background integration", variant: "destructive" });
+        return;
+      }
+      if (!productImage && !backgroundImage && !generationPrompt.trim()) {
+        toast({ title: "Empty prompt", description: "Please enter a scenario prompt, upload a product, or add a background", variant: "destructive" });
+        return;
+      }
     }
-    if (productImage && !selectedPreset) {
-      toast({ title: "No preset selected", description: "Please select a styling preset for the product", variant: "destructive" });
-      return;
-    }
-    if (backgroundImage && !selectedPose) {
-      toast({ title: "No pose selected", description: "Please select a character pose for the background integration", variant: "destructive" });
-      return;
-    }
-    if (!productImage && !backgroundImage && !generationPrompt.trim()) {
-      toast({ title: "Empty prompt", description: "Please enter a scenario prompt, upload a product, or add a background", variant: "destructive" });
-      return;
-    }
+    
     if (!hasEnoughGems("generate-character-image")) {
       toast({ title: "Insufficient gems", description: `You need ${getGemCost("generate-character-image")} gems for this feature`, variant: "destructive" });
       return;
@@ -128,25 +177,39 @@ const CharacterGeneratorPage = () => {
     }
 
     try {
+      // Build request body based on mode
+      const requestBody = isCoupleMode 
+        ? {
+            coupleMode: true,
+            coupleImage,
+            maleDressImage,
+            femaleDressImage,
+            userId: user?.id,
+          }
+        : {
+            characterImage,
+            prompt: generationPrompt.trim(),
+            productImage,
+            preset: selectedPreset,
+            cameraAngle: selectedCameraAngle || undefined,
+            backgroundImage: backgroundImage || undefined,
+            pose: selectedPose || undefined,
+            userId: user?.id,
+          };
+      
       const { data, error } = await supabase.functions.invoke("generate-character-image", {
-        body: {
-          characterImage,
-          prompt: generationPrompt.trim(),
-          productImage,
-          preset: selectedPreset,
-          cameraAngle: selectedCameraAngle || undefined,
-          backgroundImage: backgroundImage || undefined,
-          pose: selectedPose || undefined,
-          userId: user?.id,
-        },
+        body: requestBody,
       });
       if (error) throw error;
       if (data?.generatedImageUrl) {
         setGenerationProgress(100);
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
-        toast({ title: "Image generated", description: "Character-consistent image created successfully" });
+        toast({ title: "Image generated", description: isCoupleMode ? "Couple dresses applied successfully!" : "Character-consistent image created successfully" });
         // Log generation
-        await logGeneration("generate-character-image", [characterImage], [data.generatedImageUrl], user?.id);
+        const inputImages = isCoupleMode 
+          ? [coupleImage, maleDressImage, femaleDressImage].filter(Boolean) as string[]
+          : [characterImage].filter(Boolean) as string[];
+        await logGeneration("generate-character-image", inputImages, [data.generatedImageUrl], user?.id);
       } else if (data?.error) {
         // Generation failed - refund gems
         await refundGems("generate-character-image");
@@ -188,6 +251,10 @@ const CharacterGeneratorPage = () => {
     setSelectedCameraAngle("");
     setBackgroundImage(null);
     setSelectedPose("");
+    // Reset couple mode states
+    setCoupleImage(null);
+    setMaleDressImage(null);
+    setFemaleDressImage(null);
   };
 
   const handleRefinePrompt = async () => {
@@ -247,154 +314,272 @@ const CharacterGeneratorPage = () => {
       badge={tool.badge}
     >
       <div className="space-y-8">
-        {/* Character Upload Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-cream text-center">Upload Character Reference</h3>
-          <div className="max-w-xs mx-auto">
-            <ImageUploader
-              id="character-main"
-              image={characterImage}
-              onUpload={handleCharacterImageUpload}
-              onRemove={() => setCharacterImage(null)}
-              label="Main Photo"
-              description="Front-facing photo"
-              aspectRatio="portrait"
-            />
-          </div>
-          {/* Bangla guidance for better AI results */}
-          <p className="text-sm text-cream/60 text-center font-bangla max-w-md mx-auto">
-            সামনে থেকে তোলা পরিষ্কার ছবি দিন। মুখ স্পষ্ট দেখা যাওয়া উচিত, ব্যাকগ্রাউন্ড সাদা বা হালকা রঙের হলে ভালো ফলাফল পাবেন।
-          </p>
+        {/* Mode Toggle */}
+        <div className="flex justify-center gap-2">
+          <Button
+            variant={!isCoupleMode ? "default" : "outline"}
+            onClick={() => handleModeSwitch(false)}
+            className="flex items-center gap-2"
+          >
+            <User className="w-4 h-4" />
+            Single Person
+          </Button>
+          <Button
+            variant={isCoupleMode ? "default" : "outline"}
+            onClick={() => handleModeSwitch(true)}
+            className="flex items-center gap-2"
+          >
+            <Users className="w-4 h-4" />
+            Couple Mode
+          </Button>
         </div>
 
-        {characterImage && (
+        {/* ========== COUPLE MODE UI ========== */}
+        {isCoupleMode && (
           <>
-            {/* Product Upload (Optional) */}
-            <div className="space-y-4 pt-6 border-t border-border/30">
-              <h3 className="text-lg font-semibold text-cream text-center">Add Product (Optional)</h3>
+            {/* Couple Photo Upload */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-cream text-center">Upload Couple Photo</h3>
               <div className="max-w-xs mx-auto">
                 <ImageUploader
-                  id="product-upload"
-                  image={productImage}
-                  onUpload={handleProductImageUpload}
-                  onRemove={() => {
-                    setProductImage(null);
-                    setSelectedPreset("");
-                  }}
-                  label="Product Image"
-                  description="Saree, jewelry, dress, etc."
-                  aspectRatio="square"
-                />
-              </div>
-              {productImage && (
-                <div className="space-y-2">
-                  <p className="text-sm text-cream/70 text-center">Product Styling</p>
-                  <SelectionGrid
-                    options={presetOptions}
-                    selectedId={selectedPreset}
-                    onSelect={setSelectedPreset}
-                  />
-                </div>
-              )}
-              {selectedPreset && (
-                <div className="space-y-2">
-                  <p className="text-sm text-cream/70 text-center">Camera Angle</p>
-                  <SelectionGrid
-                    options={cameraAngleOptions}
-                    selectedId={selectedCameraAngle}
-                    onSelect={setSelectedCameraAngle}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Background Upload (Optional) */}
-            <div className="space-y-4 pt-6 border-t border-border/30">
-              <h3 className="text-lg font-semibold text-cream text-center">Custom Background (Optional)</h3>
-              <div className="max-w-xs mx-auto">
-                <ImageUploader
-                  id="background-upload"
-                  image={backgroundImage}
-                  onUpload={handleBackgroundImageUpload}
-                  onRemove={() => {
-                    setBackgroundImage(null);
-                    setSelectedPose("");
-                  }}
-                  label="Background Image"
-                  description="Scene or location"
+                  id="couple-photo"
+                  image={coupleImage}
+                  onUpload={handleCoupleImageUpload}
+                  onRemove={() => setCoupleImage(null)}
+                  label="Couple Photo"
+                  description="Photo of the couple together"
                   aspectRatio="landscape"
                 />
               </div>
-              {backgroundImage && (
-                <div className="space-y-2">
-                  <p className="text-sm text-cream/70 text-center">Character Pose</p>
-                  <SelectionGrid
-                    options={poseOptions}
-                    selectedId={selectedPose}
-                    onSelect={setSelectedPose}
-                  />
+              <p className="text-sm text-cream/60 text-center font-bangla max-w-md mx-auto">
+                দম্পতির একসাথে তোলা পরিষ্কার ছবি আপলোড করুন। দুইজনের মুখ স্পষ্ট দেখা যাওয়া উচিত।
+              </p>
+            </div>
+
+            {coupleImage && (
+              <>
+                {/* Dress Uploads */}
+                <div className="space-y-4 pt-6 border-t border-border/30">
+                  <h3 className="text-lg font-semibold text-cream text-center">Upload Dresses</h3>
+                  <p className="text-sm text-cream/60 text-center max-w-md mx-auto">
+                    Upload dress images on mannequins. AI will auto-detect which is male/female dress.
+                  </p>
+                  <p className="text-sm text-cream/60 text-center font-bangla max-w-md mx-auto">
+                    ডামির উপর পোশাকের ছবি আপলোড করুন। AI স্বয়ংক্রিয়ভাবে পুরুষ/মহিলা পোশাক চিনে নেবে।
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    <ImageUploader
+                      id="male-dress"
+                      image={maleDressImage}
+                      onUpload={handleMaleDressUpload}
+                      onRemove={() => setMaleDressImage(null)}
+                      label="Dress 1"
+                      description="First outfit"
+                      aspectRatio="portrait"
+                    />
+                    <ImageUploader
+                      id="female-dress"
+                      image={femaleDressImage}
+                      onUpload={handleFemaleDressUpload}
+                      onRemove={() => setFemaleDressImage(null)}
+                      label="Dress 2"
+                      description="Second outfit"
+                      aspectRatio="portrait"
+                    />
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* Prompt Section */}
-            <div className="space-y-4 pt-6 border-t border-border/30">
-              <h3 className="text-lg font-semibold text-cream text-center">Scenario Prompt</h3>
-              <Textarea
-                placeholder="Describe the scenario you want to generate... e.g., 'Standing in a luxury palace garden wearing an elegant red saree'"
-                value={generationPrompt}
-                onChange={(e) => setGenerationPrompt(e.target.value)}
-                className="min-h-[100px] bg-secondary/30 border-border/50 text-cream placeholder:text-cream/40 resize-none"
-              />
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefinePrompt}
-                  disabled={isRefiningPrompt || !generationPrompt.trim()}
-                  className="text-sm"
-                >
-                  {isRefiningPrompt ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Refining...
-                    </>
-                  ) : (
-                    "✨ Refine Prompt (Free)"
-                  )}
-                </Button>
-              </div>
-            </div>
+                {/* Generate Button for Couple Mode */}
+                <div className="flex flex-col items-center gap-2 pt-4">
+                  <LoadingButton
+                    onClick={handleGenerateImage}
+                    isLoading={isGeneratingImage}
+                    loadingText={`Generating... ${generationProgress.toFixed(0)}%`}
+                    disabled={!coupleImage || !maleDressImage || !femaleDressImage}
+                    size="lg"
+                    className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
+                  >
+                    Generate Couple Image
+                  </LoadingButton>
+                  <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+                    <Diamond className="w-3.5 h-3.5 text-primary" />
+                    <span>Costs {getGemCost("generate-character-image")} gems</span>
+                  </div>
+                </div>
+              </>
+            )}
 
-            {/* Generate Button */}
-            <div className="flex flex-col items-center gap-2 pt-4">
-              <LoadingButton
-                onClick={handleGenerateImage}
-                isLoading={isGeneratingImage}
-                loadingText={`Generating... ${generationProgress.toFixed(0)}%`}
-                disabled={!characterImage}
-                size="lg"
-                className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
-              >
-                Generate Image
-              </LoadingButton>
-              <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                <Diamond className="w-3.5 h-3.5 text-primary" />
-                <span>Costs {getGemCost("generate-character-image")} gems</span>
-              </div>
-            </div>
-
-            {/* Result */}
+            {/* Result for Couple Mode */}
             {generatedImage && (
               <ResultDisplay
                 result={generatedImage}
-                originalImages={characterImage ? [{ src: characterImage, label: "Character" }] : []}
+                originalImages={[
+                  ...(coupleImage ? [{ src: coupleImage, label: "Couple" }] : []),
+                  ...(maleDressImage ? [{ src: maleDressImage, label: "Dress 1" }] : []),
+                  ...(femaleDressImage ? [{ src: femaleDressImage, label: "Dress 2" }] : []),
+                ]}
                 onDownload={handleDownloadGenerated}
                 onRegenerate={handleGenerateImage}
                 onReset={handleResetGenerator}
                 isProcessing={isGeneratingImage}
                 resetLabel="Start New"
               />
+            )}
+          </>
+        )}
+
+        {/* ========== SINGLE PERSON MODE UI ========== */}
+        {!isCoupleMode && (
+          <>
+            {/* Character Upload Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-cream text-center">Upload Character Reference</h3>
+              <div className="max-w-xs mx-auto">
+                <ImageUploader
+                  id="character-main"
+                  image={characterImage}
+                  onUpload={handleCharacterImageUpload}
+                  onRemove={() => setCharacterImage(null)}
+                  label="Main Photo"
+                  description="Front-facing photo"
+                  aspectRatio="portrait"
+                />
+              </div>
+              <p className="text-sm text-cream/60 text-center font-bangla max-w-md mx-auto">
+                সামনে থেকে তোলা পরিষ্কার ছবি দিন। মুখ স্পষ্ট দেখা যাওয়া উচিত, ব্যাকগ্রাউন্ড সাদা বা হালকা রঙের হলে ভালো ফলাফল পাবেন।
+              </p>
+            </div>
+
+            {characterImage && (
+              <>
+                {/* Product Upload (Optional) */}
+                <div className="space-y-4 pt-6 border-t border-border/30">
+                  <h3 className="text-lg font-semibold text-cream text-center">Add Product (Optional)</h3>
+                  <div className="max-w-xs mx-auto">
+                    <ImageUploader
+                      id="product-upload"
+                      image={productImage}
+                      onUpload={handleProductImageUpload}
+                      onRemove={() => {
+                        setProductImage(null);
+                        setSelectedPreset("");
+                      }}
+                      label="Product Image"
+                      description="Saree, jewelry, dress, etc."
+                      aspectRatio="square"
+                    />
+                  </div>
+                  {productImage && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-cream/70 text-center">Product Styling</p>
+                      <SelectionGrid
+                        options={presetOptions}
+                        selectedId={selectedPreset}
+                        onSelect={setSelectedPreset}
+                      />
+                    </div>
+                  )}
+                  {selectedPreset && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-cream/70 text-center">Camera Angle</p>
+                      <SelectionGrid
+                        options={cameraAngleOptions}
+                        selectedId={selectedCameraAngle}
+                        onSelect={setSelectedCameraAngle}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Background Upload (Optional) */}
+                <div className="space-y-4 pt-6 border-t border-border/30">
+                  <h3 className="text-lg font-semibold text-cream text-center">Custom Background (Optional)</h3>
+                  <div className="max-w-xs mx-auto">
+                    <ImageUploader
+                      id="background-upload"
+                      image={backgroundImage}
+                      onUpload={handleBackgroundImageUpload}
+                      onRemove={() => {
+                        setBackgroundImage(null);
+                        setSelectedPose("");
+                      }}
+                      label="Background Image"
+                      description="Scene or location"
+                      aspectRatio="landscape"
+                    />
+                  </div>
+                  {backgroundImage && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-cream/70 text-center">Character Pose</p>
+                      <SelectionGrid
+                        options={poseOptions}
+                        selectedId={selectedPose}
+                        onSelect={setSelectedPose}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Prompt Section */}
+                <div className="space-y-4 pt-6 border-t border-border/30">
+                  <h3 className="text-lg font-semibold text-cream text-center">Scenario Prompt</h3>
+                  <Textarea
+                    placeholder="Describe the scenario you want to generate... e.g., 'Standing in a luxury palace garden wearing an elegant red saree'"
+                    value={generationPrompt}
+                    onChange={(e) => setGenerationPrompt(e.target.value)}
+                    className="min-h-[100px] bg-secondary/30 border-border/50 text-cream placeholder:text-cream/40 resize-none"
+                  />
+                  <div className="flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRefinePrompt}
+                      disabled={isRefiningPrompt || !generationPrompt.trim()}
+                      className="text-sm"
+                    >
+                      {isRefiningPrompt ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Refining...
+                        </>
+                      ) : (
+                        "✨ Refine Prompt (Free)"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Generate Button */}
+                <div className="flex flex-col items-center gap-2 pt-4">
+                  <LoadingButton
+                    onClick={handleGenerateImage}
+                    isLoading={isGeneratingImage}
+                    loadingText={`Generating... ${generationProgress.toFixed(0)}%`}
+                    disabled={!characterImage}
+                    size="lg"
+                    className="btn-glow bg-foreground text-background hover:bg-foreground/90 px-10"
+                  >
+                    Generate Image
+                  </LoadingButton>
+                  <div className="flex items-center gap-1.5 text-cream/50 text-xs">
+                    <Diamond className="w-3.5 h-3.5 text-primary" />
+                    <span>Costs {getGemCost("generate-character-image")} gems</span>
+                  </div>
+                </div>
+
+                {/* Result */}
+                {generatedImage && (
+                  <ResultDisplay
+                    result={generatedImage}
+                    originalImages={characterImage ? [{ src: characterImage, label: "Character" }] : []}
+                    onDownload={handleDownloadGenerated}
+                    onRegenerate={handleGenerateImage}
+                    onReset={handleResetGenerator}
+                    isProcessing={isGeneratingImage}
+                    resetLabel="Start New"
+                  />
+                )}
+              </>
             )}
           </>
         )}

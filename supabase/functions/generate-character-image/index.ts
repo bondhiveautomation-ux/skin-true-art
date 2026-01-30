@@ -53,8 +53,168 @@ serve(async (req) => {
   }
 
   try {
-    const { characterImage, characterLeftProfile, characterRightProfile, prompt, productImage, preset, cameraAngle, backgroundImage, pose, userId } = await req.json();
+    const requestBody = await req.json();
+    const { 
+      characterImage, characterLeftProfile, characterRightProfile, 
+      prompt, productImage, preset, cameraAngle, backgroundImage, pose, userId,
+      // Couple mode fields
+      coupleMode, coupleImage, maleDressImage, femaleDressImage
+    } = requestBody;
     
+    // ========== COUPLE MODE HANDLING ==========
+    if (coupleMode) {
+      if (!coupleImage) {
+        return new Response(
+          JSON.stringify({ error: "No couple photo provided" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (!maleDressImage || !femaleDressImage) {
+        return new Response(
+          JSON.stringify({ error: "Both dress images are required for couple mode" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) {
+        return new Response(
+          JSON.stringify({ error: "Service not configured. Please contact support." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      console.log("COUPLE MODE: Generating dress transfer for couple");
+
+      const couplePrompt = `You are an expert fashion AI. Your task is to transfer dresses onto a couple photo while preserving their faces 100%.
+
+CRITICAL IDENTITY PRESERVATION RULES:
+- The faces of BOTH people in the couple photo MUST remain EXACTLY identical - no changes whatsoever
+- Preserve: face shape, facial features, expressions, skin tone, hair, eye color, eyebrows
+- Only the clothing/outfit should change
+
+TASK:
+1. Analyze the couple photo and identify the two people
+2. Analyze both dress images to determine which dress is for which person (based on style - saree/lehenga typically female, sherwani/suit typically male, etc.)
+3. Generate a new image where:
+   - Both people are wearing the appropriate dresses
+   - Their faces remain 100% identical to the original
+   - The dresses fit naturally on their body types
+   - Lighting and composition match the original photo
+   - The pose and positioning remain similar
+
+OUTPUT: A photorealistic image of the couple wearing the transferred dresses, with absolutely no changes to their facial features.`;
+
+      const contentArray = [
+        { type: "text", text: couplePrompt },
+        { type: "image_url", image_url: { url: coupleImage } },
+        { type: "image_url", image_url: { url: maleDressImage } },
+        { type: "image_url", image_url: { url: femaleDressImage } }
+      ];
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-pro-image-preview",
+          messages: [{ role: "user", content: contentArray }],
+          modalities: ["image", "text"]
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limits exceeded. Please try again later." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "Payment required. Please add credits." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const errorText = await response.text();
+        console.error("AI gateway error:", response.status, errorText);
+        throw new Error(`AI gateway error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const finishReason = data.choices?.[0]?.native_finish_reason || data.choices?.[0]?.finish_reason;
+      if (finishReason === "IMAGE_SAFETY" || finishReason === "SAFETY") {
+        return new Response(
+          JSON.stringify({ error: "Image blocked by safety filters. Please try different photos." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      if (!generatedImageUrl) {
+        const errorMessage = data.error?.message || data.choices?.[0]?.message?.content || "No image generated";
+        return new Response(
+          JSON.stringify({ error: `Generation failed: ${errorMessage}` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log("Couple dress transfer generated successfully");
+
+      // Upload and log for couple mode
+      if (userId) {
+        try {
+          const inputUrls: string[] = [];
+          let outputStorageUrl: string | null = null;
+
+          if (coupleImage.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, coupleImage, userId, 'input_couple');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(coupleImage);
+          }
+
+          if (maleDressImage.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, maleDressImage, userId, 'input_dress1');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(maleDressImage);
+          }
+
+          if (femaleDressImage.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, femaleDressImage, userId, 'input_dress2');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(femaleDressImage);
+          }
+
+          if (generatedImageUrl.startsWith('data:image')) {
+            outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_couple_dress');
+          }
+
+          const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+          await supabase.rpc('log_generation', {
+            p_user_id: userId,
+            p_feature_name: 'Character Generator (Couple)',
+            p_input_images: inputUrls,
+            p_output_images: outputImages
+          });
+        } catch (logErr) {
+          console.error("Error in couple mode logging:", logErr);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ generatedImageUrl }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // ========== SINGLE PERSON MODE (existing logic) ==========
     if (!characterImage) {
       return new Response(
         JSON.stringify({ error: "No character reference image provided" }),
