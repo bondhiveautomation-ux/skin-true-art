@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { ProcessingModal } from "@/components/gems/ProcessingModal";
 import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
 import { getGemCost } from "@/lib/gemCosts";
+import { logGeneration } from "@/lib/logGeneration";
 
 type PhotoType = "product" | "portrait" | "lifestyle";
 type StylePreset = "clean_studio" | "luxury_brand" | "soft_natural" | "dark_premium" | "ecommerce_white" | "royal_monochrome" | "instagram_editorial";
@@ -45,28 +46,6 @@ const PhotographyStudio = () => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-
-  // Helper function to log generation
-  const logGeneration = async (
-    featureName: string,
-    inputImages: string[] = [],
-    outputImages: string[] = []
-  ) => {
-    if (!user?.id) return;
-
-    const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
-
-    try {
-      await supabase.rpc("log_generation", {
-        p_user_id: user.id,
-        p_feature_name: featureName,
-        p_input_images: onlyUrls(inputImages),
-        p_output_images: onlyUrls(outputImages),
-      });
-    } catch (error) {
-      console.error("Failed to log generation:", error);
-    }
-  };
 
   // Redirect to auth if not authenticated
   useEffect(() => {

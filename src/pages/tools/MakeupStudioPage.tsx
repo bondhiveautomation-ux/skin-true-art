@@ -4,8 +4,8 @@ import { Loader2 } from "lucide-react";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { MakeupDNAStudio } from "@/components/makeup/MakeupDNAStudio";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { getToolById } from "@/config/tools";
+import { logGeneration } from "@/lib/logGeneration";
 
 const MakeupStudioPage = () => {
   const navigate = useNavigate();
@@ -31,18 +31,7 @@ const MakeupStudioPage = () => {
     inputImages: string[] = [],
     outputImages: string[] = []
   ) => {
-    if (!user?.id) return;
-    const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
-    try {
-      await supabase.rpc("log_generation", {
-        p_user_id: user.id,
-        p_feature_name: featureName,
-        p_input_images: onlyUrls(inputImages),
-        p_output_images: onlyUrls(outputImages),
-      });
-    } catch (error) {
-      console.error("Failed to log generation:", error);
-    }
+    await logGeneration(featureName, inputImages, outputImages, user?.id);
   };
 
   return (
