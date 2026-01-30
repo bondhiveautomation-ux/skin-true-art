@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
 import { getGemCost } from "@/lib/gemCosts";
 import { getToolById } from "@/config/tools";
+import { logGeneration } from "@/lib/logGeneration";
 
 const CharacterGeneratorPage = () => {
   const navigate = useNavigate();
@@ -34,26 +35,6 @@ const CharacterGeneratorPage = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [isRefiningPrompt, setIsRefiningPrompt] = useState(false);
-
-  // Helper function to log generation
-  const logGeneration = async (
-    featureName: string,
-    inputImages: string[] = [],
-    outputImages: string[] = []
-  ) => {
-    if (!user?.id) return;
-    const onlyUrls = (arr: string[]) => arr.filter((v) => typeof v === "string" && v.startsWith("http"));
-    try {
-      await supabase.rpc("log_generation", {
-        p_user_id: user.id,
-        p_feature_name: featureName,
-        p_input_images: onlyUrls(inputImages),
-        p_output_images: onlyUrls(outputImages),
-      });
-    } catch (error) {
-      console.error("Failed to log generation:", error);
-    }
-  };
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -165,7 +146,7 @@ const CharacterGeneratorPage = () => {
         setTimeout(() => setGeneratedImage(data.generatedImageUrl), 300);
         toast({ title: "Image generated", description: "Character-consistent image created successfully" });
         // Log generation
-        logGeneration("generate-character-image", [characterImage], [data.generatedImageUrl]);
+        await logGeneration("generate-character-image", [characterImage], [data.generatedImageUrl], user?.id);
       } else if (data?.error) {
         // Generation failed - refund gems
         await refundGems("generate-character-image");
