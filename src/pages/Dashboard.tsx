@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { Footer } from "@/components/landing/Footer";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { DashboardHowItWorksSection } from "@/components/dashboard/DashboardHowItWorksSection";
 import { ValueSection } from "@/components/landing/ValueSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { DepartmentToolGrid } from "@/components/dashboard/DepartmentToolGrid";
@@ -140,7 +140,7 @@ const Dashboard = () => {
       </section>
 
       {/* How It Works */}
-      <HowItWorksSection id="how-it-works" />
+      <DashboardHowItWorksSection id="how-it-works" />
 
       {/* Value Section */}
       <ValueSection />
