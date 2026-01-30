@@ -111,7 +111,19 @@ const PhotographyStudioPage = () => {
       if (error) throw error;
       if (data?.error) {
         await refundGems("enhance-photo");
-        toast({ title: "Enhancement failed", description: data.error, variant: "destructive" });
+        // Show more descriptive error with guidance
+        const isRetryable = data.retryable !== false;
+        const reason = data.reason || "unknown";
+        let description = data.error;
+        if (!isRetryable) {
+          description += " Please use a different photo.";
+        }
+        toast({ 
+          title: isRetryable ? "Enhancement failed — please try again" : "This photo can't be enhanced", 
+          description, 
+          variant: "destructive" 
+        });
+        console.log("[PhotographyStudio] Enhancement failed:", { error: data.error, reason, retryable: isRetryable });
         return;
       }
 
@@ -122,11 +134,12 @@ const PhotographyStudioPage = () => {
         await logGeneration("enhance-photo", [originalImage!], [data.enhancedImage], user?.id);
       } else {
         await refundGems("enhance-photo");
-        toast({ title: "Enhancement failed", description: "No result received", variant: "destructive" });
+        toast({ title: "Enhancement failed", description: "No result received. Please try again.", variant: "destructive" });
       }
     } catch (error: any) {
       await refundGems("enhance-photo");
-      toast({ title: "Enhancement failed", description: error.message, variant: "destructive" });
+      console.error("[PhotographyStudio] Unexpected error:", error);
+      toast({ title: "Enhancement failed", description: error.message || "Something went wrong — please try again", variant: "destructive" });
     } finally {
       setIsEnhancing(false);
     }

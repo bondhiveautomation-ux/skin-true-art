@@ -536,39 +536,65 @@ After completing, provide a brief 2-sentence creative director's note explaining
       console.error("AI gateway error payload:", JSON.stringify(data));
       const msg = typeof data.error?.message === "string" ? data.error.message : "AI service temporarily unavailable";
       return new Response(
-        JSON.stringify({ error: msg }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: msg, retryable: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Extract the enhanced image and creative brief from the response
     const enhancedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     const creativeBrief = data.choices?.[0]?.message?.content || "";
+    
+    // Comprehensive finish reason and refusal detection
+    const finishReason = (data.choices?.[0]?.native_finish_reason || data.choices?.[0]?.finish_reason || "").toUpperCase();
+    const textContent = (data.choices?.[0]?.message?.content || "").toLowerCase();
+    
+    // Known safety / refusal finish reasons
+    const safetyReasons = ["SAFETY", "IMAGE_SAFETY", "CONTENT_FILTER", "RECITATION", "OTHER"];
+    const isSafetyBlock = safetyReasons.includes(finishReason);
+    
+    // Known refusal phrases in model text
+    const refusalPhrases = ["cannot", "i'm unable", "i am unable", "not able to", "i can't", "inappropriate", "violates", "policy"];
+    const isTextRefusal = refusalPhrases.some(phrase => textContent.includes(phrase));
 
     if (!enhancedImageUrl) {
       // Log detailed response for debugging
-      const responsePreview = JSON.stringify(data).substring(0, 800);
+      const responsePreview = JSON.stringify(data).substring(0, 1200);
       console.error("No image in AI response. Full response preview:", responsePreview);
-      
-      // Check for common reasons
-      const finishReason = data.choices?.[0]?.finish_reason;
-      const textContent = data.choices?.[0]?.message?.content || "";
-      
       console.error("Finish reason:", finishReason);
-      console.error("Text content:", textContent.substring(0, 300));
+      console.error("Text content preview:", textContent.substring(0, 400));
       
-      // Provide specific error messages based on likely cause
-      if (finishReason === "content_filter" || textContent.toLowerCase().includes("cannot") || textContent.toLowerCase().includes("unable")) {
+      // Provide specific, actionable error messages
+      if (isSafetyBlock) {
         return new Response(
-          JSON.stringify({ error: "The AI couldn't process this image. Try a different photo or adjust settings." }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ 
+            error: "This photo was blocked by content safety filters. Please try a different image—avoid close-ups of skin, suggestive poses, or images that may be flagged as sensitive.",
+            retryable: false,
+            reason: "safety_filter"
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       
-      // Generic retry message for other cases
+      if (isTextRefusal) {
+        return new Response(
+          JSON.stringify({ 
+            error: "The AI couldn't enhance this particular image. Try a different photo with clearer lighting or less complex backgrounds.",
+            retryable: false,
+            reason: "model_refusal"
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Generic transient failure - encourage retry
       return new Response(
-        JSON.stringify({ error: "Image generation failed. Please try again — this sometimes happens with complex images." }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ 
+          error: "Image enhancement failed this time. This can happen occasionally—please try again.",
+          retryable: true,
+          reason: "no_image_generated"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
