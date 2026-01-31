@@ -19,8 +19,9 @@ interface GenerationHistory {
   feature_name: string;
   created_at: string;
   user_email?: string;
-  input_images: string[];
-  output_images: string[];
+  input_images?: string[];
+  output_images?: string[];
+  images_loaded?: boolean;
 }
 
 // Cache key for localStorage fallback
@@ -200,63 +201,68 @@ export const useAdmin = () => {
     }
   }, [isAdmin]);
 
-  // Fetch generation history with images - with retry for timeouts
+  // Fetch generation history - WITHOUT images for fast loading
   const fetchHistory = useCallback(async () => {
     if (!isAdmin) return;
 
-    const maxRetries = 3;
-    let lastError: any = null;
+    try {
+      console.log(`[useAdmin] Fetching history (lightweight)...`);
+      
+      // Only fetch metadata - NO images (they cause timeouts)
+      const { data, error } = await supabase
+        .from('generation_history')
+        .select('id, user_id, feature_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        console.log(`[useAdmin] Fetching history, attempt ${attempt + 1}/${maxRetries}`);
-        
-        // Smaller limit to reduce timeout risk
-        const { data, error } = await supabase
-          .from('generation_history')
-          .select('id, user_id, feature_name, created_at, input_images, output_images')
-          .order('created_at', { ascending: false })
-          .limit(50);
+      if (error) throw error;
 
-        if (error) {
-          lastError = error;
-          // If timeout, retry
-          if (error.code === '57014' || error.message?.includes('timeout')) {
-            console.warn(`[useAdmin] History fetch timeout, retrying in ${(attempt + 1) * 2}s...`);
-            await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
-            continue;
-          }
-          throw error;
-        }
+      // Get user emails in parallel
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, email');
 
-        // Get user emails in parallel
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, email');
+      const emailMap = new Map(profiles?.map(p => [p.user_id, p.email]) || []);
 
-        const emailMap = new Map(profiles?.map(p => [p.user_id, p.email]) || []);
+      const historyWithEmails: GenerationHistory[] = (data || []).map(h => ({
+        ...h,
+        user_email: emailMap.get(h.user_id) || 'Unknown',
+        images_loaded: false,
+      }));
 
-        const historyWithEmails: GenerationHistory[] = (data || []).map(h => ({
-          ...h,
-          user_email: emailMap.get(h.user_id) || 'Unknown',
-          input_images: h.input_images || [],
-          output_images: h.output_images || [],
-        }));
-
-        setHistory(historyWithEmails);
-        console.log(`[useAdmin] Fetched ${historyWithEmails.length} history entries`);
-        return; // Success
-      } catch (error: any) {
-        lastError = error;
-        console.error(`[useAdmin] History fetch attempt ${attempt + 1} failed:`, error?.message || error);
-        if (attempt < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
-        }
-      }
+      setHistory(historyWithEmails);
+      console.log(`[useAdmin] Fetched ${historyWithEmails.length} history entries`);
+    } catch (error: any) {
+      console.error("[useAdmin] History fetch failed:", error?.message || error);
     }
-
-    console.error("[useAdmin] All history fetch attempts failed:", lastError);
   }, [isAdmin]);
+
+  // Lazy load images for a specific history entry
+  const loadHistoryImages = useCallback(async (historyId: string): Promise<{ input_images: string[], output_images: string[] } | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('generation_history')
+        .select('input_images, output_images')
+        .eq('id', historyId)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        // Update the history entry with loaded images
+        setHistory(prev => prev.map(h => 
+          h.id === historyId 
+            ? { ...h, input_images: data.input_images || [], output_images: data.output_images || [], images_loaded: true }
+            : h
+        ));
+        return { input_images: data.input_images || [], output_images: data.output_images || [] };
+      }
+      return null;
+    } catch (error) {
+      console.error("Error loading images for history:", error);
+      return null;
+    }
+  }, []);
 
   // Update user gems
   const updateCredits = useCallback(async (targetUserId: string, newGems: number): Promise<boolean> => {
@@ -450,5 +456,6 @@ export const useAdmin = () => {
     clearSubscription,
     refetchUsers: fetchUsers,
     refetchHistory: fetchHistory,
+    loadHistoryImages,
   };
 };
