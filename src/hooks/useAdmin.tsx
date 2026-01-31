@@ -23,14 +23,52 @@ interface GenerationHistory {
   output_images: string[];
 }
 
+// Cache key for localStorage fallback
+const ADMIN_CACHE_KEY = 'bh_admin_status';
+
+// Get cached admin status from localStorage
+const getCachedAdminStatus = (userId: string): boolean | null => {
+  try {
+    const cached = localStorage.getItem(ADMIN_CACHE_KEY);
+    if (cached) {
+      const { userId: cachedUserId, isAdmin, timestamp } = JSON.parse(cached);
+      // Cache valid for 24 hours and must match current user
+      if (cachedUserId === userId && Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+        return isAdmin;
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+};
+
+// Save admin status to localStorage
+const setCachedAdminStatus = (userId: string, isAdmin: boolean) => {
+  try {
+    localStorage.setItem(ADMIN_CACHE_KEY, JSON.stringify({
+      userId,
+      isAdmin,
+      timestamp: Date.now()
+    }));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 export const useAdmin = () => {
   const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Initialize from cache if available
+  const [isAdmin, setIsAdmin] = useState(() => {
+    if (user?.id) {
+      return getCachedAdminStatus(user.id) ?? false;
+    }
+    return false;
+  });
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserWithGems[]>([]);
   const [history, setHistory] = useState<GenerationHistory[]>([]);
-  // IMPORTANT: Admin status should never "flip" to false purely because of transient network errors.
-  // We only downgrade to non-admin when we have a *successful* RPC response of false, or on sign-out.
 
   // Check if current user is admin with retry logic
   useEffect(() => {
@@ -41,12 +79,17 @@ export const useAdmin = () => {
       if (!user?.id) {
         setIsAdmin(false);
         setLoading(false);
+        localStorage.removeItem(ADMIN_CACHE_KEY);
         return;
       }
 
-      // If we have a user, we are actively checking admin status.
-      // (We keep isAdmin as last-known-good on transient failures.)
-      setLoading(true);
+      // Check cache first - use cached value immediately while we verify
+      const cachedStatus = getCachedAdminStatus(user.id);
+      if (cachedStatus !== null) {
+        setIsAdmin(cachedStatus);
+        // Don't show loading if we have a cached value
+        setLoading(false);
+      }
 
       console.log("[useAdmin] Checking admin status for user:", user.id);
 
@@ -70,38 +113,44 @@ export const useAdmin = () => {
           if (error) {
             lastError = error;
             console.warn(`[useAdmin] RPC error:`, error.message);
-            // If it's a timeout, wait and retry
-            if (error.message?.includes('timeout') || error.code === '544' || error.message?.includes('connection')) {
-              console.warn(`[useAdmin] Attempt ${attempt + 1} timed out, retrying...`);
-              await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)));
+            // If it's a timeout or connection error, wait and retry
+            if (error.message?.includes('timeout') || error.code === '544' || 
+                error.message?.includes('connection') || error.code === 'PGRST002' ||
+                error.message?.includes('schema cache')) {
+              console.warn(`[useAdmin] Attempt ${attempt + 1} failed, retrying...`);
+              await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
               continue;
             }
             throw error;
           }
           
           console.log("[useAdmin] Admin check result:", data);
-          setIsAdmin(data === true);
+          const adminStatus = data === true;
+          setIsAdmin(adminStatus);
+          setCachedAdminStatus(user.id, adminStatus);
           setLoading(false);
           return; // Success, exit the retry loop
         } catch (error: any) {
           lastError = error;
           console.error(`[useAdmin] Attempt ${attempt + 1} failed:`, error?.message || error);
           if (attempt < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)));
+            await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
           }
         }
       }
       
-       // All retries failed
-       // Do NOT downgrade admin status on errors; keep the last known value.
-       console.error("[useAdmin] All admin check attempts failed:", lastError);
-       if (isMounted) {
-         setLoading(false);
-         // Keep trying in the background; otherwise a bad first fetch can lock isAdmin=false forever.
-         retryTimer = window.setTimeout(() => {
-           if (isMounted) checkAdmin();
-         }, 5000);
-       }
+      // All retries failed - use cached value if available, otherwise keep current state
+      console.error("[useAdmin] All admin check attempts failed:", lastError);
+      if (isMounted) {
+        // If we had a cached value, we already set it above
+        // If not, we keep the default (false) but show loading is done
+        setLoading(false);
+        
+        // Keep trying in the background
+        retryTimer = window.setTimeout(() => {
+          if (isMounted) checkAdmin();
+        }, 10000); // Retry every 10 seconds when database is down
+      }
     };
 
     checkAdmin();
