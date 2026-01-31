@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PresenceProvider } from "@/components/PresenceProvider";
+import { AuthProvider } from "@/hooks/useAuth";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -37,43 +38,45 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <PresenceProvider>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/info" element={<Info />} />
-            
-            {/* Protected routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-            <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
-            
-            {/* Tool pages - all unified under /tools/ */}
-            <Route path="/tools/character-generator" element={<ProtectedRoute><CharacterGeneratorPage /></ProtectedRoute>} />
-            <Route path="/tools/prompt-extractor" element={<ProtectedRoute><PromptExtractorPage /></ProtectedRoute>} />
-            <Route path="/tools/dress-extractor" element={<ProtectedRoute><DressExtractorPage /></ProtectedRoute>} />
-            <Route path="/tools/background-saver" element={<ProtectedRoute><BackgroundSaverPage /></ProtectedRoute>} />
-            <Route path="/tools/pose-transfer" element={<ProtectedRoute><PoseTransferPage /></ProtectedRoute>} />
-            <Route path="/tools/makeup-studio" element={<ProtectedRoute><MakeupStudioPage /></ProtectedRoute>} />
-            <Route path="/tools/face-swap" element={<ProtectedRoute><FaceSwapPage /></ProtectedRoute>} />
-            <Route path="/tools/cinematic-studio" element={<ProtectedRoute><CinematicStudioPage /></ProtectedRoute>} />
-            <Route path="/tools/background-creator" element={<ProtectedRoute><BackgroundCreatorPage /></ProtectedRoute>} />
-            <Route path="/tools/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
-            <Route path="/tools/caption-studio" element={<ProtectedRoute><CaptionStudioPage /></ProtectedRoute>} />
-            <Route path="/tools/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
-            <Route path="/tools/prompt-engineer" element={<ProtectedRoute><PromptEngineerPage /></ProtectedRoute>} />
-            <Route path="/tools/logo-generator" element={<ProtectedRoute><LogoGeneratorPage /></ProtectedRoute>} />
-            
-            {/* Legacy routes - redirect to new paths */}
-            <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
-            <Route path="/caption-studio" element={<ProtectedRoute><CaptionStudioPage /></ProtectedRoute>} />
-            <Route path="/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
-            
-            {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </PresenceProvider>
+        <AuthProvider>
+          <PresenceProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/info" element={<Info />} />
+              
+              {/* Protected routes */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+              
+              {/* Tool pages - all unified under /tools/ */}
+              <Route path="/tools/character-generator" element={<ProtectedRoute><CharacterGeneratorPage /></ProtectedRoute>} />
+              <Route path="/tools/prompt-extractor" element={<ProtectedRoute><PromptExtractorPage /></ProtectedRoute>} />
+              <Route path="/tools/dress-extractor" element={<ProtectedRoute><DressExtractorPage /></ProtectedRoute>} />
+              <Route path="/tools/background-saver" element={<ProtectedRoute><BackgroundSaverPage /></ProtectedRoute>} />
+              <Route path="/tools/pose-transfer" element={<ProtectedRoute><PoseTransferPage /></ProtectedRoute>} />
+              <Route path="/tools/makeup-studio" element={<ProtectedRoute><MakeupStudioPage /></ProtectedRoute>} />
+              <Route path="/tools/face-swap" element={<ProtectedRoute><FaceSwapPage /></ProtectedRoute>} />
+              <Route path="/tools/cinematic-studio" element={<ProtectedRoute><CinematicStudioPage /></ProtectedRoute>} />
+              <Route path="/tools/background-creator" element={<ProtectedRoute><BackgroundCreatorPage /></ProtectedRoute>} />
+              <Route path="/tools/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
+              <Route path="/tools/caption-studio" element={<ProtectedRoute><CaptionStudioPage /></ProtectedRoute>} />
+              <Route path="/tools/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
+              <Route path="/tools/prompt-engineer" element={<ProtectedRoute><PromptEngineerPage /></ProtectedRoute>} />
+              <Route path="/tools/logo-generator" element={<ProtectedRoute><LogoGeneratorPage /></ProtectedRoute>} />
+              
+              {/* Legacy routes - redirect to new paths */}
+              <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
+              <Route path="/caption-studio" element={<ProtectedRoute><CaptionStudioPage /></ProtectedRoute>} />
+              <Route path="/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
+              
+              {/* Catch-all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PresenceProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
