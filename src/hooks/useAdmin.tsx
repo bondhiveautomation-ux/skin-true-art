@@ -29,6 +29,8 @@ export const useAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserWithGems[]>([]);
   const [history, setHistory] = useState<GenerationHistory[]>([]);
+  // IMPORTANT: Admin status should never "flip" to false purely because of transient network errors.
+  // We only downgrade to non-admin when we have a *successful* RPC response of false, or on sign-out.
 
   // Check if current user is admin with retry logic
   useEffect(() => {
@@ -85,12 +87,12 @@ export const useAdmin = () => {
         }
       }
       
-      // All retries failed
-      console.error("[useAdmin] All admin check attempts failed:", lastError);
-      if (isMounted) {
-        setIsAdmin(false);
-        setLoading(false);
-      }
+       // All retries failed
+       // Do NOT downgrade admin status on errors; keep the last known value.
+       console.error("[useAdmin] All admin check attempts failed:", lastError);
+       if (isMounted) {
+         setLoading(false);
+       }
     };
 
     checkAdmin();
