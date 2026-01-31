@@ -5,6 +5,7 @@ import { useFeatureGemCosts } from "@/hooks/useFeatureGemCosts";
 import { TOOLS } from "@/config/tools";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Gem, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,11 +14,43 @@ interface DepartmentToolGridProps {
   onBack?: () => void;
 }
 
+// Skeleton card for instant perceived loading
+const ToolCardSkeleton = () => (
+  <Card className="relative overflow-hidden bg-charcoal-light border-gold/15 aspect-square">
+    <Skeleton className="absolute inset-0 bg-charcoal" />
+    <div className="absolute top-3 right-3">
+      <Skeleton className="w-12 h-6 rounded-full bg-charcoal-light" />
+    </div>
+    <div className="absolute bottom-0 left-0 right-0 p-4">
+      <Skeleton className="h-6 w-3/4 mb-2 bg-charcoal-light" />
+      <Skeleton className="h-4 w-1/2 bg-charcoal-light" />
+    </div>
+  </Card>
+);
+
+// Department skeleton for instant perceived loading
+const DepartmentSkeleton = () => (
+  <section className="space-y-5">
+    <div className="border-b border-gold/20 pb-4">
+      <Skeleton className="h-8 w-48 mb-2 bg-charcoal-light" />
+      <Skeleton className="h-5 w-32 bg-charcoal-light" />
+    </div>
+    <div className="grid grid-cols-2 gap-4 sm:gap-5">
+      <ToolCardSkeleton />
+      <ToolCardSkeleton />
+      <ToolCardSkeleton />
+      <ToolCardSkeleton />
+    </div>
+  </section>
+);
+
 export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGridProps) => {
   const navigate = useNavigate();
   const { departments, isLoading: depsLoading, error: depsError, refetch: refetchDeps } = useDepartments();
   const { toolConfigs, isLoading: toolsLoading, error: toolsError, refetch: refetchTools } = useToolConfigs();
   const { features } = useFeatureGemCosts();
+
+  const isLoading = depsLoading || toolsLoading;
 
   const getGemCost = (featureKey: string) => {
     const feature = features.find(f => f.feature_key === featureKey);
@@ -29,8 +62,8 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
     refetchTools();
   };
 
-  // Error state with retry button
-  if (depsError || toolsError) {
+  // Error state with retry button (only show if not loading and there's an error)
+  if (!isLoading && (depsError || toolsError)) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
         <div className="w-14 h-14 rounded-full bg-destructive/20 flex items-center justify-center mb-4">
@@ -48,10 +81,12 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
     );
   }
 
-  if (depsLoading || toolsLoading) {
+  // Show skeleton loading state immediately (no spinner delay)
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
+      <div className="space-y-10">
+        <DepartmentSkeleton />
+        <DepartmentSkeleton />
       </div>
     );
   }
