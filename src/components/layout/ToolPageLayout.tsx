@@ -51,7 +51,7 @@ export const ToolPageLayout = ({
   const location = useLocation();
   const { signOut } = useAuth();
   const { gems } = useGems();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const { getToolConfig } = useToolConfigs();
 
   // Scroll to top when tool page loads
@@ -81,6 +81,7 @@ export const ToolPageLayout = ({
         onSignOut={signOut}
         credits={gems}
         isAdmin={isAdmin}
+        adminLoading={adminLoading}
       />
 
       {/* Hero Section - Compact on mobile */}
