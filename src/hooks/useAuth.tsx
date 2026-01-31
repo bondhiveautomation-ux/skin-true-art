@@ -123,10 +123,27 @@ export const useAuth = () => {
   }, [checkBlockedStatus]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setIsBlocked(false);
-    // Redirect to homepage after logout
-    window.location.href = "/";
+    try {
+      // Clear local state first for immediate UI feedback
+      setSession(null);
+      setUser(null);
+      setIsBlocked(false);
+      
+      // Then sign out from Supabase (with timeout to prevent hanging)
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
+      );
+      
+      await Promise.race([signOutPromise, timeoutPromise]).catch((err) => {
+        console.warn('Sign out warning:', err);
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      // Always redirect to homepage
+      window.location.href = "/";
+    }
   };
 
   return {
