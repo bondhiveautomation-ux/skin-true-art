@@ -30,7 +30,7 @@ export const useAdmin = () => {
   const [users, setUsers] = useState<UserWithGems[]>([]);
   const [history, setHistory] = useState<GenerationHistory[]>([]);
 
-  // Check if current user is admin
+  // Check if current user is admin with retry logic
   useEffect(() => {
     const checkAdmin = async () => {
       if (!user?.id) {
@@ -39,20 +39,44 @@ export const useAdmin = () => {
         return;
       }
 
-      try {
-        const { data, error } = await supabase.rpc('has_role', {
-          _user_id: user.id,
-          _role: 'admin'
-        });
-        
-        if (error) throw error;
-        setIsAdmin(data === true);
-      } catch (error) {
-        console.error("Error checking admin status:", error);
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
+      // Retry logic for database timeouts
+      const maxRetries = 3;
+      let lastError: any = null;
+      
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const { data, error } = await supabase.rpc('has_role', {
+            _user_id: user.id,
+            _role: 'admin'
+          });
+          
+          if (error) {
+            lastError = error;
+            // If it's a timeout, wait and retry
+            if (error.message?.includes('timeout') || error.code === '544') {
+              console.warn(`Admin check attempt ${attempt + 1} timed out, retrying...`);
+              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              continue;
+            }
+            throw error;
+          }
+          
+          setIsAdmin(data === true);
+          setLoading(false);
+          return; // Success, exit the retry loop
+        } catch (error) {
+          lastError = error;
+          console.error(`Admin check attempt ${attempt + 1} failed:`, error);
+          if (attempt < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+          }
+        }
       }
+      
+      // All retries failed
+      console.error("All admin check attempts failed:", lastError);
+      setIsAdmin(false);
+      setLoading(false);
     };
 
     checkAdmin();
