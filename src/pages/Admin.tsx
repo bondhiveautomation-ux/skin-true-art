@@ -87,7 +87,8 @@ import { ArticlesManager } from "@/components/admin/ArticlesManager";
 import { GenerationCounter } from "@/components/admin/GenerationCounter";
 import ToolConfigsManager from "@/components/admin/ToolConfigsManager";
 import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
-import { FolderOpen } from "lucide-react";
+import { LandingExamplesManager } from "@/components/admin/LandingExamplesManager";
+import { FolderOpen, ImageIcon } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -652,6 +653,10 @@ const Admin = () => {
                   <DropdownMenuItem onClick={() => setActiveTab("departments")} className="gap-2 cursor-pointer">
                     <FolderOpen className="w-4 h-4" />
                     Departments
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("landing-examples")} className="gap-2 cursor-pointer">
+                    <ImageIcon className="w-4 h-4" />
+                    Landing Examples
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1234,6 +1239,10 @@ const Admin = () => {
 
           <TabsContent value="departments">
             <DepartmentsManager />
+          </TabsContent>
+
+          <TabsContent value="landing-examples">
+            <LandingExamplesManager />
           </TabsContent>
         </Tabs>
       </main>
