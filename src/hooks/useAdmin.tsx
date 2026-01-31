@@ -35,6 +35,7 @@ export const useAdmin = () => {
   // Check if current user is admin with retry logic
   useEffect(() => {
     let isMounted = true;
+    let retryTimer: number | null = null;
     
     const checkAdmin = async () => {
       if (!user?.id) {
@@ -42,6 +43,10 @@ export const useAdmin = () => {
         setLoading(false);
         return;
       }
+
+      // If we have a user, we are actively checking admin status.
+      // (We keep isAdmin as last-known-good on transient failures.)
+      setLoading(true);
 
       console.log("[useAdmin] Checking admin status for user:", user.id);
 
@@ -92,6 +97,10 @@ export const useAdmin = () => {
        console.error("[useAdmin] All admin check attempts failed:", lastError);
        if (isMounted) {
          setLoading(false);
+         // Keep trying in the background; otherwise a bad first fetch can lock isAdmin=false forever.
+         retryTimer = window.setTimeout(() => {
+           if (isMounted) checkAdmin();
+         }, 5000);
        }
     };
 
@@ -99,6 +108,7 @@ export const useAdmin = () => {
     
     return () => {
       isMounted = false;
+      if (retryTimer) window.clearTimeout(retryTimer);
     };
   }, [user?.id]);
 
