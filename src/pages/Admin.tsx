@@ -93,11 +93,12 @@ import { FolderOpen, ImageIcon } from "lucide-react";
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, toggleBlockUser, setSubscription, clearSubscription, refetchUsers, refetchHistory } = useAdmin();
+  const { isAdmin, loading: adminLoading, users, history, updateCredits, deleteUser, deleteHistoryEntry, createUser, toggleBlockUser, setSubscription, clearSubscription, refetchUsers, refetchHistory, loadHistoryImages } = useAdmin();
   const { toast } = useToast();
   const [creditInputs, setCreditInputs] = useState<Record<string, string>>({});
   const [processingUser, setProcessingUser] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [loadingImagesFor, setLoadingImagesFor] = useState<Set<string>>(new Set());
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState("counter");
@@ -370,16 +371,30 @@ const Admin = () => {
     setCreatingUser(false);
   };
 
-  const toggleRow = (id: string) => {
-    setExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
+  const toggleRow = async (id: string) => {
+    const isCurrentlyExpanded = expandedRows.has(id);
+    
+    if (isCurrentlyExpanded) {
+      // Collapse
+      setExpandedRows(prev => {
+        const newSet = new Set(prev);
         newSet.delete(id);
-      } else {
-        newSet.add(id);
+        return newSet;
+      });
+    } else {
+      // Expand - load images if needed
+      const entry = history.find(h => h.id === id);
+      if (entry && !entry.images_loaded) {
+        setLoadingImagesFor(prev => new Set(prev).add(id));
+        await loadHistoryImages(id);
+        setLoadingImagesFor(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
       }
-      return newSet;
-    });
+      setExpandedRows(prev => new Set(prev).add(id));
+    }
   };
 
   const handleDownloadImage = async (url: string, filename: string) => {
@@ -1073,9 +1088,11 @@ const Admin = () => {
                     </TableRow>
                   ) : (
                     history.map((h) => {
-                      const hasImages = h.input_images.length > 0 || h.output_images.length > 0;
+                      const inputImages = h.input_images || [];
+                      const outputImages = h.output_images || [];
+                      const hasImages = h.images_loaded ? (inputImages.length > 0 || outputImages.length > 0) : true; // Assume has images until loaded
                       const isExpanded = expandedRows.has(h.id);
-                      
+                      const isLoadingImages = loadingImagesFor.has(h.id);
                       return (
                         <React.Fragment key={h.id}>
                           <TableRow className={hasImages ? "cursor-pointer hover:bg-accent/30" : ""}>
@@ -1086,30 +1103,38 @@ const Admin = () => {
                                 aria-label={`Select ${h.feature_name}`}
                               />
                             </TableCell>
-                            <TableCell onClick={() => hasImages && toggleRow(h.id)}>
-                              {hasImages && (
-                                <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
-                                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                </Button>
-                              )}
+                            <TableCell onClick={() => toggleRow(h.id)}>
+                              <Button variant="ghost" size="sm" className="p-0 h-6 w-6">
+                                {isLoadingImages ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : isExpanded ? (
+                                  <ChevronUp className="w-4 h-4" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4" />
+                                )}
+                              </Button>
                             </TableCell>
-                            <TableCell onClick={() => hasImages && toggleRow(h.id)} className="font-medium">{h.user_email}</TableCell>
-                            <TableCell onClick={() => hasImages && toggleRow(h.id)}>
+                            <TableCell onClick={() => toggleRow(h.id)} className="font-medium">{h.user_email}</TableCell>
+                            <TableCell onClick={() => toggleRow(h.id)}>
                               <span className="px-2 py-1 rounded-full bg-gold/10 text-gold text-sm font-medium">
                                 {h.feature_name}
                               </span>
                             </TableCell>
-                            <TableCell onClick={() => hasImages && toggleRow(h.id)}>
-                              {hasImages ? (
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                  <Image className="w-4 h-4" />
-                                  <span>{h.input_images.length} in / {h.output_images.length} out</span>
-                                </div>
+                            <TableCell onClick={() => toggleRow(h.id)}>
+                              {h.images_loaded ? (
+                                inputImages.length > 0 || outputImages.length > 0 ? (
+                                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    <Image className="w-4 h-4" />
+                                    <span>{inputImages.length} in / {outputImages.length} out</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground/50">No images</span>
+                                )
                               ) : (
-                                <span className="text-sm text-muted-foreground/50">No images</span>
+                                <span className="text-sm text-muted-foreground/50">Click to view</span>
                               )}
                             </TableCell>
-                            <TableCell onClick={() => hasImages && toggleRow(h.id)} className="text-muted-foreground text-sm">
+                            <TableCell onClick={() => toggleRow(h.id)} className="text-muted-foreground text-sm">
                               {formatDate(h.created_at)}
                             </TableCell>
                             <TableCell className="text-right">
@@ -1149,57 +1174,66 @@ const Admin = () => {
                           </TableRow>
                           
                           {/* Expanded row for images */}
-                          {isExpanded && hasImages && (
+                          {isExpanded && (
                             <TableRow key={`${h.id}-images`}>
                               <TableCell colSpan={7} className="bg-accent/20 p-4">
-                                {/* Feature explanation */}
-                                <div className="mb-4 p-3 rounded-lg bg-card/50 border border-gold/10">
-                                  <FeatureExplanation featureName={h.feature_name} inputCount={h.input_images.length} />
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  {/* Input Images */}
-                                  <div>
-                                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                      Input Images ({h.input_images.length})
-                                    </h4>
-                                    {h.input_images.length > 0 ? (
-                                      <div className="flex flex-wrap gap-2">
-                                        {h.input_images.map((img, idx) => {
-                                          const label = getInputImageLabel(h.feature_name, idx, h.input_images.length);
-                                          return (
-                                            <div key={idx} className="flex flex-col items-center gap-1">
-                                              <ImageThumbnail src={img} alt={label} />
-                                              <span className="text-[10px] text-muted-foreground text-center max-w-[60px] truncate" title={label}>
-                                                {label}
-                                              </span>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    ) : (
-                                      <p className="text-sm text-muted-foreground">No input images recorded</p>
-                                    )}
+                                {isLoadingImages ? (
+                                  <div className="flex items-center justify-center py-8">
+                                    <Loader2 className="w-6 h-6 animate-spin text-gold" />
+                                    <span className="ml-2 text-muted-foreground">Loading images...</span>
                                   </div>
-                                  
-                                  {/* Output Media (Images/Videos) */}
-                                  <div>
-                                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                      Output ({h.output_images.length}) {h.feature_name === "Videography Studio" && <Video className="w-3 h-3 text-gold" />}
-                                    </h4>
-                                    {h.output_images.length > 0 ? (
-                                      <div className="flex flex-wrap gap-2">
-                                        {h.output_images.map((media, idx) => (
-                                          <MediaThumbnail key={idx} src={media} alt={`Output ${idx + 1}`} isOutput />
-                                        ))}
+                                ) : (
+                                  <>
+                                    {/* Feature explanation */}
+                                    <div className="mb-4 p-3 rounded-lg bg-card/50 border border-gold/10">
+                                      <FeatureExplanation featureName={h.feature_name} inputCount={inputImages.length} />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      {/* Input Images */}
+                                      <div>
+                                        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                          Input Images ({inputImages.length})
+                                        </h4>
+                                        {inputImages.length > 0 ? (
+                                          <div className="flex flex-wrap gap-2">
+                                            {inputImages.map((img, idx) => {
+                                              const label = getInputImageLabel(h.feature_name, idx, inputImages.length);
+                                              return (
+                                                <div key={idx} className="flex flex-col items-center gap-1">
+                                                  <ImageThumbnail src={img} alt={label} />
+                                                  <span className="text-[10px] text-muted-foreground text-center max-w-[60px] truncate" title={label}>
+                                                    {label}
+                                                  </span>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        ) : (
+                                          <p className="text-sm text-muted-foreground">No input images recorded</p>
+                                        )}
                                       </div>
-                                    ) : (
-                                      <p className="text-sm text-muted-foreground">No output recorded</p>
-                                    )}
-                                  </div>
-                                </div>
+                                      
+                                      {/* Output Media (Images/Videos) */}
+                                      <div>
+                                        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                          Output ({outputImages.length}) {h.feature_name === "Videography Studio" && <Video className="w-3 h-3 text-gold" />}
+                                        </h4>
+                                        {outputImages.length > 0 ? (
+                                          <div className="flex flex-wrap gap-2">
+                                            {outputImages.map((media, idx) => (
+                                              <MediaThumbnail key={idx} src={media} alt={`Output ${idx + 1}`} isOutput />
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <p className="text-sm text-muted-foreground">No output recorded</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                               </TableCell>
                             </TableRow>
                           )}
