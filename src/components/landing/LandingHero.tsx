@@ -134,20 +134,12 @@ export const LandingHero = () => {
           <span className="gradient-text">এখন প্রফেশনালভাবে তৈরি করুন</span>
         </h1>
         
-        {/* English Sub-headline */}
-        <p className="text-sm sm:text-base md:text-lg text-cream/50 max-w-2xl mx-auto mb-6 section-animate delay-2 font-light px-4">
-          Create premium visuals and brand content without a photographer, designer, or editing skills.
-        </p>
-
         {/* Supporting Paragraph - Bangla */}
         <div className="max-w-2xl mx-auto mb-4 section-animate delay-2 px-4">
-          <p className="font-bangla text-sm sm:text-base text-cream/60 leading-relaxed mb-2">
+          <p className="font-bangla text-sm sm:text-base text-cream/60 leading-relaxed">
             BH Studio হলো একটাই প্ল্যাটফর্ম— যেখানে আপনি আপনার প্রোডাক্ট/সার্ভিসের জন্য প্রফেশনাল কনটেন্ট বানাতে পারবেন।
             <br />
             সেল বাড়ানোর মতো ছবি, ব্র্যান্ড লুক, ক্যাপশন-রেডি কনটেন্ট— সব এক জায়গায়।
-          </p>
-          <p className="text-xs sm:text-sm text-cream/40 font-light">
-            One place to create content that looks expensive, consistent, and sales-ready.
           </p>
         </div>
 
