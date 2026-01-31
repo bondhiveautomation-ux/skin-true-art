@@ -200,37 +200,62 @@ export const useAdmin = () => {
     }
   }, [isAdmin]);
 
-  // Fetch generation history with images
+  // Fetch generation history with images - with retry for timeouts
   const fetchHistory = useCallback(async () => {
     if (!isAdmin) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('generation_history')
-        .select('id, user_id, feature_name, created_at, input_images, output_images')
-        .order('created_at', { ascending: false })
-        .limit(100);
+    const maxRetries = 3;
+    let lastError: any = null;
 
-      if (error) throw error;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        console.log(`[useAdmin] Fetching history, attempt ${attempt + 1}/${maxRetries}`);
+        
+        // Smaller limit to reduce timeout risk
+        const { data, error } = await supabase
+          .from('generation_history')
+          .select('id, user_id, feature_name, created_at, input_images, output_images')
+          .order('created_at', { ascending: false })
+          .limit(50);
 
-      // Get user emails
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, email');
+        if (error) {
+          lastError = error;
+          // If timeout, retry
+          if (error.code === '57014' || error.message?.includes('timeout')) {
+            console.warn(`[useAdmin] History fetch timeout, retrying in ${(attempt + 1) * 2}s...`);
+            await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+            continue;
+          }
+          throw error;
+        }
 
-      const emailMap = new Map(profiles?.map(p => [p.user_id, p.email]) || []);
+        // Get user emails in parallel
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, email');
 
-      const historyWithEmails: GenerationHistory[] = (data || []).map(h => ({
-        ...h,
-        user_email: emailMap.get(h.user_id) || 'Unknown',
-        input_images: h.input_images || [],
-        output_images: h.output_images || [],
-      }));
+        const emailMap = new Map(profiles?.map(p => [p.user_id, p.email]) || []);
 
-      setHistory(historyWithEmails);
-    } catch (error) {
-      console.error("Error fetching history:", error);
+        const historyWithEmails: GenerationHistory[] = (data || []).map(h => ({
+          ...h,
+          user_email: emailMap.get(h.user_id) || 'Unknown',
+          input_images: h.input_images || [],
+          output_images: h.output_images || [],
+        }));
+
+        setHistory(historyWithEmails);
+        console.log(`[useAdmin] Fetched ${historyWithEmails.length} history entries`);
+        return; // Success
+      } catch (error: any) {
+        lastError = error;
+        console.error(`[useAdmin] History fetch attempt ${attempt + 1} failed:`, error?.message || error);
+        if (attempt < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+        }
+      }
     }
+
+    console.error("[useAdmin] All history fetch attempts failed:", lastError);
   }, [isAdmin]);
 
   // Update user gems
