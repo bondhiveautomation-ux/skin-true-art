@@ -1,7 +1,7 @@
-import { Crown, Shield, Star } from "lucide-react";
+import { Crown, Shield, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type BadgeType = "admin" | "pro" | "elite";
+type BadgeType = "checking" | "admin" | "pro" | "elite";
 
 interface UserBadgeProps {
   type: BadgeType;
@@ -16,6 +16,14 @@ const badgeConfig: Record<BadgeType, {
   textClass: string;
   borderClass: string;
 }> = {
+  checking: {
+    label: "Checking…",
+    labelBn: "যাচাই হচ্ছে…",
+    icon: Loader2,
+    bgClass: "bg-muted/30",
+    textClass: "text-muted-foreground",
+    borderClass: "border-border/40",
+  },
   admin: {
     label: "Admin",
     labelBn: "অ্যাডমিন",
@@ -56,7 +64,13 @@ export const UserBadge = ({ type, className }: UserBadgeProps) => {
         className
       )}
     >
-      <Icon className={cn("w-3.5 h-3.5", config.textClass)} />
+      <Icon
+        className={cn(
+          "w-3.5 h-3.5",
+          config.textClass,
+          type === "checking" && "animate-spin"
+        )}
+      />
       <span className={cn("text-xs font-semibold", config.textClass)}>
         {config.label}
       </span>
@@ -65,7 +79,12 @@ export const UserBadge = ({ type, className }: UserBadgeProps) => {
 };
 
 // Helper to determine badge type from user data
-export const getUserBadgeType = (isAdmin: boolean, subscriptionType?: string | null): BadgeType => {
+export const getUserBadgeType = (
+  isAdmin: boolean,
+  subscriptionType?: string | null,
+  adminLoading?: boolean
+): BadgeType => {
+  if (adminLoading) return "checking";
   if (isAdmin) return "admin";
   if (subscriptionType === "elite") return "elite";
   return "pro";

@@ -16,7 +16,7 @@ import { WelcomePopup } from "@/components/WelcomePopup";
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { gems, subscriptionType } = useGems();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const toolsRef = useRef<HTMLElement>(null);
   const [toolsVisible, setToolsVisible] = useState(false);
   
@@ -98,6 +98,7 @@ const Dashboard = () => {
         userEmail={user?.email}
         credits={gems}
         isAdmin={isAdmin}
+        adminLoading={adminLoading}
         subscriptionType={subscriptionType}
       />
 
