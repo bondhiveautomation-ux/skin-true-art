@@ -424,6 +424,42 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_examples: {
+        Row: {
+          category_key: string
+          category_name: string
+          category_name_bn: string
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          category_key: string
+          category_name: string
+          category_name_bn: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category_key?: string
+          category_name?: string
+          category_name_bn?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       logo_generations: {
         Row: {
           brand_name: string
