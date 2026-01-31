@@ -17,7 +17,7 @@ export const useDepartments = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: departments, isLoading, error } = useQuery({
+  const { data: departments, isLoading, error, refetch } = useQuery({
     queryKey: ["departments"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,6 +28,9 @@ export const useDepartments = () => {
       if (error) throw error;
       return data as Department[];
     },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const createDepartment = useMutation({
@@ -110,6 +113,7 @@ export const useDepartments = () => {
     departments,
     isLoading,
     error,
+    refetch,
     createDepartment,
     updateDepartment,
     deleteDepartment,

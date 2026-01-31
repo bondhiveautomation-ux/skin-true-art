@@ -5,7 +5,7 @@ import { useFeatureGemCosts } from "@/hooks/useFeatureGemCosts";
 import { TOOLS } from "@/config/tools";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Gem, ArrowLeft } from "lucide-react";
+import { Gem, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DepartmentToolGridProps {
@@ -15,14 +15,38 @@ interface DepartmentToolGridProps {
 
 export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGridProps) => {
   const navigate = useNavigate();
-  const { departments, isLoading: depsLoading } = useDepartments();
-  const { toolConfigs, isLoading: toolsLoading } = useToolConfigs();
+  const { departments, isLoading: depsLoading, error: depsError, refetch: refetchDeps } = useDepartments();
+  const { toolConfigs, isLoading: toolsLoading, error: toolsError, refetch: refetchTools } = useToolConfigs();
   const { features } = useFeatureGemCosts();
 
   const getGemCost = (featureKey: string) => {
     const feature = features.find(f => f.feature_key === featureKey);
     return feature?.gem_cost ?? 1;
   };
+
+  const handleRetry = () => {
+    refetchDeps();
+    refetchTools();
+  };
+
+  // Error state with retry button
+  if (depsError || toolsError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="w-14 h-14 rounded-full bg-destructive/20 flex items-center justify-center mb-4">
+          <AlertTriangle className="w-7 h-7 text-destructive" />
+        </div>
+        <h3 className="text-lg font-medium text-cream mb-2">Failed to load tools</h3>
+        <p className="text-sm text-cream/60 mb-6 max-w-xs">
+          There was a problem loading the tools. Please check your connection and try again.
+        </p>
+        <Button onClick={handleRetry} variant="outline" className="gap-2">
+          <RefreshCw className="w-4 h-4" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   if (depsLoading || toolsLoading) {
     return (

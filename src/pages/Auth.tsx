@@ -144,6 +144,10 @@ const Auth = () => {
           errorMessage = "Invalid email or password. Please try again.";
         } else if (error.message.includes("Email not confirmed")) {
           errorMessage = "Please verify your email first. Check your inbox for the verification link.";
+        } else if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError") || error.message.includes("network")) {
+          errorMessage = "Network error. Please check your internet connection and try again.";
+        } else if (error.message.includes("timeout")) {
+          errorMessage = "Connection timed out. Please try again.";
         }
         toast({
           title: "Login failed",
@@ -151,10 +155,17 @@ const Auth = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Handle network errors that throw exceptions
+      const isNetworkError = error?.message?.includes("Failed to fetch") || 
+                            error?.message?.includes("NetworkError") ||
+                            error?.message?.includes("network") ||
+                            error?.name === "TypeError";
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: isNetworkError ? "Connection error" : "Error",
+        description: isNetworkError 
+          ? "Unable to connect. Please check your internet and try again."
+          : "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -22,7 +22,7 @@ export const useToolConfigs = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: toolConfigs, isLoading, error } = useQuery({
+  const { data: toolConfigs, isLoading, error, refetch } = useQuery({
     queryKey: ["tool-configs"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,6 +33,9 @@ export const useToolConfigs = () => {
       if (error) throw error;
       return data as ToolConfigDB[];
     },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const updateToolConfig = useMutation({
@@ -80,6 +83,7 @@ export const useToolConfigs = () => {
     toolConfigs,
     isLoading,
     error,
+    refetch,
     updateToolConfig,
     toggleToolActive,
     getToolConfig,
