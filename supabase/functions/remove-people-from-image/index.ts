@@ -139,34 +139,53 @@ Generate a clean, people-free version of this image where the background remains
 
     console.log('Calling Lovable AI for people removal...');
     
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image-preview',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: systemPrompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: image
+    // Add timeout to AI request (60 seconds)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    
+    let aiResponse: Response;
+    try {
+      aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-image',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: systemPrompt
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: image
+                  }
                 }
-              }
-            ]
-          }
-        ],
-        modalities: ['image', 'text']
-      }),
-    });
+              ]
+            }
+          ],
+          modalities: ['image', 'text']
+        }),
+        signal: controller.signal
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ error: 'Request timed out. Please try again with a smaller image.' }),
+          { status: 408, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw fetchError;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
@@ -205,43 +224,47 @@ Generate a clean, people-free version of this image where the background remains
       );
     }
 
-    // Upload to storage and log generation if userId is provided
+    // Return the result immediately, don't wait for storage uploads
+    // Storage uploads happen in the background (fire and forget) to prevent timeouts
     if (userId) {
-      try {
-        let inputStorageUrl: string | null = null;
-        let outputStorageUrl: string | null = null;
+      // Non-blocking background task - don't await
+      (async () => {
+        try {
+          let inputStorageUrl: string | null = null;
+          let outputStorageUrl: string | null = null;
 
-        // Upload input image to storage
-        if (image.startsWith('data:image')) {
-          inputStorageUrl = await uploadImageToStorage(supabase, image, userId, 'input_bg_saver');
-          console.log("Input image uploaded:", inputStorageUrl ? "success" : "failed");
-        } else {
-          inputStorageUrl = image;
+          // Upload input image to storage with timeout
+          if (image.startsWith('data:image')) {
+            inputStorageUrl = await Promise.race([
+              uploadImageToStorage(supabase, image, userId, 'input_bg_saver'),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+            ]);
+            console.log("Input image uploaded:", inputStorageUrl ? "success" : "skipped/failed");
+          } else {
+            inputStorageUrl = image;
+          }
+
+          if (generatedImageUrl.startsWith('data:image')) {
+            outputStorageUrl = await Promise.race([
+              uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_bg_saver'),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+            ]);
+            console.log("Output image uploaded:", outputStorageUrl ? "success" : "skipped/failed");
+          }
+
+          const inputImages = inputStorageUrl ? [inputStorageUrl] : [];
+          const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
+
+          await supabase.rpc('log_generation', {
+            p_user_id: userId,
+            p_feature_name: 'Background Saver',
+            p_input_images: inputImages,
+            p_output_images: outputImages
+          });
+        } catch (logErr) {
+          console.error("Background logging error (non-blocking):", logErr);
         }
-
-        if (generatedImageUrl.startsWith('data:image')) {
-          outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_bg_saver');
-          console.log("Output image uploaded:", outputStorageUrl ? "success" : "failed");
-        }
-
-        const inputImages = inputStorageUrl ? [inputStorageUrl] : [];
-        const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
-
-        const { error: logError } = await supabase.rpc('log_generation', {
-          p_user_id: userId,
-          p_feature_name: 'Background Saver',
-          p_input_images: inputImages,
-          p_output_images: outputImages
-        });
-
-        if (logError) {
-          console.error("Error logging generation:", logError);
-        } else {
-          console.log("Generation logged with images:", { inputCount: inputImages.length, outputCount: outputImages.length });
-        }
-      } catch (logErr) {
-        console.error("Error in logging/upload:", logErr);
-      }
+      })();
     }
 
     return new Response(
