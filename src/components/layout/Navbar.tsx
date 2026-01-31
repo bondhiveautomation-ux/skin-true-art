@@ -32,11 +32,20 @@ interface NavbarProps {
   userEmail?: string;
   credits?: number | null;
   isAdmin?: boolean;
+  adminLoading?: boolean;
   subscriptionType?: string | null;
 }
 
-export const Navbar = ({ onNavigate, onSignOut, userEmail, credits, isAdmin, subscriptionType }: NavbarProps) => {
-  const badgeType = getUserBadgeType(isAdmin || false, subscriptionType);
+export const Navbar = ({
+  onNavigate,
+  onSignOut,
+  userEmail,
+  credits,
+  isAdmin,
+  adminLoading,
+  subscriptionType,
+}: NavbarProps) => {
+  const badgeType = getUserBadgeType(!!isAdmin, subscriptionType, adminLoading);
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
