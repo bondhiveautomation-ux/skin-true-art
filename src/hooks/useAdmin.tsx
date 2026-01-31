@@ -32,6 +32,8 @@ export const useAdmin = () => {
 
   // Check if current user is admin with retry logic
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAdmin = async () => {
       if (!user?.id) {
         setIsAdmin(false);
@@ -39,47 +41,63 @@ export const useAdmin = () => {
         return;
       }
 
+      console.log("[useAdmin] Checking admin status for user:", user.id);
+
       // Retry logic for database timeouts
       const maxRetries = 3;
       let lastError: any = null;
       
       for (let attempt = 0; attempt < maxRetries; attempt++) {
+        if (!isMounted) return;
+        
         try {
+          console.log(`[useAdmin] Attempt ${attempt + 1}/${maxRetries}`);
+          
           const { data, error } = await supabase.rpc('has_role', {
             _user_id: user.id,
             _role: 'admin'
           });
           
+          if (!isMounted) return;
+          
           if (error) {
             lastError = error;
+            console.warn(`[useAdmin] RPC error:`, error.message);
             // If it's a timeout, wait and retry
-            if (error.message?.includes('timeout') || error.code === '544') {
-              console.warn(`Admin check attempt ${attempt + 1} timed out, retrying...`);
-              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            if (error.message?.includes('timeout') || error.code === '544' || error.message?.includes('connection')) {
+              console.warn(`[useAdmin] Attempt ${attempt + 1} timed out, retrying...`);
+              await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)));
               continue;
             }
             throw error;
           }
           
+          console.log("[useAdmin] Admin check result:", data);
           setIsAdmin(data === true);
           setLoading(false);
           return; // Success, exit the retry loop
-        } catch (error) {
+        } catch (error: any) {
           lastError = error;
-          console.error(`Admin check attempt ${attempt + 1} failed:`, error);
+          console.error(`[useAdmin] Attempt ${attempt + 1} failed:`, error?.message || error);
           if (attempt < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)));
           }
         }
       }
       
       // All retries failed
-      console.error("All admin check attempts failed:", lastError);
-      setIsAdmin(false);
-      setLoading(false);
+      console.error("[useAdmin] All admin check attempts failed:", lastError);
+      if (isMounted) {
+        setIsAdmin(false);
+        setLoading(false);
+      }
     };
 
     checkAdmin();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [user?.id]);
 
   // Fetch all users with gems and subscription info
