@@ -476,88 +476,93 @@ Generate an image showing the same person in this new situation.`;
 
     console.log("Character-consistent image generated successfully");
 
-    // Upload to storage and log generation if userId is provided
-    if (userId) {
+    // CRITICAL: Upload output image to storage first to prevent memory issues from returning large base64
+    let finalImageUrl = generatedImageUrl;
+    
+    if (generatedImageUrl.startsWith('data:image') && userId) {
       try {
-        const inputUrls: string[] = [];
-        let outputStorageUrl: string | null = null;
-
-        // Upload character image to storage
-        if (characterImage.startsWith('data:image')) {
-          const url = await uploadImageToStorage(supabase, characterImage, userId, 'input_character');
-          if (url) inputUrls.push(url);
-          console.log("Character image uploaded:", url ? "success" : "failed");
-        } else {
-          inputUrls.push(characterImage);
+        const outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_character');
+        if (outputStorageUrl) {
+          finalImageUrl = outputStorageUrl;
+          console.log("Output image uploaded to storage successfully");
         }
-
-        // Upload additional reference images if provided
-        if (characterLeftProfile) {
-          if (characterLeftProfile.startsWith('data:image')) {
-            const url = await uploadImageToStorage(supabase, characterLeftProfile, userId, 'input_character_left');
-            if (url) inputUrls.push(url);
-          } else {
-            inputUrls.push(characterLeftProfile);
-          }
-        }
-
-        if (characterRightProfile) {
-          if (characterRightProfile.startsWith('data:image')) {
-            const url = await uploadImageToStorage(supabase, characterRightProfile, userId, 'input_character_right');
-            if (url) inputUrls.push(url);
-          } else {
-            inputUrls.push(characterRightProfile);
-          }
-        }
-
-        // Upload product image if provided
-        if (productImage) {
-          if (productImage.startsWith('data:image')) {
-            const url = await uploadImageToStorage(supabase, productImage, userId, 'input_product');
-            if (url) inputUrls.push(url);
-          } else {
-            inputUrls.push(productImage);
-          }
-        }
-
-        // Upload background image if provided
-        if (backgroundImage) {
-          if (backgroundImage.startsWith('data:image')) {
-            const url = await uploadImageToStorage(supabase, backgroundImage, userId, 'input_background');
-            if (url) inputUrls.push(url);
-          } else {
-            inputUrls.push(backgroundImage);
-          }
-        }
-
-        // Upload output image to storage
-        if (generatedImageUrl.startsWith('data:image')) {
-          outputStorageUrl = await uploadImageToStorage(supabase, generatedImageUrl, userId, 'output_character');
-          console.log("Output image uploaded to storage:", outputStorageUrl ? "success" : "failed");
-        }
-
-        const outputImages = outputStorageUrl ? [outputStorageUrl] : [];
-
-        // Log the generation
-        const { error: logError } = await supabase.rpc('log_generation', {
-          p_user_id: userId,
-          p_feature_name: 'Character Generator',
-          p_input_images: inputUrls,
-          p_output_images: outputImages
-        });
-
-        if (logError) {
-          console.error("Error logging generation:", logError);
-        } else {
-          console.log("Generation logged with images:", { inputCount: inputUrls.length, outputCount: outputImages.length });
-        }
-      } catch (logErr) {
-        console.error("Error in logging/upload:", logErr);
+      } catch (uploadErr) {
+        console.error("Failed to upload output to storage, returning base64:", uploadErr);
+        // Continue with base64 if upload fails
       }
     }
 
+    // Fire-and-forget: Log generation asynchronously to avoid blocking the response
+    if (userId) {
+      (async () => {
+        try {
+          const inputUrls: string[] = [];
+
+          // Upload character image to storage
+          if (characterImage.startsWith('data:image')) {
+            const url = await uploadImageToStorage(supabase, characterImage, userId, 'input_character');
+            if (url) inputUrls.push(url);
+          } else {
+            inputUrls.push(characterImage);
+          }
+
+          // Upload additional reference images if provided
+          if (characterLeftProfile) {
+            if (characterLeftProfile.startsWith('data:image')) {
+              const url = await uploadImageToStorage(supabase, characterLeftProfile, userId, 'input_character_left');
+              if (url) inputUrls.push(url);
+            } else {
+              inputUrls.push(characterLeftProfile);
+            }
+          }
+
+          if (characterRightProfile) {
+            if (characterRightProfile.startsWith('data:image')) {
+              const url = await uploadImageToStorage(supabase, characterRightProfile, userId, 'input_character_right');
+              if (url) inputUrls.push(url);
+            } else {
+              inputUrls.push(characterRightProfile);
+            }
+          }
+
+          // Upload product image if provided
+          if (productImage) {
+            if (productImage.startsWith('data:image')) {
+              const url = await uploadImageToStorage(supabase, productImage, userId, 'input_product');
+              if (url) inputUrls.push(url);
+            } else {
+              inputUrls.push(productImage);
+            }
+          }
+
+          // Upload background image if provided
+          if (backgroundImage) {
+            if (backgroundImage.startsWith('data:image')) {
+              const url = await uploadImageToStorage(supabase, backgroundImage, userId, 'input_background');
+              if (url) inputUrls.push(url);
+            } else {
+              inputUrls.push(backgroundImage);
+            }
+          }
+
+          const outputImages = finalImageUrl.startsWith('http') ? [finalImageUrl] : [];
+
+          // Log the generation
+          await supabase.rpc('log_generation', {
+            p_user_id: userId,
+            p_feature_name: 'Character Generator',
+            p_input_images: inputUrls,
+            p_output_images: outputImages
+          });
+          console.log("Generation logged successfully");
+        } catch (logErr) {
+          console.error("Error in logging/upload:", logErr);
+        }
+      })();
+    }
+
     return new Response(
-      JSON.stringify({ generatedImageUrl }),
+      JSON.stringify({ generatedImageUrl: finalImageUrl }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
