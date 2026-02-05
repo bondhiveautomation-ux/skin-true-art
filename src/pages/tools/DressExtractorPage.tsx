@@ -263,14 +263,32 @@ const DressExtractorPage = () => {
     }, 100);
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!extractedDressImage) return;
-    const link = document.createElement("a");
-    link.href = extractedDressImage;
-    link.download = "dress-extracted.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // Handle both base64 and URL images with proper cross-origin fetch
+      let blob: Blob;
+      if (extractedDressImage.startsWith('data:')) {
+        const res = await fetch(extractedDressImage);
+        blob = await res.blob();
+      } else {
+        const res = await fetch(extractedDressImage, { mode: 'cors' });
+        blob = await res.blob();
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `dress-extracted-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback: open in new tab
+      window.open(extractedDressImage, '_blank');
+      toast({ title: "Download started", description: "Image opened in new tab. Right-click to save." });
+    }
   };
 
   const handleReset = () => {
