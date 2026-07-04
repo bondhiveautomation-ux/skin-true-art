@@ -96,7 +96,7 @@ export const useAdminMessages = () => {
     fetchUserMessages();
 
     const channel = supabase
-      .channel("user-messages")
+      .channel(`user-messages-${user.id}`)
       .on(
         "postgres_changes",
         {
