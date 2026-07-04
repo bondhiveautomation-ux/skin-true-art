@@ -328,7 +328,15 @@ The final image should appear as if the person was actually photographed in that
       const cameraAngleInstructions = cameraAngle ? (() => {
         switch(cameraAngle) {
           case 'front':
-            return '\n\n📸 CAMERA ANGLE: Front view - Position the character facing directly forward. Straight-on perspective with clear frontal view of both character and product.';
+            return `\n\n📸 CAMERA ANGLE: Front view - Position the character facing directly forward. Straight-on perspective with clear frontal view of both character and product.${preset === 'wearing' ? `
+
+🚨 MANDATORY FULL-BODY FRAMING (NON-NEGOTIABLE):
+- The output MUST be a FULL BODY, HEAD-TO-TOE shot of the character.
+- Frame the character from the TOP OF THE HEAD down to BELOW THE FEET (include shoes/feet fully in frame).
+- The ENTIRE product/dress/outfit must be VISIBLE from top to bottom — collar/neckline all the way down to the hem, and shoes must be included.
+- Do NOT crop at the waist, hips, thighs, knees, or ankles. No half-body, no medium shot, no close-up.
+- Portrait 3:4 or 9:16 vertical composition, wide enough to fit the full standing figure with a small margin of headroom and floor beneath the feet.
+- This is a full-length fashion/product photograph — every part of the garment must be shown clearly and unobstructed.` : ''}`;
           case 'side':
             return '\n\n📸 CAMERA ANGLE: Side view - Position the character in profile. 90-degree side perspective showing character and product from the side.';
           case 'three-quarter':
