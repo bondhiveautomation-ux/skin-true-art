@@ -95,8 +95,9 @@ export const useAdminMessages = () => {
 
     fetchUserMessages();
 
+    const channelInstanceId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel(`user-messages-${user.id}`)
+      .channel(`user-messages-${user.id}-${channelInstanceId}`)
       .on(
         "postgres_changes",
         {
@@ -116,7 +117,7 @@ export const useAdminMessages = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [user?.id, fetchUserMessages]);
 
@@ -263,8 +264,9 @@ export const useAdminMessaging = () => {
 
     fetchConversations();
 
+    const channelInstanceId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel("admin-messages")
+      .channel(`admin-messages-${user.id}-${channelInstanceId}`)
       .on(
         "postgres_changes",
         {
@@ -279,7 +281,7 @@ export const useAdminMessaging = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [user?.id, fetchConversations]);
 

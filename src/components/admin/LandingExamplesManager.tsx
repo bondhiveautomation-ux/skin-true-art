@@ -174,9 +174,14 @@ export const LandingExamplesManager = () => {
     value: string
   ) => {
     try {
+      const updatePayload =
+        field === "category_name"
+          ? { category_name: value }
+          : { category_name_bn: value };
+
       const { error } = await supabase
         .from("landing_examples")
-        .update({ [field]: value })
+        .update(updatePayload)
         .eq("id", example.id);
 
       if (error) throw error;

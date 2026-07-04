@@ -31,7 +31,7 @@ const HEARTBEAT_INTERVAL = 20000; // 20 seconds
 export const usePresence = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPathRef = useRef<string>("");
   const currentToolRef = useRef<string | null>(null);
 
