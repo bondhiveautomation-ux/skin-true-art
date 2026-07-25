@@ -232,14 +232,35 @@ const CharacterGeneratorPage = () => {
     }
   };
 
-  const handleDownloadGenerated = () => {
+  const handleDownloadGenerated = async () => {
     if (!generatedImage) return;
-    const link = document.createElement("a");
-    link.href = generatedImage;
-    link.download = "generated-character-image.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      let blobUrl: string;
+      let revoke = false;
+      if (generatedImage.startsWith("data:") || generatedImage.startsWith("blob:")) {
+        blobUrl = generatedImage;
+      } else {
+        const res = await fetch(generatedImage, { mode: "cors", cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch image");
+        const blob = await res.blob();
+        blobUrl = URL.createObjectURL(blob);
+        revoke = true;
+      }
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `bh-character-${Date.now()}.png`;
+      link.rel = "noopener";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      if (revoke) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch (err) {
+      toast({
+        title: "Download failed",
+        description: "Please long-press the image to save it manually.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleResetGenerator = () => {
