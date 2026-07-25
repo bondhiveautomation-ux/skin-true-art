@@ -73,7 +73,14 @@ const App = () => (
               <Route path="/tools/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
               <Route path="/tools/prompt-engineer" element={<ProtectedRoute><PromptEngineerPage /></ProtectedRoute>} />
               <Route path="/tools/logo-generator" element={<ProtectedRoute><LogoGeneratorPage /></ProtectedRoute>} />
-              
+
+              {/* Business Machine */}
+              <Route path="/business-machine" element={<ProtectedRoute><BMDashboard /></ProtectedRoute>} />
+              <Route path="/business-machine/brands" element={<ProtectedRoute><BMBrands /></ProtectedRoute>} />
+              <Route path="/business-machine/brands/:id" element={<ProtectedRoute><BMBrandEditor /></ProtectedRoute>} />
+              <Route path="/business-machine/products/new" element={<ProtectedRoute><BMNewProduct /></ProtectedRoute>} />
+              <Route path="/business-machine/products/:id" element={<ProtectedRoute><BMProduct /></ProtectedRoute>} />
+
               {/* Legacy routes - redirect to new paths */}
               <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
               <Route path="/caption-studio" element={<ProtectedRoute><CaptionStudioPage /></ProtectedRoute>} />
