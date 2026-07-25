@@ -30,6 +30,13 @@ import BrandingStudioPage from "./pages/tools/BrandingStudioPage";
 import PromptEngineerPage from "./pages/tools/PromptEngineerPage";
 import LogoGeneratorPage from "./pages/tools/LogoGeneratorPage";
 
+// Business Machine
+import BMDashboard from "./pages/business-machine/Dashboard";
+import BMBrands from "./pages/business-machine/Brands";
+import BMBrandEditor from "./pages/business-machine/BrandEditor";
+import BMNewProduct from "./pages/business-machine/NewProduct";
+import BMProduct from "./pages/business-machine/Product";
+
 const queryClient = new QueryClient();
 
 const App = () => (
