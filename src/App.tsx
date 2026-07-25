@@ -30,6 +30,13 @@ import BrandingStudioPage from "./pages/tools/BrandingStudioPage";
 import PromptEngineerPage from "./pages/tools/PromptEngineerPage";
 import LogoGeneratorPage from "./pages/tools/LogoGeneratorPage";
 
+// Business Machine
+import BMDashboard from "./pages/business-machine/Dashboard";
+import BMBrands from "./pages/business-machine/Brands";
+import BMBrandEditor from "./pages/business-machine/BrandEditor";
+import BMNewProduct from "./pages/business-machine/NewProduct";
+import BMProduct from "./pages/business-machine/Product";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -66,7 +73,14 @@ const App = () => (
               <Route path="/tools/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
               <Route path="/tools/prompt-engineer" element={<ProtectedRoute><PromptEngineerPage /></ProtectedRoute>} />
               <Route path="/tools/logo-generator" element={<ProtectedRoute><LogoGeneratorPage /></ProtectedRoute>} />
-              
+
+              {/* Business Machine */}
+              <Route path="/business-machine" element={<ProtectedRoute><BMDashboard /></ProtectedRoute>} />
+              <Route path="/business-machine/brands" element={<ProtectedRoute><BMBrands /></ProtectedRoute>} />
+              <Route path="/business-machine/brands/:id" element={<ProtectedRoute><BMBrandEditor /></ProtectedRoute>} />
+              <Route path="/business-machine/products/new" element={<ProtectedRoute><BMNewProduct /></ProtectedRoute>} />
+              <Route path="/business-machine/products/:id" element={<ProtectedRoute><BMProduct /></ProtectedRoute>} />
+
               {/* Legacy routes - redirect to new paths */}
               <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
               <Route path="/caption-studio" element={<ProtectedRoute><CaptionStudioPage /></ProtectedRoute>} />

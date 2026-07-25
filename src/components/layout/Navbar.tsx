@@ -148,6 +148,12 @@ export const Navbar = ({
                 </DropdownMenuContent>
               </DropdownMenu>
               <button 
+                onClick={() => navigate("/business-machine")}
+                className="text-xs font-semibold text-primary hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
+              >
+                Business Machine
+              </button>
+              <button 
                 onClick={() => navigate("/pricing")}
                 className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
               >

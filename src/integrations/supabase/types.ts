@@ -110,6 +110,806 @@ export type Database = {
         }
         Relationships: []
       }
+      bm_brand_profiles: {
+        Row: {
+          ad_style: string | null
+          avoid_phrases: Json | null
+          brand_colors: Json | null
+          cod_available: boolean | null
+          common_tags: Json | null
+          created_at: string
+          currency: string | null
+          custom_ai_instructions: string | null
+          description: string | null
+          emoji_density: string | null
+          id: string
+          is_default: boolean | null
+          language_ratio: number | null
+          logo_url: string | null
+          name: string
+          naming_style: string | null
+          personality: string | null
+          preferred_aesthetic: string | null
+          preferred_dimensions: string | null
+          preferred_language: string | null
+          preorder_policy: string | null
+          shipping_policy: string | null
+          standard_cta: string | null
+          standard_delivery_time: string | null
+          target_country: string | null
+          target_customer: string | null
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_style?: string | null
+          avoid_phrases?: Json | null
+          brand_colors?: Json | null
+          cod_available?: boolean | null
+          common_tags?: Json | null
+          created_at?: string
+          currency?: string | null
+          custom_ai_instructions?: string | null
+          description?: string | null
+          emoji_density?: string | null
+          id?: string
+          is_default?: boolean | null
+          language_ratio?: number | null
+          logo_url?: string | null
+          name: string
+          naming_style?: string | null
+          personality?: string | null
+          preferred_aesthetic?: string | null
+          preferred_dimensions?: string | null
+          preferred_language?: string | null
+          preorder_policy?: string | null
+          shipping_policy?: string | null
+          standard_cta?: string | null
+          standard_delivery_time?: string | null
+          target_country?: string | null
+          target_customer?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ad_style?: string | null
+          avoid_phrases?: Json | null
+          brand_colors?: Json | null
+          cod_available?: boolean | null
+          common_tags?: Json | null
+          created_at?: string
+          currency?: string | null
+          custom_ai_instructions?: string | null
+          description?: string | null
+          emoji_density?: string | null
+          id?: string
+          is_default?: boolean | null
+          language_ratio?: number | null
+          logo_url?: string | null
+          name?: string
+          naming_style?: string | null
+          personality?: string | null
+          preferred_aesthetic?: string | null
+          preferred_dimensions?: string | null
+          preferred_language?: string | null
+          preorder_policy?: string | null
+          shipping_policy?: string | null
+          standard_cta?: string | null
+          standard_delivery_time?: string | null
+          target_country?: string | null
+          target_customer?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bm_brand_templates: {
+        Row: {
+          created_at: string
+          data: Json
+          description: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      bm_copy_sections: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          is_locked: boolean
+          meta: Json | null
+          project_id: string
+          section_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          meta?: Json | null
+          project_id: string
+          section_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          meta?: Json | null
+          project_id?: string
+          section_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_copy_sections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_copy_versions: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          meta: Json | null
+          section_id: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          section_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          section_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_copy_versions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "bm_copy_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_creative_concepts: {
+        Row: {
+          created_at: string
+          data: Json | null
+          emotion: string | null
+          id: string
+          objection: string | null
+          placement: string | null
+          project_id: string
+          purpose: string | null
+          sort_order: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          emotion?: string | null
+          id?: string
+          objection?: string | null
+          placement?: string | null
+          project_id: string
+          purpose?: string | null
+          sort_order?: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          emotion?: string | null
+          id?: string
+          objection?: string | null
+          placement?: string | null
+          project_id?: string
+          purpose?: string | null
+          sort_order?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_creative_concepts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_creative_strategies: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          strategy: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          strategy?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          strategy?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_creative_strategies_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_generated_images: {
+        Row: {
+          created_at: string
+          id: string
+          is_final: boolean
+          job_id: string | null
+          project_id: string
+          prompt_id: string | null
+          public_url: string | null
+          sort_order: number
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_final?: boolean
+          job_id?: string | null
+          project_id: string
+          prompt_id?: string | null
+          public_url?: string | null
+          sort_order?: number
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_final?: boolean
+          job_id?: string | null
+          project_id?: string
+          prompt_id?: string | null
+          public_url?: string | null
+          sort_order?: number
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_generated_images_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "bm_generation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bm_generated_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bm_generated_images_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "bm_image_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_generation_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          prompt_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          prompt_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          prompt_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_generation_jobs_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "bm_image_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_image_prompts: {
+        Row: {
+          concept_id: string | null
+          created_at: string
+          format: string | null
+          height: number | null
+          id: string
+          locks: Json | null
+          project_id: string
+          prompt_json: Json
+          status: Database["public"]["Enums"]["bm_prompt_status"]
+          title: string | null
+          updated_at: string
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          concept_id?: string | null
+          created_at?: string
+          format?: string | null
+          height?: number | null
+          id?: string
+          locks?: Json | null
+          project_id: string
+          prompt_json?: Json
+          status?: Database["public"]["Enums"]["bm_prompt_status"]
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          width?: number | null
+        }
+        Update: {
+          concept_id?: string | null
+          created_at?: string
+          format?: string | null
+          height?: number | null
+          id?: string
+          locks?: Json | null
+          project_id?: string
+          prompt_json?: Json
+          status?: Database["public"]["Enums"]["bm_prompt_status"]
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_image_prompts_concept_id_fkey"
+            columns: ["concept_id"]
+            isOneToOne: false
+            referencedRelation: "bm_creative_concepts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bm_image_prompts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_name_options: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          id: string
+          is_locked: boolean
+          is_selected: boolean
+          name: string
+          naming_style: string | null
+          positioning: string | null
+          project_id: string
+          rationale: string | null
+          subtitle: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          is_selected?: boolean
+          name: string
+          naming_style?: string | null
+          positioning?: string | null
+          project_id: string
+          rationale?: string | null
+          subtitle?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          is_selected?: boolean
+          name?: string
+          naming_style?: string | null
+          positioning?: string | null
+          project_id?: string
+          rationale?: string | null
+          subtitle?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_name_options_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_product_analysis: {
+        Row: {
+          analysis: Json
+          confirmed_by_user: boolean
+          created_at: string
+          id: string
+          project_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json
+          confirmed_by_user?: boolean
+          created_at?: string
+          id?: string
+          project_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json
+          confirmed_by_user?: boolean
+          created_at?: string
+          id?: string
+          project_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_product_analysis_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_product_assets: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          project_id: string
+          public_url: string | null
+          role: Database["public"]["Enums"]["bm_asset_role"]
+          sort_order: number
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          project_id: string
+          public_url?: string | null
+          role?: Database["public"]["Enums"]["bm_asset_role"]
+          sort_order?: number
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          project_id?: string
+          public_url?: string | null
+          role?: Database["public"]["Enums"]["bm_asset_role"]
+          sort_order?: number
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_product_assets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_product_packages: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          snapshot: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          snapshot?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          snapshot?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_product_packages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "bm_product_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_product_projects: {
+        Row: {
+          advance_payment: string | null
+          brand_id: string | null
+          category: string | null
+          cod_available: boolean | null
+          colors: Json | null
+          competitor_info: string | null
+          completion_pct: number
+          created_at: string
+          currency: string | null
+          current_step: number
+          delivery_time: string | null
+          dimensions: string | null
+          fabric_composition: string | null
+          features: Json | null
+          id: string
+          landed_cost: number | null
+          material: string | null
+          positioning: string | null
+          preorder: boolean | null
+          product_type: string | null
+          raw_title: string | null
+          selling_price: number | null
+          sizes: Json | null
+          special_instructions: string | null
+          status: Database["public"]["Enums"]["bm_project_status"]
+          supplier_description: string | null
+          target_age: string | null
+          target_customer: string | null
+          target_market: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          user_notes: string | null
+          weight_range: string | null
+        }
+        Insert: {
+          advance_payment?: string | null
+          brand_id?: string | null
+          category?: string | null
+          cod_available?: boolean | null
+          colors?: Json | null
+          competitor_info?: string | null
+          completion_pct?: number
+          created_at?: string
+          currency?: string | null
+          current_step?: number
+          delivery_time?: string | null
+          dimensions?: string | null
+          fabric_composition?: string | null
+          features?: Json | null
+          id?: string
+          landed_cost?: number | null
+          material?: string | null
+          positioning?: string | null
+          preorder?: boolean | null
+          product_type?: string | null
+          raw_title?: string | null
+          selling_price?: number | null
+          sizes?: Json | null
+          special_instructions?: string | null
+          status?: Database["public"]["Enums"]["bm_project_status"]
+          supplier_description?: string | null
+          target_age?: string | null
+          target_customer?: string | null
+          target_market?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+          user_notes?: string | null
+          weight_range?: string | null
+        }
+        Update: {
+          advance_payment?: string | null
+          brand_id?: string | null
+          category?: string | null
+          cod_available?: boolean | null
+          colors?: Json | null
+          competitor_info?: string | null
+          completion_pct?: number
+          created_at?: string
+          currency?: string | null
+          current_step?: number
+          delivery_time?: string | null
+          dimensions?: string | null
+          fabric_composition?: string | null
+          features?: Json | null
+          id?: string
+          landed_cost?: number | null
+          material?: string | null
+          positioning?: string | null
+          preorder?: boolean | null
+          product_type?: string | null
+          raw_title?: string | null
+          selling_price?: number | null
+          sizes?: Json | null
+          special_instructions?: string | null
+          status?: Database["public"]["Enums"]["bm_project_status"]
+          supplier_description?: string | null
+          target_age?: string | null
+          target_customer?: string | null
+          target_market?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          user_notes?: string | null
+          weight_range?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_product_projects_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "bm_brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bm_prompt_presets: {
+        Row: {
+          category: string | null
+          created_at: string
+          data: Json
+          id: string
+          is_system: boolean
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          is_system?: boolean
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          is_system?: boolean
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      bm_prompt_versions: {
+        Row: {
+          created_at: string
+          id: string
+          prompt_id: string
+          prompt_json: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prompt_id: string
+          prompt_json?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prompt_id?: string
+          prompt_json?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bm_prompt_versions_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "bm_image_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -916,6 +1716,23 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      bm_asset_role:
+        | "primary"
+        | "additional"
+        | "identity"
+        | "garment"
+        | "packaging"
+        | "size_chart"
+        | "other"
+      bm_project_status: "draft" | "in_progress" | "completed" | "archived"
+      bm_prompt_status:
+        | "draft"
+        | "needs_review"
+        | "approved"
+        | "generating"
+        | "generated"
+        | "revision_requested"
+        | "final"
       lead_status: "new" | "contacted" | "enrolled"
       payment_status: "pending" | "approved" | "rejected"
     }
@@ -1046,6 +1863,25 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      bm_asset_role: [
+        "primary",
+        "additional",
+        "identity",
+        "garment",
+        "packaging",
+        "size_chart",
+        "other",
+      ],
+      bm_project_status: ["draft", "in_progress", "completed", "archived"],
+      bm_prompt_status: [
+        "draft",
+        "needs_review",
+        "approved",
+        "generating",
+        "generated",
+        "revision_requested",
+        "final",
+      ],
       lead_status: ["new", "contacted", "enrolled"],
       payment_status: ["pending", "approved", "rejected"],
     },
