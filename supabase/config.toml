@@ -50,3 +50,12 @@ verify_jwt = false
 
 [functions.generate-logo]
 verify_jwt = false
+
+[functions.bm-analyze-product]
+verify_jwt = false
+
+[functions.bm-generate-names]
+verify_jwt = false
+
+[functions.bm-generate-copy]
+verify_jwt = false
