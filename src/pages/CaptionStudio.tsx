@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { getGemCost } from "@/lib/gemCosts";
 
 type Language = "bangla" | "english";

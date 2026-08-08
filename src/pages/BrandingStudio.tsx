@@ -28,8 +28,7 @@ import {
   Diamond
 } from "lucide-react";
 import { toast } from "sonner";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { getGemCost } from "@/lib/gemCosts";
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";

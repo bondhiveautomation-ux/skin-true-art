@@ -9,8 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BilingualHeading } from "@/components/ui/BilingualHeading";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { MobileStickyFooter } from "@/components/ui/MobileStickyFooter";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
@@ -709,12 +708,6 @@ const LogoGeneratorPage = () => {
         customMessage="Designing luxury logos..."
       />
 
-      <LowBalanceAlert
-        isOpen={showLowBalance}
-        onClose={() => setShowLowBalance(false)}
-        requiredGems={totalCost}
-        currentBalance={currentBalance}
-      />
     </ToolPageLayout>
   );
 };
