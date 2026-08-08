@@ -511,9 +511,9 @@ const LogoGeneratorPage = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 Variation ({gemCost} gems)</SelectItem>
-                      <SelectItem value="2">2 Variations ({gemCost * 2} gems)</SelectItem>
-                      <SelectItem value="4">4 Variations ({gemCost * 4} gems)</SelectItem>
+                      <SelectItem value="1">1 Variation</SelectItem>
+                      <SelectItem value="2">2 Variations</SelectItem>
+                      <SelectItem value="4">4 Variations</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -587,7 +587,6 @@ const LogoGeneratorPage = () => {
                       <>
                         <Sparkles className="w-5 h-5 mr-2" />
                         Generate Luxury Logos
-                        <span className="ml-2 text-sm opacity-80">({totalCost} gems)</span>
                       </>
                     )}
                   </Button>
@@ -665,7 +664,7 @@ const LogoGeneratorPage = () => {
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 mr-2" />
-                          Regenerate ({totalCost} gems)
+                          Regenerate
                         </>
                       )}
                     </Button>
@@ -695,7 +694,7 @@ const LogoGeneratorPage = () => {
             ) : (
               <>
                 <Sparkles className="w-5 h-5 mr-2" />
-                Generate ({totalCost} gems)
+                Generate
               </>
             )}
           </Button>

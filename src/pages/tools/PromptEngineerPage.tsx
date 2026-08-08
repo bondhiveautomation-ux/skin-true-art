@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Wand2, RotateCcw, Sparkles, Copy, Check, Gem } from "lucide-react";
+import { Wand2, RotateCcw, Sparkles, Copy, Check } from "lucide-react";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -179,10 +179,6 @@ const PromptEngineerPage = () => {
             <span className="text-xs text-cream/40">
               {rawPrompt.length} characters
             </span>
-            <div className="flex items-center gap-2 text-xs text-cream/60">
-              <Gem className="w-3 h-3 text-primary" />
-              <span>{gemCost} gem per refinement</span>
-            </div>
           </div>
         </div>
 
