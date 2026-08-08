@@ -731,66 +731,18 @@ const Admin = () => {
               </div>
             </div>
 
-            {/* Expiring Subscriptions Alert */}
-            {expiringUsers.length > 0 && (
-              <div className="mb-6 p-4 rounded-lg border border-orange-500/30 bg-orange-500/10">
-                <h3 className="text-sm font-medium mb-3 flex items-center gap-2 text-orange-500">
-                  <AlertTriangle className="w-4 h-4" />
-                  Expiring Subscriptions ({expiringUsers.length})
-                </h3>
-                <div className="space-y-2">
-                  {expiringUsers.map(u => {
-                    const status = getExpiryStatus(u.subscription_expires_at);
-                    return (
-                      <div key={u.user_id} className="flex items-center justify-between p-2 rounded bg-background/50">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium text-sm">{u.email}</span>
-                          <span className={`text-xs font-medium ${status.color}`}>
-                            {u.subscription_type} • {status.label}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSetSubscription(u.user_id, u.subscription_type || '7-day', 7)}
-                            disabled={processingUser === u.user_id}
-                            className="text-xs"
-                          >
-                            +7 Days
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSetSubscription(u.user_id, 'monthly', 30)}
-                            disabled={processingUser === u.user_id}
-                            className="text-xs"
-                          >
-                            +30 Days
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             <div className="rounded-lg border border-gold/10 overflow-x-auto">
-              <Table className="min-w-[900px]">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow className="bg-card/50">
                     <TableHead>Status</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Gems</TableHead>
-                    <TableHead>Subscription</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.map((u) => {
-                    const expiryStatus = getExpiryStatus(u.subscription_expires_at);
                     return (
                     <TableRow key={u.user_id} className={u.is_blocked ? "opacity-60" : ""}>
                       <TableCell>
@@ -815,110 +767,12 @@ const Admin = () => {
                           <span className="ml-2 text-xs text-gold">(You)</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Diamond className="w-4 h-4 text-purple-400" />
-                          <span className="font-medium">{u.gems}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          {u.subscription_type ? (
-                            <>
-                              <span className="text-xs font-medium capitalize">{u.subscription_type}</span>
-                              <span className={`text-xs ${expiryStatus.color} flex items-center gap-1`}>
-                                <Clock className="w-3 h-3" />
-                                {expiryStatus.label}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">No subscription</span>
-                          )}
-                        </div>
-                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {formatDate(u.created_at)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-1 flex-wrap">
-                          {/* Subscription buttons */}
-                          <div className="flex items-center gap-1 mr-2">
-                            <Button
-                              variant={u.subscription_type === '7-day' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => handleSetSubscription(u.user_id, '7-day', 7)}
-                              disabled={processingUser === u.user_id}
-                              className="text-xs px-2"
-                              title="Set 7-day subscription"
-                            >
-                              7D
-                            </Button>
-                            <Button
-                              variant={u.subscription_type === 'monthly' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => handleSetSubscription(u.user_id, 'monthly', 30)}
-                              disabled={processingUser === u.user_id}
-                              className="text-xs px-2"
-                              title="Set Monthly subscription"
-                            >
-                              30D
-                            </Button>
-                            {u.subscription_type && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleClearSubscription(u.user_id)}
-                                disabled={processingUser === u.user_id}
-                                className="text-xs px-1 text-muted-foreground hover:text-destructive"
-                                title="Clear subscription"
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
-                            )}
-                          </div>
-                          
-                          {/* Quick add/remove gems */}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddGems(u.user_id, -10)}
-                            disabled={processingUser === u.user_id || u.gems <= 0}
-                            title="Remove 10 gems"
-                          >
-                            <Minus className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddGems(u.user_id, 10)}
-                            disabled={processingUser === u.user_id}
-                            title="Add 10 gems"
-                          >
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                          
-                          {/* Set specific gems */}
-                          <div className="flex items-center gap-1">
-                            <Input
-                              type="number"
-                              placeholder="Set"
-                              className="w-20 h-8 text-sm"
-                              value={creditInputs[u.user_id] || ""}
-                              onChange={(e) => setCreditInputs(prev => ({ 
-                                ...prev, 
-                                [u.user_id]: e.target.value 
-                              }))}
-                              min={0}
-                            />
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => handleSetGems(u.user_id)}
-                              disabled={processingUser === u.user_id || !creditInputs[u.user_id]}
-                            >
-                              Set
-                            </Button>
-                          </div>
+
 
                           {/* Block/Unblock user */}
                           {u.user_id !== user.id && (
