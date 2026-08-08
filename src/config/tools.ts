@@ -197,7 +197,20 @@ export const TOOLS: ToolConfig[] = [
     gradient: "bg-gradient-to-br from-gold/10 to-amber-500/5",
     badge: "Brand AI",
   },
+  {
+    id: "product-photography",
+    name: "Product Photography",
+    shortName: "Product",
+    description: "Turn raw product photos into a 5-shot commercial photoshoot.",
+    longDescription: "Upload up to 10 photos of your product, describe it, and give your creative direction. AI generates five premium, true-to-product commercial photographs ready for e-commerce and ads.",
+    icon: Camera,
+    path: "/tools/product-photography",
+    gemCostKey: "product-photography",
+    gradient: "bg-gradient-to-br from-amber-500/10 to-yellow-500/5",
+    badge: "5 Shots",
+  },
 ];
+
 
 export const getToolByPath = (path: string): ToolConfig | undefined => {
   return TOOLS.find(tool => tool.path === path || tool.path.endsWith(path.replace('/tools/', '')));
