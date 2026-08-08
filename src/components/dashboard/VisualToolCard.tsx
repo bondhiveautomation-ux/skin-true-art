@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { LucideIcon, Diamond } from "lucide-react";
-import { getGemCost } from "@/lib/gemCosts";
 import { cn } from "@/lib/utils";
 
 // Default fallback preview images
@@ -56,7 +55,6 @@ export const VisualToolCard = ({
 }: VisualToolCardProps) => {
   const navigate = useNavigate();
   const banglaName = BANGLA_NAMES[name] || name;
-  const gemCost = getGemCost(gemCostKey);
   
   // Use database image if provided, otherwise fall back to defaults
   const imageUrl = previewImageUrl || DEFAULT_PREVIEWS[name] || "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop";
@@ -85,12 +83,6 @@ export const VisualToolCard = ({
         
         {/* Gradient overlay for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-      </div>
-
-      {/* Gem Cost Badge - Fixed top-right */}
-      <div className="absolute top-3 right-3 z-20 flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-primary/30">
-        <Diamond className="w-3.5 h-3.5 text-primary" />
-        <span className="text-xs font-semibold text-cream">{gemCost}</span>
       </div>
 
       {/* Tool Icon - Top left for visual identity */}

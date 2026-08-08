@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useToolConfigs, ToolConfigDB } from "@/hooks/useToolConfigs";
-import { useFeatureGemCosts } from "@/hooks/useFeatureGemCosts";
 import { TOOLS } from "@/config/tools";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Gem, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DepartmentToolGridProps {
@@ -48,14 +47,8 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
   const navigate = useNavigate();
   const { departments, isLoading: depsLoading, error: depsError, refetch: refetchDeps } = useDepartments();
   const { toolConfigs, isLoading: toolsLoading, error: toolsError, refetch: refetchTools } = useToolConfigs();
-  const { features } = useFeatureGemCosts();
 
   const isLoading = depsLoading || toolsLoading;
-
-  const getGemCost = (featureKey: string) => {
-    const feature = features.find(f => f.feature_key === featureKey);
-    return feature?.gem_cost ?? 1;
-  };
 
   const handleRetry = () => {
     refetchDeps();
@@ -105,7 +98,6 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
     const staticTool = TOOLS.find(t => t.id === tool.tool_id);
     if (!staticTool) return null;
 
-    const gemCost = getGemCost(staticTool.gemCostKey);
     const Icon = staticTool.icon;
 
     return (
@@ -127,14 +119,6 @@ export const DepartmentToolGrid = ({ showBackButton, onBack }: DepartmentToolGri
           )}
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-        </div>
-
-        {/* Gem Cost Badge */}
-        <div className="absolute top-3 right-3 z-10">
-          <Badge className="bg-black/60 backdrop-blur-sm border-gold/30 text-cream flex items-center gap-1.5 px-2 py-1">
-            <Gem className="w-3 h-3 text-gold" />
-            <span className="text-sm font-medium">{gemCost}</span>
-          </Badge>
         </div>
 
 
