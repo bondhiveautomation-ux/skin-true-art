@@ -414,10 +414,6 @@ const CaptionStudio = () => {
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate Caption
                 </LoadingButton>
-                <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Costs {getGemCost("generate-caption")} gem</span>
-                </div>
               </div>
 
               {/* Output Section */}

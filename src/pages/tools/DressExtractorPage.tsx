@@ -432,10 +432,6 @@ const DressExtractorPage = () => {
               >
                 Extract Dress
               </LoadingButton>
-              <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                <Diamond className="w-3.5 h-3.5 text-primary" />
-                <span>Costs {getGemCost("extract-dress-to-dummy")} gems</span>
-              </div>
             </div>
           </>
         )}

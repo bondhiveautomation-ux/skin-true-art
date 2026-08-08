@@ -609,10 +609,6 @@ const BrandingStudio = () => {
                     </>
                   )}
                 </Button>
-                <div className="flex items-center justify-center gap-1.5 text-cream/50 text-xs">
-                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Costs {getGemCost("apply-branding")} gems</span>
-                </div>
               </div>
 
               {/* Right Column - Output */}
