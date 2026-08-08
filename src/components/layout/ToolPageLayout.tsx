@@ -1,13 +1,11 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Diamond } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { useGems } from "@/hooks/useGems";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useToolConfigs } from "@/hooks/useToolConfigs";
-import { getGemCost } from "@/lib/gemCosts";
 import { LucideIcon } from "lucide-react";
 
 // Bangla descriptions for each tool
@@ -50,7 +48,6 @@ export const ToolPageLayout = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
-  const { gems } = useGems();
   const { isAdmin, loading: adminLoading } = useAdmin();
   const { getToolConfig } = useToolConfigs();
 
@@ -79,7 +76,6 @@ export const ToolPageLayout = ({
       <Navbar 
         onNavigate={scrollToSection}
         onSignOut={signOut}
-        credits={gems}
         isAdmin={isAdmin}
         adminLoading={adminLoading}
       />
@@ -122,14 +118,6 @@ export const ToolPageLayout = ({
             <p className="hidden sm:block font-bangla text-cream/50 max-w-xl mx-auto leading-relaxed font-light mb-6">
               {banglaDescription}
             </p>
-            
-            {/* Gem cost badge */}
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-secondary/30 border border-border/30">
-              <Diamond className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-primary" />
-              <span className="text-xs sm:text-sm text-cream/70">
-                <span className="font-semibold text-primary">{getGemCost(gemCostKey)}</span> gems
-              </span>
-            </div>
           </div>
         </div>
       </section>
