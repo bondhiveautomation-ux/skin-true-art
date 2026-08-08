@@ -28,6 +28,7 @@ import CaptionStudioPage from "./pages/tools/CaptionStudioPage";
 import BrandingStudioPage from "./pages/tools/BrandingStudioPage";
 import PromptEngineerPage from "./pages/tools/PromptEngineerPage";
 import LogoGeneratorPage from "./pages/tools/LogoGeneratorPage";
+import ProductPhotographyPage from "./pages/tools/ProductPhotographyPage";
 
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/tools/branding-studio" element={<ProtectedRoute><BrandingStudioPage /></ProtectedRoute>} />
               <Route path="/tools/prompt-engineer" element={<ProtectedRoute><PromptEngineerPage /></ProtectedRoute>} />
               <Route path="/tools/logo-generator" element={<ProtectedRoute><LogoGeneratorPage /></ProtectedRoute>} />
+              <Route path="/tools/product-photography" element={<ProtectedRoute><ProductPhotographyPage /></ProtectedRoute>} />
 
               {/* Legacy routes - redirect to new paths */}
               <Route path="/photography-studio" element={<ProtectedRoute><PhotographyStudioPage /></ProtectedRoute>} />
