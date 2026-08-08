@@ -1,7 +1,6 @@
-import { X, Shield, LogOut, Sparkles, CreditCard, Play, ExternalLink, Camera, Pen, Palette, Film, Briefcase } from "lucide-react";
+import { X, Shield, LogOut, Sparkles, Camera, Pen, Palette, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { GemBalance } from "@/components/gems/GemBalance";
 
 const STUDIOS = [
   { name: "Photography Studio", path: "/photography-studio", icon: Camera },
@@ -74,9 +73,6 @@ export const MobileNavDrawer = ({
         {userEmail && (
           <div className="p-4 sm:p-5 border-b border-gold/10 flex-shrink-0">
             <p className="text-xs sm:text-sm text-cream/50 truncate mb-2">{userEmail}</p>
-            {credits !== null && credits !== undefined && (
-              <GemBalance gems={credits} size="md" showLabel className="rounded-xl" />
-            )}
           </div>
         )}
 
@@ -94,17 +90,6 @@ export const MobileNavDrawer = ({
           >
             <span className="text-sm font-medium">Process</span>
           </button>
-          <a
-            href="https://www.facebook.com/share/v/17WGy9jeFi/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left active:scale-[0.98] min-h-[44px]"
-          >
-            <Play className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm font-medium">Tutorial</span>
-            <ExternalLink className="w-3 h-3 opacity-50 ml-auto flex-shrink-0" />
-          </a>
           <div className="pt-2 pb-1">
             <p className="px-3.5 py-1.5 text-[10px] text-cream/40 uppercase tracking-wider font-medium">Studios</p>
             {STUDIOS.map((studio) => (
@@ -126,20 +111,6 @@ export const MobileNavDrawer = ({
               </button>
             ))}
           </div>
-          <button
-            onClick={() => handleRoute("/business-machine")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-primary hover:bg-primary/10 transition-all text-left active:scale-[0.98] min-h-[44px]"
-          >
-            <Briefcase className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm font-semibold">Business Machine</span>
-          </button>
-          <button
-            onClick={() => handleRoute("/pricing")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-cream/70 hover:text-gold hover:bg-gold/5 transition-all text-left active:scale-[0.98] min-h-[44px]"
-          >
-            <CreditCard className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm font-medium">Pricing</span>
-          </button>
           
           {isAdmin && (
             <button

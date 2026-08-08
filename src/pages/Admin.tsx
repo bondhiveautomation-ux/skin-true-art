@@ -78,9 +78,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { WebsiteControlCenter } from "@/components/admin/WebsiteControlCenter";
-import { PaymentInbox } from "@/components/admin/PaymentInbox";
-import { PricingManager } from "@/components/admin/PricingManager";
-import { FeatureGemCostsManager } from "@/components/admin/FeatureGemCostsManager";
 import LiveUsersMonitor from "@/components/admin/LiveUsersMonitor";
 import AdminInbox from "@/components/admin/AdminInbox";
 import { ArticlesManager } from "@/components/admin/ArticlesManager";
@@ -625,10 +622,6 @@ const Admin = () => {
               <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                 Users
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
-                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                Payments
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
                 <History className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1246,18 +1239,7 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="payments">
-            <PaymentInbox />
-          </TabsContent>
 
-
-          <TabsContent value="pricing">
-            <PricingManager />
-          </TabsContent>
-
-          <TabsContent value="feature-costs">
-            <FeatureGemCostsManager />
-          </TabsContent>
 
           <TabsContent value="website-cms">
             <WebsiteControlCenter />
