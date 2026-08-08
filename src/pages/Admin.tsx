@@ -638,14 +638,6 @@ const Admin = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-card border-border z-50">
-                  <DropdownMenuItem onClick={() => setActiveTab("pricing")} className="gap-2 cursor-pointer">
-                    <Diamond className="w-4 h-4" />
-                    Pricing
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab("feature-costs")} className="gap-2 cursor-pointer">
-                    <Diamond className="w-4 h-4" />
-                    Tool Costs
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setActiveTab("website-cms")} className="gap-2 cursor-pointer">
                     <Settings2 className="w-4 h-4" />
                     CMS
