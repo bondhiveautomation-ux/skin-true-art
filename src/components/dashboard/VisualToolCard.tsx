@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LucideIcon, Diamond } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Default fallback preview images

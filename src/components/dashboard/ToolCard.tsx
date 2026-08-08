@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LucideIcon, Diamond } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 // Bangla translations for tool descriptions
 const BANGLA_DESCRIPTIONS: Record<string, string> = {
