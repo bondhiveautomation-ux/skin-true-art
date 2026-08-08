@@ -16,7 +16,6 @@ import {
 import { useContent } from "@/hooks/useSiteContent";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import UserInbox from "@/components/user/UserInbox";
-import { GemBalance } from "@/components/gems/GemBalance";
 import { UserBadge, getUserBadgeType } from "@/components/dashboard/UserBadge";
 
 const STUDIOS = [
@@ -105,23 +104,6 @@ export const Navbar = ({
               >
                 {navProcess}
               </button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <a 
-                    href="https://www.facebook.com/share/v/17WGy9jeFi/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
-                  >
-                    <Play className="w-3 h-3" />
-                    Tutorial
-                    <ExternalLink className="w-2.5 h-2.5 opacity-50" />
-                  </a>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Watch the full BH Studio tutorial</p>
-                </TooltipContent>
-              </Tooltip>
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1 text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap">
                   Studios
@@ -147,18 +129,6 @@ export const Navbar = ({
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <button 
-                onClick={() => navigate("/business-machine")}
-                className="text-xs font-semibold text-primary hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
-              >
-                Business Machine
-              </button>
-              <button 
-                onClick={() => navigate("/pricing")}
-                className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase whitespace-nowrap"
-              >
-                Pricing
-              </button>
             </nav>
 
             {/* Desktop User section */}
@@ -173,11 +143,6 @@ export const Navbar = ({
                   <Shield className="w-4 h-4 mr-1.5" />
                   Admin
                 </Button>
-              )}
-              {credits !== null && credits !== undefined && (
-                <div className="shrink-0">
-                  <GemBalance gems={credits} size="md" />
-                </div>
               )}
               {userEmail && (
                 <div className="flex items-center gap-3 shrink-0">
@@ -213,9 +178,6 @@ export const Navbar = ({
             {/* Mobile/Tablet: Inbox + Gems + Hamburger */}
             <div className="flex lg:hidden items-center gap-2">
               {userEmail && <UserInbox />}
-              {credits !== null && credits !== undefined && (
-                <GemBalance gems={credits} size="sm" />
-              )}
               <button 
                 onClick={() => setMobileMenuOpen(true)}
                 className="p-2.5 rounded-xl bg-secondary/50 text-cream/70 hover:text-gold transition-colors active:scale-95"

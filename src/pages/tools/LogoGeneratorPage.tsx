@@ -9,8 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BilingualHeading } from "@/components/ui/BilingualHeading";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { MobileStickyFooter } from "@/components/ui/MobileStickyFooter";
 import { useAuth } from "@/hooks/useAuth";
 import { useGems } from "@/hooks/useGems";
@@ -512,9 +511,9 @@ const LogoGeneratorPage = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 Variation ({gemCost} gems)</SelectItem>
-                      <SelectItem value="2">2 Variations ({gemCost * 2} gems)</SelectItem>
-                      <SelectItem value="4">4 Variations ({gemCost * 4} gems)</SelectItem>
+                      <SelectItem value="1">1 Variation</SelectItem>
+                      <SelectItem value="2">2 Variations</SelectItem>
+                      <SelectItem value="4">4 Variations</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -588,7 +587,6 @@ const LogoGeneratorPage = () => {
                       <>
                         <Sparkles className="w-5 h-5 mr-2" />
                         Generate Luxury Logos
-                        <span className="ml-2 text-sm opacity-80">({totalCost} gems)</span>
                       </>
                     )}
                   </Button>
@@ -666,7 +664,7 @@ const LogoGeneratorPage = () => {
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 mr-2" />
-                          Regenerate ({totalCost} gems)
+                          Regenerate
                         </>
                       )}
                     </Button>
@@ -696,7 +694,7 @@ const LogoGeneratorPage = () => {
             ) : (
               <>
                 <Sparkles className="w-5 h-5 mr-2" />
-                Generate ({totalCost} gems)
+                Generate
               </>
             )}
           </Button>
@@ -709,12 +707,6 @@ const LogoGeneratorPage = () => {
         customMessage="Designing luxury logos..."
       />
 
-      <LowBalanceAlert
-        isOpen={showLowBalance}
-        onClose={() => setShowLowBalance(false)}
-        requiredGems={totalCost}
-        currentBalance={currentBalance}
-      />
     </ToolPageLayout>
   );
 };

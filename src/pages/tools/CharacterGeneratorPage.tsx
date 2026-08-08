@@ -422,10 +422,6 @@ const CharacterGeneratorPage = () => {
                   >
                     Generate Couple Image
                   </LoadingButton>
-                  <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                    <Diamond className="w-3.5 h-3.5 text-primary" />
-                    <span>Costs {getGemCost("generate-character-image")} gems</span>
-                  </div>
                 </div>
               </>
             )}
@@ -582,10 +578,6 @@ const CharacterGeneratorPage = () => {
                   >
                     Generate Image
                   </LoadingButton>
-                  <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                    <Diamond className="w-3.5 h-3.5 text-primary" />
-                    <span>Costs {getGemCost("generate-character-image")} gems</span>
-                  </div>
                 </div>
 
                 {/* Result */}

@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { getGemCost } from "@/lib/gemCosts";
 
 type Language = "bangla" | "english";
@@ -415,10 +414,6 @@ const CaptionStudio = () => {
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate Caption
                 </LoadingButton>
-                <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Costs {getGemCost("generate-caption")} gem</span>
-                </div>
               </div>
 
               {/* Output Section */}

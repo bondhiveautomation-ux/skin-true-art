@@ -28,8 +28,7 @@ import {
   Diamond
 } from "lucide-react";
 import { toast } from "sonner";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { getGemCost } from "@/lib/gemCosts";
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -350,10 +349,6 @@ const BrandingStudio = () => {
             <Shield className="w-5 h-5 text-gold" />
             <span className="font-serif text-xl text-cream">Branding Studio</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30">
-            <Diamond className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-medium bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">{gems ?? 0}</span>
-          </div>
         </div>
       </header>
 
@@ -610,10 +605,6 @@ const BrandingStudio = () => {
                     </>
                   )}
                 </Button>
-                <div className="flex items-center justify-center gap-1.5 text-cream/50 text-xs">
-                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Costs {getGemCost("apply-branding")} gems</span>
-                </div>
               </div>
 
               {/* Right Column - Output */}

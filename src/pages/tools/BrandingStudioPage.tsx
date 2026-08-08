@@ -494,10 +494,6 @@ const BrandingStudioPage = () => {
                     {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                     Apply Branding
                   </Button>
-                  <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                    <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Costs {getGemCost("apply-branding")} gems</span>
-                  </div>
                 </div>
               </div>
 
@@ -627,10 +623,6 @@ const BrandingStudioPage = () => {
                           `Process ${batchImages.length} Images`
                         )}
                       </Button>
-                      <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                        <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                        <span>Costs {batchImages.length * getGemCost("apply-branding")} gems total</span>
-                      </div>
                     </div>
                   )}
                 </>

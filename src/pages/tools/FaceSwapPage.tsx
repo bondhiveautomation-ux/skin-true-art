@@ -184,10 +184,6 @@ const FaceSwapPage = () => {
             >
               Swap Face
             </LoadingButton>
-            <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-              <Diamond className="w-3.5 h-3.5 text-purple-400" />
-              <span>Costs {getGemCost("face-swap")} gems</span>
-            </div>
           </div>
         )}
 

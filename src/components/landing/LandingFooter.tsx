@@ -41,12 +41,6 @@ export const LandingFooter = () => {
             >
               Features
             </button>
-            <a 
-              href="/pricing" 
-              className="text-cream/40 hover:text-gold transition-colors duration-300 uppercase text-[10px] sm:text-xs font-medium py-2 px-1"
-            >
-              Pricing
-            </a>
             <button 
               onClick={() => scrollToSection("faq")}
               className="text-cream/40 hover:text-gold transition-colors duration-300 uppercase text-[10px] sm:text-xs font-medium py-2 px-1"

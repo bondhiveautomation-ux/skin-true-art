@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Wand2, RotateCcw, Sparkles, Copy, Check, Gem } from "lucide-react";
+import { Wand2, RotateCcw, Sparkles, Copy, Check } from "lucide-react";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,8 +11,7 @@ import { getGemCost } from "@/lib/gemCosts";
 import { PromptTypeSelector, PromptType } from "@/components/prompt-engineer/PromptTypeSelector";
 import { AgentPipeline, AgentState } from "@/components/prompt-engineer/AgentPipeline";
 import { LivePreview } from "@/components/prompt-engineer/LivePreview";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 
 const INITIAL_AGENTS: AgentState[] = [
   { id: 'detailer', name: 'Detailer', description: 'Adds technical details', status: 'waiting', output: '' },
@@ -180,10 +179,6 @@ const PromptEngineerPage = () => {
             <span className="text-xs text-cream/40">
               {rawPrompt.length} characters
             </span>
-            <div className="flex items-center gap-2 text-xs text-cream/60">
-              <Gem className="w-3 h-3 text-primary" />
-              <span>{gemCost} gem per refinement</span>
-            </div>
           </div>
         </div>
 
@@ -276,12 +271,6 @@ const PromptEngineerPage = () => {
       </div>
 
       {/* Low Balance Alert */}
-      <LowBalanceAlert 
-        isOpen={showLowBalance}
-        onClose={() => setShowLowBalance(false)}
-        currentBalance={gems ?? 0}
-        requiredGems={gemCost}
-      />
 
       {/* Processing Modal */}
       <ProcessingModal 

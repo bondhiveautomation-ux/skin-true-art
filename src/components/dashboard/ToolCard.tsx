@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LucideIcon, Diamond } from "lucide-react";
-import { getGemCost } from "@/lib/gemCosts";
+import { LucideIcon } from "lucide-react";
 
 // Bangla translations for tool descriptions
 const BANGLA_DESCRIPTIONS: Record<string, string> = {
@@ -69,14 +68,6 @@ export const ToolCard = ({
         <p className="font-bangla text-[11px] sm:text-xs lg:text-sm text-cream/60 leading-relaxed line-clamp-2">
           {banglaDescription}
         </p>
-      </div>
-
-      {/* Gem cost badge */}
-      <div className="relative mt-2 sm:mt-4 lg:mt-5 flex items-center gap-1">
-        <Diamond className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary/70" />
-        <span className="text-[10px] sm:text-xs text-cream/40">
-          {getGemCost(gemCostKey)}
-        </span>
       </div>
 
       {/* Arrow indicator - Desktop only */}

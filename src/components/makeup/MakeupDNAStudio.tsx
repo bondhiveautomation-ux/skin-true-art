@@ -965,10 +965,6 @@ export const MakeupDNAStudio: React.FC<MakeupDNAStudioProps> = ({ onLogGeneratio
           <Sparkles className="w-4 h-4 mr-2" />
           Apply Makeup
         </LoadingButton>
-        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-          <Diamond className="w-3.5 h-3.5 text-purple-400" />
-          <span>Costs {getGemCost("apply-makeup")} gems</span>
-        </div>
       </div>
 
       {/* Result Display */}

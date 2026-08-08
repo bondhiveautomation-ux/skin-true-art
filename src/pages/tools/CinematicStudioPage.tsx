@@ -474,10 +474,6 @@ const CinematicStudioPage = () => {
                       >
                         Apply Cinematic Transformation
                       </LoadingButton>
-                      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                        <Diamond className="w-3.5 h-3.5 text-primary" />
-                        <span>Costs {getGemCost("cinematic-transform")} gems</span>
-                      </div>
                     </div>
                   </div>
                 )}

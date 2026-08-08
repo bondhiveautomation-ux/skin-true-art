@@ -35,12 +35,6 @@ export const LandingNavbar = () => {
               Features
             </button>
             <button
-              onClick={() => navigate("/pricing")}
-              className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
-            >
-              Pricing
-            </button>
-            <button
               onClick={() => scrollToSection("examples")}
               className="text-xs font-medium text-cream/60 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
             >
@@ -105,12 +99,6 @@ export const LandingNavbar = () => {
                 className="text-sm text-cream/70 hover:text-gold py-2 text-left"
               >
                 Features
-              </button>
-              <button
-                onClick={() => { navigate("/pricing"); setMobileMenuOpen(false); }}
-                className="text-sm text-cream/70 hover:text-gold py-2 text-left"
-              >
-                Pricing
               </button>
               <button
                 onClick={() => scrollToSection("examples")}

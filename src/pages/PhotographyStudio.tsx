@@ -12,8 +12,7 @@ import { ImageUploader } from "@/components/ui/ImageUploader";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ProcessingModal } from "@/components/gems/ProcessingModal";
-import { LowBalanceAlert } from "@/components/gems/LowBalanceAlert";
+import { ProcessingModal } from "@/components/common/ProcessingModal";
 import { getGemCost } from "@/lib/gemCosts";
 import { logGeneration } from "@/lib/logGeneration";
 
@@ -521,10 +520,6 @@ const PhotographyStudio = () => {
                   <Camera className="w-4 h-4 mr-2" />
                   Enhance Photo
                 </LoadingButton>
-                <div className="flex items-center gap-1.5 text-cream/50 text-xs">
-                  <Diamond className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Costs {getGemCost("enhance-photo")} gems</span>
-                </div>
               </div>
 
               {/* Before/After Comparison */}
